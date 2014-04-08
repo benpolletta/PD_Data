@@ -1,15 +1,18 @@
-function [] = parkpop(folderName,filetocombine,channels)
+function [] = parkpop(folderName, filetocombine, channels)
 
 srate=1000; %downsampled sampling rate;
 timebinlength=srate/20; %if 10,=100ms per point; if 20, 50ms each points, if 50, 20ms each point
 
-[DataDirectory, DataAnalysisDirectory] = SetDirectory_temp(folderName);
+% [DataDirectory, DataAnalysisDirectory] = SetDirectory_temp(folderName);
 
+folderName = [folderName, '/'];
 
-parfor f=1:size(filetocombine,1)
-    data = load ([DataAnalysisDirectory, filetocombine(f,:)]);
+parfor f=1:length(filetocombine)
+
+    data = load ([folderName, filetocombine{f}]);
     
     for a=1:channels
+        
         channel=['ch' num2str(a)];
         totaltime=length(data.(channel).energy);
         downPoint=floor(totaltime/timebinlength);
@@ -44,7 +47,7 @@ parfor f=1:size(filetocombine,1)
 end
 
 fileName=[filetocombine(1,1:8),'_',filetocombine(end,6:8)];
-outputname=[DataAnalysisDirectory, 'ParkPop',fileName,'.mat'];
+outputname=[folderName,'ParkPop',fileName,'.mat'];
 
 for a=1:channels
     chan=['ch' num2str(a)];

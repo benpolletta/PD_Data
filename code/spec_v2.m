@@ -5,20 +5,30 @@ b=200;
 
 % matfile={DataAnalysisDirectory, filenumber, '.mat'};
 
-[DataDirectory, DataAnalysisDirectory] = SetDirectory_temp(folderName);
+% [DataDirectory, DataAnalysisDirectory] = SetDirectory_temp(folderName);
 
+% matfile=abf_to_mat(folderName, fileName); %%convert .abf to .mat for wave_clus
+% load(matfile);
 
-matfile=abf_to_mat(folderName, fileName); %%convert .abf to .mat for wave_clus
-load(matfile);
+present_dir = pwd;
+
+cd (folderName)
+
+load(fileName)
 
 for i=1:channels
+    
     channel=['ch' num2str(i)];
-    dummydata=rate*5; %5sec of dummy data
+    if isstruct(data)
+        data = data.(channel);
+    end
+    
+    dummydata=rate*5; % 5 sec. of dummy data.
     %Zeropadding=zeros(1,dummydata);
     %tempdata=horzcat(Zeropadding, data, Zeropadding);
-    tempdata = horzcat(data.(channel)(dummydata:-1:1), data.(channel), data.(channel)(end:-1:end-dummydata+1));
+    tempdata = horzcat(data(dummydata:-1:1), data, data(end:-1:end-dummydata+1)); % Dealing with edge effects by reflection.
     
-    filteredsignal = eegfilt(tempdata,rate,0,300);  %this performs a lowpass at the safe cutoff frequency
+    filteredsignal = eegfilt(tempdata,rate,0,300);  % This performs a lowpass at the safe cutoff frequency.
     clear tempdata;
     
     %Hz60signal = eegfilt(data,rate,59.5,60.5);
@@ -27,64 +37,70 @@ for i=1:channels
     
     downfactor=rate/1000;
     srate = 1000;
-    LFP = downsample(filteredsignal,downfactor);
+    LFP = downsample(filteredsignal,downfactor); % Downsample by a rate of 20;
     clear filteredsignal;
     
-    dummypoints=dummydata/downfactor; %5000points, 5 sec of data;
-    SegPoints=5000;
+    dummypoints=dummydata/downfactor; % Number of "dummy" (or reflected) data points.
+    SegPoints=5000; % Calculating power in 5 sec. segments.
     SegmentN=ceil(length(LFP)/SegPoints);
     
     % calculate gamma and beta power
     parfor j=1:SegmentN-2
+        
+        local_LFP = LFP;
+        
         segStart = (j-1)*SegPoints+1;
         segEnd = (j-1)*SegPoints+SegPoints;
-        tempanaLFP=LFP(segStart:j*SegPoints+dummypoints*2);
+        tempanaLFP = local_LFP(segStart:segEnd+dummypoints*2);
         
-        tempsignalLG=eegfilt(tempanaLFP,srate, 40, 65);
+        % Low gamma.
+        tempsignalLG = eegfilt(tempanaLFP, srate, 40, 65);
         tempLG = tempsignalLG(dummypoints+1:end-dummypoints); %%deleting the 2000 point in the beginning and the end
         signal_for_Lgamma = detrend(tempLG);
         PDdataLocal(j).logammaenergy = abs(hilbert(signal_for_Lgamma));
-        PDdataLocal(j).logammaphase= angle(hilbert(signal_for_Lgamma));
+        PDdataLocal(j).logammaphase = angle(hilbert(signal_for_Lgamma));
         
-        tempsignalHG=eegfilt(tempanaLFP,srate, 65, 100);
+        % High gamma.
+        tempsignalHG = eegfilt(tempanaLFP,srate, 65, 100);
         tempHG = tempsignalHG(dummypoints+1:end-dummypoints); %%deleting the 2000 point in the beginning and the end
         signal_for_Hgamma = detrend(tempHG);
         PDdataLocal(j).higammaenergy = abs(hilbert(signal_for_Hgamma));
-        PDdataLocal(j).higammaphase= angle(hilbert(signal_for_Hgamma));
+        PDdataLocal(j).higammaphase = angle(hilbert(signal_for_Hgamma));
         
-        tempsignalB=eegfilt(tempanaLFP,srate, 10,30);
-        tempB =tempsignalB(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
-        signal_for_beta=detrend(tempB);
+        % Beta.
+        tempsignalB = eegfilt(tempanaLFP,srate, 10,30);
+        tempB = tempsignalB(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
+        signal_for_beta = detrend(tempB);
         PDdataLocal(j).betaenergy = abs(hilbert(signal_for_beta));
-        PDdataLocal(j).betaphase= angle(hilbert(signal_for_beta));
+        PDdataLocal(j).betaphase = angle(hilbert(signal_for_beta));
         
-        % delta
+        % Delta.
         tempsignalD=eegfilt(tempanaLFP,srate, 1,4);
         tempD =tempsignalD(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
         signal_for_delta=detrend(tempD);
         PDdataLocal(j).deltaenergy = abs(hilbert(signal_for_delta));
         PDdataLocal(j).deltaphase= angle(hilbert(signal_for_delta));
         
-        % theta
-        tempsignalT=eegfilt(tempanaLFP,srate, 5,7);
-        tempT =tempsignalT(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
-        signal_for_theta=detrend(tempT);
+        % Theta.
+        tempsignalT = eegfilt(tempanaLFP,srate, 4,10);
+        tempT = tempsignalT(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
+        signal_for_theta = detrend(tempT);
         PDdataLocal(j).thetaenergy = abs(hilbert(signal_for_theta));
-        PDdataLocal(j).thetaphase= angle(hilbert(signal_for_theta));
+        PDdataLocal(j).thetaphase = angle(hilbert(signal_for_theta));
 
-        % lobeta
-        tempsignalLB=eegfilt(tempanaLFP,srate, 10,20);
-        tempLB =tempsignalLB(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
-        signal_for_lobeta=detrend(tempLB);
+        % Low beta.
+        tempsignalLB = eegfilt(tempanaLFP,srate, 10,20);
+        tempLB = tempsignalLB(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
+        signal_for_lobeta = detrend(tempLB);
         PDdataLocal(j).lobetaenergy = abs(hilbert(signal_for_lobeta));
-        PDdataLocal(j).lobetaphase= angle(hilbert(signal_for_lobeta));
+        PDdataLocal(j).lobetaphase = angle(hilbert(signal_for_lobeta));
         
-        % hibeta
-        tempsignalHB=eegfilt(tempanaLFP,srate, 20,30);
-        tempHB =tempsignalHB(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
-        signal_for_hibeta=detrend(tempHB);
+        % High beta.
+        tempsignalHB = eegfilt(tempanaLFP,srate, 20,30);
+        tempHB = tempsignalHB(dummypoints+1:end-dummypoints); %%%%deleting the 2000 point in the beginning and the end
+        signal_for_hibeta = detrend(tempHB);
         PDdataLocal(j).hibetaenergy = abs(hilbert(signal_for_hibeta));
-        PDdataLocal(j).hibetaphase= angle(hilbert(signal_for_hibeta));
+        PDdataLocal(j).hibetaphase = angle(hilbert(signal_for_hibeta));
         
         warning off all;
 %         clear tempsignalHB tempsignalLB tempsignalB tempsignalLG tempsignalHG;
@@ -103,15 +119,19 @@ for i=1:channels
     PDdata.(channel).phase=[];
     PDdata.(channel).energy=[];
     
-    [PDdata.(channel).phase,PDdata.(channel).energy] = basic_HT_improved_x12(LFP,srate,SegPoints, dummypoints, a,b,fileName);
+    [PDdata.(channel).phase,PDdata.(channel).energy] = basic_HT_improved_x11(LFP, srate, SegPoints, dummypoints, a, b, fileName);
     PDdata.(channel).phase = single(PDdata.(channel).phase);
     PDdata.(channel).energy = single(PDdata.(channel).energy);
-    PDdata.(channel).LFP = single(LFP(dummypoints+1:end-dummypoints));    
+    PDdata.(channel).LFP = single(LFP(dummypoints+1:end-dummypoints));
+    
 end
 
 
-    outputname=[DataAnalysisDirectory, fileName, '_HT', '.mat'];
-    save (outputname, '-struct','PDdata','-v6')
+%     outputname=[DataAnalysisDirectory, fileName, '_HT', '.mat'];
+    outputname = [fileName(1:end-4), '_HT.mat'];
+    save (outputname, '-struct', 'PDdata', '-v6')
+    
+    cd (present_dir)
 %     
 %     clear phase; clear energy; clear ('betaphase', 'betaenergy', 'logammaenergy', 'logammaphase', 'higammaenergy', 'higammaphase','lobetaphase','lobetaenerg','hibetaphase','hibetaenergy');
 % 
