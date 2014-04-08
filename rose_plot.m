@@ -12,14 +12,6 @@ function [MR_vec,p_hist,freqs]=rose_plot(p_vec,f_vec,no_p_bins,f_bins)
 % MRL_vec = mean resultant vectors for each frequency bin.
 % freqs = center frequency for each bin.
 
-if length(p_vec) ~= length(f_vec)
-    
-    display('Lengths of input phase and frequency vectors must be the same.')
-    
-    return
-    
-end
-
 p_bins = linspace(-pi,pi,no_p_bins+1)-2*pi/(2*no_p_bins); % Making vector of phase bin edges.
 p_bins(1) = pi*(1-1/no_p_bins);   % Taking care of phases close to pi.
 phases = (p_bins(1:end-1)+p_bins(2:end))/2; % Making vector of phase bin centers.
