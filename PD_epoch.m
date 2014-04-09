@@ -1,8 +1,6 @@
-load('PD_dec')
+load('All_data_dec.mat')
 
-sampling_freq = 2000;
-
-t_secs = 1:length(PD_data)/sampling_freq;
+t_secs = 1:length(PD_dec)/sampling_freq;
 
 injection_sec = 300;
 
@@ -20,9 +18,9 @@ for e = -50:150
     
     end_index = end_sec*sampling_freq;
     
-    data = PD_data(start_index:end_index);
+    data = PD_dec(start_index:end_index);
     
-    fid = fopen(['PD_epoch',num2str(e),'.txt'],'w');
+    fid = fopen(['epoch',num2str(e),'.txt'],'w');
     
     fprintf(fid,'%f\n',data);
     

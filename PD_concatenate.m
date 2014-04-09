@@ -17,14 +17,6 @@ for f=1:no_files
         
     end
     
-    data = [fliplr(data(1:5*sampling_rate)) data fliplr(data(1:5*sampling_rate))];
-    
-    data = eegfilt(data, sampling_rate, 0, 300);
-    
-    data = data((5*sampling_rate + 1):(end - 5*sampling_rate));
-    
-    data = detrend(data, 'linear');
-    
     PD_data(last_index+(1:length(data))) = data;
     
     clear data
@@ -33,4 +25,4 @@ for f=1:no_files
     
 end
 
-save('All_data.mat','PD_data')
+save('All_data.mat','PD_data','sampling_rate')
