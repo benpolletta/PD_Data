@@ -1,4 +1,6 @@
-datafiles=dir('*.mat');
+function PD_concatenate(prefix)
+
+datafiles=dir([prefix,'*.mat']);
 
 no_files = length(datafiles);
 PD_data = [];
@@ -25,4 +27,4 @@ for f=1:no_files
     
 end
 
-save('All_data.mat','PD_data','sampling_rate')
+save([prefix,'_all_data.mat'],'PD_data','sampling_rate')

@@ -1,4 +1,6 @@
-load('All_data_dec.mat')
+function PD_epoch(prefix)
+
+load([prefix,'_all_data_dec.mat'])
 
 t_secs = 1:length(PD_dec)/sampling_freq;
 
@@ -20,7 +22,7 @@ for e = -50:150
     
     data = PD_dec(start_index:end_index);
     
-    fid = fopen(['epoch',num2str(e),'.txt'],'w');
+    fid = fopen([prefix,'_epoch',num2str(e),'.txt'],'w');
     
     fprintf(fid,'%f\n',data);
     
