@@ -24,55 +24,60 @@ function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infus
     infuse_windows=(infusetime-window)/winstep+1;
     total_windows=length(InfuseBeta);
     
-    Basebeta=nanmedian(InfuseBeta(1:base_windows));
+    Basebeta=nanmedian(InfuseBeta(1:base_windows)); % This is scalar?
     
-    %% Finding changes in beta power.
+    %% Finding changes in beta power, looking in sliding windows of length timetottest.
     timetottest=50; % 50sec to compare to baseline
     
     Betachangettest=nan(1,totalpoints-timetottest/winstep);
-    Meanbetachange=nan(1,totalpoints-timetottest/winstep);
+    Meanbeta=nan(1,totalpoints-timetottest/winstep);
     incbeta=[];
     decbeta=[];
     for i=1:(totalpoints-timetottest/winstep)
         Betachangettest(i)=ttest(InfuseBeta(i:(i+timetottest/winstep-1)), Basebeta, 0.05, 'both'); % p=0.05 or 0.01; most cases is 0.01
-        Meanbetachange(i)=nanmean(InfuseBeta(i:(i+timetottest/winstep-1)));
-        if Meanbetachange(i)>Basebeta && Betachangettest(i)==1
+        Meanbeta(i)=nanmean(InfuseBeta(i:(i+timetottest/winstep-1)));
+        % If mean beta is bigger than baseline beta, and the two-sided t-test comes back significant, there's a beta increase.
+        if Meanbeta(i)>Basebeta && Betachangettest(i)==1
             incbeta(end+1)=i;
         end
-        
-        if Meanbetachange(i)<Basebeta && Betachangettest(i)==1
+        % If mean beta is smaller than baseline beta, and the two-sided t-test comes back significant, there's a beta increase.
+        if Meanbeta(i)<Basebeta && Betachangettest(i)==1
             decbeta(end+1)=i;
         end
     end
     
     %% To eliminate false identified changes.
     for i=1:2
+        
         if i==1
             tempbeta=incbeta;
         else
             tempbeta=decbeta;
         end
         
+        % Creating vector of time indices where beta is changed.
         Tempchange=zeros(1,length(Betachangettest));
         Tempchange(tempbeta)=1;
         
         stringent=[1 1 1 1 1 1 1 1]; %%5 consecutive windows, that is 8*winstep=40sec.
         
+        % Convolving index of change indices with square kernel (i.e., taking time avg. over 8 windows).
         TempBeta=conv(Tempchange, stringent, 'valid');
         TempBeta=horzcat(zeros(1, length(stringent)-1), TempBeta);
         
-        TrueChange{i}=find(TempBeta>length(stringent)-2);
+        TrueChange{i}=find(TempBeta>length(stringent)-2); % Want change to be over more than 6*winstep = 30 sec.
         if isempty (TrueChange{i})
             BetaOutPut(i,1)=NaN;  %latency of beta change onset
             BetaOutPut(i,2)=NaN;  %peak of beta power change
         else
-            BetaOutPut(i,1)=TrueChange{i}(1)*winstep;
+            BetaOutPut(i,1)=TrueChange{i}(1)*winstep; % This is a scalar
             if i==1
-                BetaOutPut(i,2)=max(Meanbetachange(TrueChange{i}));
+                BetaOutPut(i,2)=max(Meanbeta(TrueChange{i}));
             end
             if i==2
-                BetaOutPut(i,2)=min(Meanbetachange(TrueChange{i}));
+                BetaOutPut(i,2)=min(Meanbeta(TrueChange{i}));
             end
+        
         end
         
     end
@@ -82,8 +87,6 @@ function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infus
     BetaOut=[Basebeta BetaOutPut(1,:) BetaOutPut(2,:) recoverbeta];
     
     BetaControl=[Basebeta 750 nanmedian(InfuseBeta(150:150+basepoints-1)) NaN NaN recoverbeta];
-    
-    
     
     figure (54)
     plot(1:winstep:length(InfuseBeta)*winstep, InfuseBeta, 'r-')
