@@ -16,14 +16,18 @@ for fo = 1:length(folders)
    
     for pd = -1:2
     
-        filename = dir([folder,'/',prefix,'_5min',num2str(pd),'/AVG_THRESH_FILE_SHUFFLE_',prefix,'_5min',num2str(pd),'_1000_shufs/*IE_zs.fig']);
+        filename = dir([folder,'/',prefix,'_5min',num2str(pd),'/STATS_FILE_SHUFFLE_',prefix,'_5min',num2str(pd),'_1000_shufs/*IE.mat']);
         
         if ~isempty(filename)
         
-            open([folder,'/',prefix,'_5min',num2str(pd),'/AVG_THRESH_FILE_SHUFFLE_',prefix,'_5min',num2str(pd),'_1000_shufs/',filename.name])
-        
-        end
+            load([folder,'/',prefix,'_5min',num2str(pd),'/STATS_FILE_SHUFFLE_',prefix,'_5min',num2str(pd),'_1000_shufs/',filename.name])
             
+            figure;
+            
+            imagesc(MI_stats(:,:,2))
+            
+        end
+        
     end
     
 end

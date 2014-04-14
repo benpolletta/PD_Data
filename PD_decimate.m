@@ -14,6 +14,6 @@ PD_dec = decimate(PD_data,10);
 
 PD_dec = decimate(PD_dec,2);
 
-sampling_freq = 1000;
+sampling_freq = sampling_freq/20;
 
 save([prefix,'_all_data_dec.mat'],'PD_dec','sampling_freq')
