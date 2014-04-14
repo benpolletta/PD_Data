@@ -1,36 +1,40 @@
 function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infusetime)
 
-    srate=1000; %downsampled sampling rate;
-    timebinlength=srate/20; %if 10,=100ms per point; if 20, 50ms each points, if 50, 20ms each point
-    betaPower=(chData.beta).^2;
-    totaltime=length(chData.beta)*timebinlength/1000; %in seconds
+    srate = 1000; % Downsampled sampling rate.
+    binrate = 20; % How many timebins per second.
+    timebinlength = srate/binrate; % If 10, 100ms per point; if 20, 50ms each points; if 50, 20ms each point.
+    betaPower = (chData.beta).^2; % Squared magnitude of FFT; should be sampled at srate.
+    totaltime = length(chData.beta)/binrate; % In seconds?
     
     %%
-    window=5; %in sec
-    winstep=5; % in sec
+    window = 5; % In sec.
+    winstep = 5; % In sec.
     
-    InfuseBeta=nan(1,floor((totaltime-window)/winstep+1));
-    for i=1:floor((totaltime-window)/winstep+1) %%sweaping window of 100s long, and 10s apart.
-        t=1+(i-1)*winstep*1000/timebinlength;
-        InfuseBeta(i)=nanmedian(betaPower(t:t+window*1000/timebinlength-1));
+    winstep_data_pts = winstep*1000/timebinlength;
+    window_data_pts = window*1000/timebinlength;
+    no_windows = floor((totaltime-window)/winstep+1); % Total # windows, based on size of steps b/ween windows.
+    
+    InfuseBeta=nan(1,no_windows); % Vector to contain beta, length of # windows.
+    for i=1:no_windows % Sweeping window of 100s long, and 10s apart.
+        t=1+(i-1)*winstep_data_pts; % Window start time. 
+        InfuseBeta(i)=nanmedian(betaPower(t:t+window_data_pts-1)); % Getting median power within window.
     end
     
-    basepoints=(basetime-window)/winstep+1;
-    infusepoints=(infusetime-window)/winstep+1;
-    totalpoints=length(InfuseBeta);
+    base_windows=(basetime-window)/winstep+1; % Total # windows in basetime.
+    infuse_windows=(infusetime-window)/winstep+1;
+    total_windows=length(InfuseBeta);
     
-    Basebeta=nanmedian(InfuseBeta(1:basepoints));
+    Basebeta=nanmedian(InfuseBeta(1:base_windows));
     
-    %%
-    %%to find changes in betapower
-    timetottest=50; %50sec to compare to baseline
+    %% Finding changes in beta power.
+    timetottest=50; % 50sec to compare to baseline
     
     Betachangettest=nan(1,totalpoints-timetottest/winstep);
     Meanbetachange=nan(1,totalpoints-timetottest/winstep);
     incbeta=[];
     decbeta=[];
     for i=1:(totalpoints-timetottest/winstep)
-        Betachangettest(i)=ttest(InfuseBeta(i:(i+timetottest/winstep-1)), Basebeta, 0.05, 'both'); %p=0.05 or 0.01; most cases is 0.01
+        Betachangettest(i)=ttest(InfuseBeta(i:(i+timetottest/winstep-1)), Basebeta, 0.05, 'both'); % p=0.05 or 0.01; most cases is 0.01
         Meanbetachange(i)=nanmean(InfuseBeta(i:(i+timetottest/winstep-1)));
         if Meanbetachange(i)>Basebeta && Betachangettest(i)==1
             incbeta(end+1)=i;
@@ -41,8 +45,7 @@ function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infus
         end
     end
     
-    %%
-    %% to eliminate false identified changes.
+    %% To eliminate false identified changes.
     for i=1:2
         if i==1
             tempbeta=incbeta;

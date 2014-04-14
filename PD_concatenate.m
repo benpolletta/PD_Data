@@ -1,7 +1,32 @@
 function PD_concatenate(prefix)
 
-datafiles=dir([prefix,'*.mat']);
+datalist = [prefix,'_datafiles.list'];
+    
+if isempty(dir(datalist))
+    
+    file_fid = fopen(datalist,'w');
+    
+    for digit=1:9
+        
+        file = dir([prefix,'*',num2str(digit),'.mat']);
+        
+        if ~isempty(file)
+            
+            fprintf(file_fid,'%s\n',file.name);
+            
+        end
+        
+    end
+    
+    fclose(file_fid);
+    
+end
 
+file_fid = fopen(datalist,'r');
+
+files = textscan(file_fid,'%s');
+datafiles = files{1};
+    
 no_files = length(datafiles);
 PD_data = [];
 
@@ -11,7 +36,7 @@ last_index = 0;
 
 for f=1:no_files
     
-    load(datafiles(f).name)
+    load(datafiles{f})
     
     if isstruct(data)
         

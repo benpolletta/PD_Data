@@ -46,8 +46,8 @@ parfor f=1:length(filetocombine)
     
 end
 
-fileName=[filetocombine(1,1:8),'_',filetocombine(end,6:8)];
-outputname=[folderName,'ParkPop',fileName,'.mat'];
+% fileName=[filetocombine(1,1:8),'_',filetocombine(end,6:8)];
+outputname=[folderName,'ParkPop.mat'];
 
 for a=1:channels
     chan=['ch' num2str(a)];
