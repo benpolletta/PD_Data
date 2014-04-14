@@ -12,7 +12,7 @@ for l = -5:14
     
     for e = start_epoch:(start_epoch+9)
    
-        epoch_name = ['PD_epoch',num2str(e),'.txt'];
+        epoch_name = ['epoch',num2str(e),'.txt'];
         
         fprintf(list_fid,'%s\n',epoch_name);
         fprintf(epochs_fid,'%d\t%d\t%s\n',l,e,epoch_name)
@@ -39,7 +39,7 @@ for l = -1:2
     
     for e = start_epoch:(start_epoch+49)
    
-        epoch_name = ['PD_epoch',num2str(e),'.txt'];
+        epoch_name = ['epoch',num2str(e),'.txt'];
         
         fprintf(list_fid,'%s\n',epoch_name);
         fprintf(epochs_fid,'%d\t%d\t%s\n',l,e,epoch_name)

@@ -2,19 +2,19 @@ present_dir = pwd;
 
 folders = {'090312','130703','130709','130718','130725'};
 
-for fo = 1:length(folders)
+for fo = 2:length(folders)
     
     folder = folders{fo};
    
     cd (folder)
     
-    if ~exist('All_data.mat')
+    if exist('All_data.mat')~=1
     
         PD_concatenate
     
     end
     
-    if ~exist('All_data_dec.mat')
+    if exist('All_data_dec.mat')~=1
         
         PD_decimate
     
@@ -24,13 +24,13 @@ for fo = 1:length(folders)
         
     end
        
-    if ~exist('epoch1.txt')
+    if exist('epoch1.txt')~=1
         
         PD_epoch
     
     end
     
-    if ~exist('PD_5min_master.list')
+    if exist('PD_5min_master.list')~=1
         
         PD_list
     
