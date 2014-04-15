@@ -4,7 +4,7 @@ folders = {'090312','130703','130709','130718','130725'};
 
 prefixes = {'09312','13703','13709','13718','13725'};
 
-for fo = 1:length(folders)
+for fo = 4:length(folders)
     
     folder = folders{fo};
     
@@ -35,6 +35,8 @@ for fo = 1:length(folders)
     end
     
     file_fid = fopen(datalist,'r');
+    
+    clear filenames
     
     files = textscan(file_fid,'%s');
     files = files{1};
