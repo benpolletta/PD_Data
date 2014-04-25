@@ -1,3 +1,5 @@
+function run_PD_peaks(peak_freq,target_freq)
+
 present_dir = pwd;
 
 folders = {'090312','130703','130709','130718','130725'};
@@ -48,7 +50,7 @@ for fo = 1:length(folders)
     
     challenge_list=[prefix,'_5min_master.list'];
     
-    peak_averaged_signal_batch_condition_parallel(challenge_list,140,4,4,sampling_freq);
+    peak_averaged_signal_batch_condition_parallel(challenge_list,peak_freq,target_freq,4,sampling_freq);
     
     cd (present_dir)
     

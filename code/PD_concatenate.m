@@ -1,4 +1,4 @@
-function PD_concatenate(prefix)
+function PD_concatenate(prefix,plot_opt)
 
 datalist = [prefix,'_datafiles.list'];
     
@@ -26,6 +26,7 @@ file_fid = fopen(datalist,'r');
 
 files = textscan(file_fid,'%s');
 datafiles = files{1};
+datafiles = sort(datafiles);
     
 no_files = length(datafiles);
 PD_data = [];
@@ -53,3 +54,17 @@ for f=1:no_files
 end
 
 save([prefix,'_all_data.mat'],'PD_data','sampling_rate')
+
+if plot_opt > 0
+   
+    figure;
+    
+    plot((1:length(PD_data))/(60*sampling_rate),PD_data)
+    
+    title([prefix,', All Data'])
+    
+    xlabel('Time (min.)')
+    
+    save_as_pdf(gcf,[prefix,'_all_data'])
+    
+end

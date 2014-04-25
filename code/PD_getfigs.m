@@ -1,12 +1,12 @@
 present_dir = pwd;
 
-% folders = {'090312','130703','130709','130718','130725'};
+folders = {'090312','130703','130709','130718','130725'};
+
+prefixes = {'09312','13703','13709','13718','13725'};
+
+% folders = {'Preliminary','130703/Filtered','130709/Filtered','130718/Filtered','130725/Filtered'};
 % 
-% prefixes = {'09312','13703','13709','13718','13725'};
-
-folders = {'Preliminary','130703/Filtered','130709/Filtered','130718/Filtered','130725/Filtered'};
-
-prefixes = {'PD','13703','13709','13718','13725'};
+% prefixes = {'PD','13703','13709','13718','13725'};
 
 for fo = 1:length(folders)
     
