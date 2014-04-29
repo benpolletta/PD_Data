@@ -1,17 +1,17 @@
-function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infusetime)
+function BetaOut = Park_pop_betapower_v3 (chData, basetime, infusetime)
 
     srate = 1000; % Downsampled sampling rate.
     binrate = 20; % How many timebins per second.
     timebinlength = srate/binrate; % If 10, 100ms per point; if 20, 50ms each points; if 50, 20ms each point.
     betaPower = (chData.beta).^2; % Squared magnitude of FFT; should be sampled at srate.
-    totaltime = length(chData.beta)/binrate; % In seconds?
+    totaltime = length(chData.beta)/binrate; % Must be one measurement of beta power per timebin?
     
     %%
     window = 5; % In sec.
     winstep = 5; % In sec.
     
-    winstep_data_pts = winstep*1000/timebinlength;
-    window_data_pts = window*1000/timebinlength;
+    winstep_data_pts = winstep*binrate;
+    window_data_pts = window*binrate;
     no_windows = floor((totaltime-window)/winstep+1); % Total # windows, based on size of steps b/ween windows.
     
     InfuseBeta=nan(1,no_windows); % Vector to contain beta, length of # windows.
@@ -29,11 +29,11 @@ function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infus
     %% Finding changes in beta power, looking in sliding windows of length timetottest.
     timetottest=50; % 50sec to compare to baseline
     
-    Betachangettest=nan(1,totalpoints-timetottest/winstep);
-    Meanbeta=nan(1,totalpoints-timetottest/winstep);
+    Betachangettest=nan(1,total_windows-timetottest/winstep);
+    Meanbeta=nan(1,total_windows-timetottest/winstep);
     incbeta=[];
     decbeta=[];
-    for i=1:(totalpoints-timetottest/winstep)
+    for i=1:(total_windows-timetottest/winstep)
         Betachangettest(i)=ttest(InfuseBeta(i:(i+timetottest/winstep-1)), Basebeta, 0.05, 'both'); % p=0.05 or 0.01; most cases is 0.01
         Meanbeta(i)=nanmean(InfuseBeta(i:(i+timetottest/winstep-1)));
         % If mean beta is bigger than baseline beta, and the two-sided t-test comes back significant, there's a beta increase.
@@ -67,31 +67,44 @@ function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infus
         
         TrueChange{i}=find(TempBeta>length(stringent)-2); % Want change to be over more than 6*winstep = 30 sec.
         if isempty (TrueChange{i})
-            BetaOutPut(i,1)=NaN;  %latency of beta change onset
-            BetaOutPut(i,2)=NaN;  %peak of beta power change
+            BetaOutPut(i,1)=NaN;  % Latency of beta change onset.
+            BetaOutPut(i,2)=NaN;  % Peak of beta power change.
         else
-            BetaOutPut(i,1)=TrueChange{i}(1)*winstep; % This is a scalar
-            if i==1
-                BetaOutPut(i,2)=max(Meanbeta(TrueChange{i}));
-            end
-            if i==2
-                BetaOutPut(i,2)=min(Meanbeta(TrueChange{i}));
-            end
+            BetaOutPut(i,1) = TrueChange{i}(1)*winstep-8*winstep; % This is a scalar.
+            BetaOutPut(i,2) = TrueChange{i}(end)*winstep-winstep;
+            % This is max & min of beta power, but I don't need this.
+            % if i==1
+            %     BetaOutPut(i,2)=max(Meanbeta(TrueChange{i})); % But this seems to be the max. beta power.
+            % end
+            % if i==2
+            %     BetaOutPut(i,2)=min(Meanbeta(TrueChange{i})); % And this seems to be the min. beta power.
+            % end
         
         end
         
     end
     
-    recoverbeta=nanmedian(InfuseBeta(totalpoints-basepoints+1:totalpoints));
+    recoverbeta=nanmedian(InfuseBeta(total_windows-base_windows+1:total_windows));
     
-    BetaOut=[Basebeta BetaOutPut(1,:) BetaOutPut(2,:) recoverbeta];
+    BetaOut = [BetaOutPut(1,:) BetaOutPut(2,:)];
     
-    BetaControl=[Basebeta 750 nanmedian(InfuseBeta(150:150+basepoints-1)) NaN NaN recoverbeta];
+    % BetaOut=[Basebeta BetaOutPut(1,:) BetaOutPut(2,:) recoverbeta]; 
+    % So, normally, this gives mean beta power during baseline, max mean
+    % beta power (over a 50 s window) during beta increase, min mean beta
+    % power (over a 50 s window) during beta increase, max etc. etc. during
+    % beta decrease, min etc. etc. during beta decrease, and finally mean
+    % beta power over all not baseline times. I don't know why you would
+    % need this last thing. I just want the latencies.
     
-    figure (54)
+    % I don't know what the fuck this is.
+%     BetaControl=[Basebeta 750 nanmedian(InfuseBeta(150:150+base_windows-1)) NaN NaN recoverbeta];
+    
+    figure;
     plot(1:winstep:length(InfuseBeta)*winstep, InfuseBeta, 'r-')
     hold on;
-    scatter(1:winstep:length(Betachangettest)*winstep, Betachangettest)
+    scatter(1:winstep:length(Betachangettest)*winstep, Betachangettest*(max(InfuseBeta)-min(InfuseBeta))+min(InfuseBeta))
+    plot(repmat(BetaOutPut(1,:),2,1), repmat([min(InfuseBeta); max(InfuseBeta)],1,2),'k')
+    plot(repmat(BetaOutPut(2,:),2,1), repmat([min(InfuseBeta); max(InfuseBeta)],1,2),'g')
     
 %     figure (1)
 %     x=0:timebinlength/1000:length(chData.beta)*timebinlength/1000;
@@ -102,5 +115,5 @@ function [BetaOut, BetaControl] = Park_pop_betapower_v3 (chData, basetime, infus
 %     xlabel ('time (s)');
 %     ylabel ('Frequency (Hz)')
 %     colorbar;
-%     
+     
 end

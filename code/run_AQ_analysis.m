@@ -1,10 +1,18 @@
+function BetaTimes = run_AQ_analysis
+
 present_dir = pwd;
 
 folders = {'090312','130703','130709','130718','130725'};
 
 prefixes = {'09312','13703','13709','13718','13725'};
 
-for fo = 4:length(folders)
+basetimes = [300 1200 1800 600 1800];
+
+infusetimes = [390 240 300 450 510];
+
+BetaTimes = nan(length(folders),4);
+
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -55,7 +63,17 @@ for fo = 4:length(folders)
             
     end
     
-    parkpop(pwd, filenames, 1)
+    if isempty(dir('ParkPop.mat'))
+        
+        parkpop(pwd, filenames, 1)
+        
+    else
+        
+        chData = load('ParkPop.mat');
+        
+        BetaTimes(fo,:) = Park_pop_betapower_v3(chData.ch1, basetimes(fo), infusetimes(fo));
+        
+    end
     
     cd (present_dir)
     
