@@ -73,6 +73,8 @@ for fo = 1:length(folders)
         
         BetaTimes(fo,:) = Park_pop_betapower_v3(chData.ch1, basetimes(fo), infusetimes(fo));
         
+        save_as_pdf(gcf,[prefix,'_PPBP.fig'])
+        
     end
     
     cd (present_dir)

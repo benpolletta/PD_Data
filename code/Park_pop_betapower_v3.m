@@ -65,13 +65,25 @@ function BetaOut = Park_pop_betapower_v3 (chData, basetime, infusetime)
         TempBeta=conv(Tempchange, stringent, 'valid');
         TempBeta=horzcat(zeros(1, length(stringent)-1), TempBeta);
         
-        TrueChange{i}=find(TempBeta>length(stringent)-2); % Want change to be over more than 6*winstep = 30 sec.
-        if isempty (TrueChange{i})
+        TrueChange{i}=TempBeta>length(stringent)-2; % Want change to be over more than 6*winstep = 30 sec.
+        if ~any(TrueChange{i})>0
             BetaOutPut(i,1)=NaN;  % Latency of beta change onset.
             BetaOutPut(i,2)=NaN;  % Peak of beta power change.
         else
-            BetaOutPut(i,1) = TrueChange{i}(1)*winstep-8*winstep; % This is a scalar.
-            BetaOutPut(i,2) = TrueChange{i}(end)*winstep-winstep;
+            
+            Change_diff = diff(TrueChange{i});
+            Change_on = find(Change_diff == 1);
+            Change_off = find(Change_diff == -1);
+            
+            Temp_meanbeta = Meanbeta;
+            Temp_meanbeta(TrueChange{i} == 0) = 0;
+            
+            [~, BetaMaxIndex] = max(Temp_meanbeta);
+            Change_on_index = max(Change_on(Change_on <= BetaMaxIndex));
+            Change_off_index = min(Change_off(Change_off >= BetaMaxIndex));
+            
+            BetaOutPut(i,1) = Change_on_index*winstep-8*winstep; % This is a scalar.
+            BetaOutPut(i,2) = Change_off_index*winstep-winstep;
             % This is max & min of beta power, but I don't need this.
             % if i==1
             %     BetaOutPut(i,2)=max(Meanbeta(TrueChange{i})); % But this seems to be the max. beta power.
