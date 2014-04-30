@@ -78,7 +78,12 @@ function BetaOut = Park_pop_betapower_v3 (chData, basetime, infusetime)
             Temp_meanbeta = Meanbeta;
             Temp_meanbeta(TrueChange{i} == 0) = 0;
             
-            [~, BetaMaxIndex] = max(Temp_meanbeta);
+            if i==1
+                [~, BetaMaxIndex] = max(Temp_meanbeta);
+            else
+                [~, BetaMaxIndex] = min(Temp_meanbeta);
+            end
+                
             Change_on_index = max(Change_on(Change_on <= BetaMaxIndex));
             Change_off_index = min(Change_off(Change_off >= BetaMaxIndex));
             
