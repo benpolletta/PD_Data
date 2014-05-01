@@ -20,12 +20,14 @@ for fo = 2:length(folders)
    
     cd (folder)
     
-    PD_concatenate_channels(prefix,1)
+%     PD_concatenate_channels(prefix,1)
     
-    PD_decimate_channels(prefix,1)
+%     PD_decimate_channels(prefix,1)
+
+    PD_epoch_list_artifacts_channels(prefix, 7)
 
     cd (present_dir)
     
 end
 
-get_beta
+% get_beta
