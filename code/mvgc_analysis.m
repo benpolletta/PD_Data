@@ -23,4 +23,8 @@ assert(~isbad(A),'VAR estimation failed');
 % Get spectral GC from autocovariance.
 f = autocov_to_spwcgc(G,nobs);
 
-save([filename,'.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','f')
+if ~isempty(filename)
+
+    save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','f')
+    
+end

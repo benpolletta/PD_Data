@@ -12,9 +12,7 @@ epoch_length = 5*1000;
 
 f_length = epoch_length/2 + 1;
 
-f = (sampling_freq/2)*(1:f_length)/f_length;
-
-for fo = 5:length(folders)
+for fo = 2:(length(folders)-1)
     
     folder = folders{fo};
     
@@ -26,9 +24,9 @@ for fo = 5:length(folders)
     
     no_epochs = length(epoch_list);
     
-    All_GC_spec = nan(f_length,no_epochs,2);
+    All_GC_spec = nan(no_epochs,f_length,2);
     
-    for e = 1:no_epochs
+    parfor e = 1:no_epochs
        
         epoch_name = epoch_list{e};
         
@@ -38,8 +36,9 @@ for fo = 5:length(folders)
         
         Orders(e) = moAIC;
         
-        All_GC_spec(:,e,1) = reshape(f(2,1,:),f_length,1);
-        All_GC_spec(:,e,2) = reshape(f(1,2,:),f_length,1);
+        GC_spec = reshape([reshape(f(2,1,:),1,f_length) reshape(f(1,2,:),1,f_length)],1,f_length,2);
+        
+        All_GC_spec(e,:,:) = GC_spec;
         
     end
     
