@@ -1,4 +1,4 @@
-function [moAIC,f] = mvgc_analysis(X,momax,filename)
+function [moAIC,info,f] = mvgc_analysis(X,momax,filename)
 
 [r,c] = size(X);
 if r>c
@@ -8,7 +8,7 @@ end
 nobs = size(X,2);
 
 % Find optimal model order.
-[AIC,BIC,moAIC,moBIC] = tsdata_to_infocrit(X,momax,'LWR');
+[AIC,BIC,moAIC,moBIC] = tsdata_to_infocrit(X,momax,'LWR',false);
 
 morder = moAIC;
 

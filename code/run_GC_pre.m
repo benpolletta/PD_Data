@@ -1,4 +1,4 @@
-function run_GC_pre
+function run_GC_pre(epoch_length,time_step,outlier_check)
 
 present_dir = pwd;
 
@@ -24,8 +24,16 @@ for fo = 2:length(folders)
     
 %     PD_decimate_channels(prefix,1)
 
-    PD_epoch_list_artifacts_channels(prefix, 7)
+    if isempty(time_step)
 
+        PD_epoch_list_artifacts_channels(prefix, epoch_length, outlier_check)
+
+    else
+
+        PD_epoch_list_artifacts_channels_sliding(prefix, epoch_length, time_step, outlier_check)
+
+    end
+    
     cd (present_dir)
     
 end

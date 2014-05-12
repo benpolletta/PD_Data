@@ -1,4 +1,4 @@
-function plot_PD_GC
+function plot_PD_GC(epoch_length,freq_lim)
 
 present_dir = pwd;
 
@@ -8,13 +8,23 @@ prefixes = {'09312','13703','13709','13718','13725'};
 
 sampling_freq = 1000;
 
-epoch_length = 5*sampling_freq;
-
-f_length = epoch_length/2 + 1;
+f_length = sampling_freq*epoch_length + 1;
 
 f = (sampling_freq/2)*(1:f_length)/f_length;
 
-f_indices = find(f < 200);
+if isscalar(freq_lim)
+
+    f_indices = find(f < freq_lim);
+
+    f_lim_label = sprintf('%g-%g',0,freq_lim(1));
+    
+else
+    
+    f_indices = find(f > freq_lim(1) & f < freq_lim(2));
+    
+    f_lim_label = sprintf('%g-%g',freq_lim(1),freq_lim(2));
+    
+end
 
 % Grand_GC_name = 'Grand_GC_spec.txt';
 % 
@@ -24,9 +34,9 @@ f_indices = find(f < 200);
 
 color_order = {'k','b','g','m','c','r'};
 
-labels = {'Striatal --> Motor','Motor --> Striatal','Difference S->M - M->S'};
+labels = {'Striatal --> Motor','Motor --> Striatal','Difference S->M - M->S','Difference z-Scores S->M - M->S'};
 
-for fo = 2:(length(folders)-1)
+for fo = 2:length(folders)
     
     folder = folders{fo};
     
@@ -34,11 +44,15 @@ for fo = 2:(length(folders)-1)
    
     cd (folder)
     
+    listname = [prefix,'_channels_',num2str(epoch_length),'s_epochs'];
+    
     %% Shuffles.
     
-    shuf_name = [prefix,'_channels_epochs_GCspec_shuffled.mat'];
+    shuf_name = [listname,'_GCspec_shuffled.mat'];
     
     load(shuf_name)
+    
+    All_GC_spec = abs(All_GC_spec);
     
     All_GC_spec(:,:,3) = -diff(All_GC_spec,[],3);
     
@@ -54,19 +68,17 @@ for fo = 2:(length(folders)-1)
         
         set(gca,'XTick',[1 f_indices(end)],'XTickLabel',f([1 f_indices(end)]))
         
-        title(['Spectral Granger, Shuffled, ',labels{i}])
+        title([folder,' Spectral Granger, Shuffled, ',labels{i}])
         
     end
     
     xlabel('Frequency (Hz)')
     
-    save_as_pdf(gcf,[shuf_name(1:end-4),'_boxplot'])
+    save_as_pdf(gcf,[shuf_name(1:end-4),'_',f_lim_label,'_boxplot'])
     
-    % Calculating, plotting mean & std.
+    % Plotting mean & std.
     
-    shuffled_mean = mean(All_GC_spec);
-    
-    shuffled_std = std(All_GC_spec);
+    load([shuf_name(1:end-4),'_stats.mat'])
     
     figure;
 
@@ -84,15 +96,19 @@ for fo = 2:(length(folders)-1)
     
     legend(h,labels)
     
-    title('Spectral Granger, Shuffled, Mean \pm STD')
+    title([folder,' Spectral Granger, Shuffled, Mean \pm STD'])
     
-    save_as_pdf(gcf,shuf_name(1:end-4))
+    save_as_pdf(gcf,[shuf_name(1:end-4),'_',f_lim_label])
     
     %% Observed.
     
-    obs_name = [prefix,'_channels_epochs_all_GCspec.mat'];
+    clear All_GC_spec
     
-    load(obs_name)
+    obs_name = [listname,'_GCspec.mat'];
+    
+    load(obs_name,'Orders')
+    
+    All_GC_spec = abs(All_GC_spec);
    
     % Plotting model order.
     
@@ -102,29 +118,9 @@ for fo = 2:(length(folders)-1)
     
     hold on
     
-    % Computing difference of GC.
+    % Plotting mean, std in freq. domain.
     
-    All_GC_spec(:,:,3) = -diff(All_GC_spec,[],3);
-    
-    spec_mean = mean(All_GC_spec);
-    
-    spec_std = std(All_GC_spec);
-    
-    % Computing normalized GC.
-    
-    All_GC_norm = nan(size(All_GC_spec));
-    
-    for i=1:3
-        
-        All_GC_norm(:,:,i) = (All_GC_spec(:,:,i) - ones(size(All_GC_spec(:,:,i)))*diag(shuffled_mean(:,:,i)))*diag(shuffled_std(:,:,i));
-        
-    end
-    
-    save([obs_name(1:end-4),'_thresh.mat'],'All_GC_norm')
-    
-    norm_mean = mean(All_GC_norm);
-    
-    norm_std = std(All_GC_norm);
+    load([obs_name(1:end-4),'_stats.mat'])
     
     figure;
 
@@ -144,27 +140,27 @@ for fo = 2:(length(folders)-1)
     
     legend(h,labels)
     
-    title('Spectral Granger, Observed, Mean \pm STD')
+    title([folder,' Spectral Granger, Observed, Mean \pm STD'])
         
     subplot(2,1,2)
     
     hold on
     
-    for i = 1:3
+    for i = 1:4
         
-        h(i) = plot(f(f_indices),norm_mean(:,f_indices,i),color_order{i});
+        h(i) = plot(f(f_indices),zs_mean(:,f_indices,i),color_order{i});
         
-        plot(f(f_indices),norm_mean(:,f_indices,i)+norm_std(:,f_indices,i),[':',color_order{i}])
+        plot(f(f_indices),zs_mean(:,f_indices,i)+zs_std(:,f_indices,i),[':',color_order{i}])
         
-        plot(f(f_indices),norm_mean(:,f_indices,i)-norm_std(:,f_indices,i),[':',color_order{i}])
+        plot(f(f_indices),zs_mean(:,f_indices,i)-zs_std(:,f_indices,i),[':',color_order{i}])
         
     end
     
     legend(h,labels)
     
-    title('Spectral Granger, z-Scored, Mean \pm STD')
+    title([folder,' Spectral Granger, z-Scored, Mean \pm STD'])
     
-    save_as_pdf(gcf,obs_name(1:end-4))
+    save_as_pdf(gcf,[obs_name(1:end-4),'_',f_lim_label])
     
     cd (present_dir)
     
@@ -174,4 +170,9 @@ figure(3)
 
 title('VAR Order')
 xlabel('Epoch Number')
-legend(order_handle,folders)
+try
+    legend(order_handle,folders)
+catch error
+    display(error.message)
+end
+save_as_pdf(gcf,[num2str(epoch_length),'s_epochs_VAR_order'])

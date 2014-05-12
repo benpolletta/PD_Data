@@ -1,12 +1,10 @@
-function PD_epoch_list_artifacts_channels(prefix, outlier_check)
+function PD_epoch_list_artifacts_channels(prefix, epoch_length, outlier_check)
 
-load([prefix,'_all_data_dec.mat'])
+load([prefix,'_all_channel_data_dec.mat'])
 
 %% Set up for epoching.
 
 data_length = length(PD_dec);
-
-epoch_length = 5;
 
 no_epochs = floor(data_length/(epoch_length*sampling_freq));
 
@@ -17,15 +15,17 @@ all_std = std(PD_dec);
 
 %% Set up for lists.
 
-outliers_fid = fopen([prefix,'_channels_outliers.list'],'w');
+outliers_fid = fopen([prefix,'_channels_',num2str(epoch_length),'s_outliers.list'],'w');
 
-epoch_list_fid = fopen([prefix,'_channels_epochs.list'],'w');
+epoch_list_fid = fopen([prefix,'_channels_',num2str(epoch_length),'s_epochs.list'],'w');
+
+epoch_nos_list_fid = fopen([prefix,'_channels_',num2str(epoch_length),'s_epoch_numbers.list'],'w');
 
 %% Extracting Epochs.
 
 for e = 1:no_epochs
     
-    epoch_name = [prefix,'_channels_epoch',num2str(e),'.txt'];
+    epoch_name = [prefix,'_channels_',num2str(epoch_length),'s_epoch',num2str(e),'.txt'];
     
     % Getting epoch.
    
@@ -53,7 +53,7 @@ for e = 1:no_epochs
         
         if any(abs(norm_data) > outlier_check)
             
-            zs_name = [epoch_name(1:end-4),'_zs.txt'];
+            zs_name = [epoch_name(1:end-4),'_',num2str(epoch_length),'s_zs.txt'];
             
             fid = fopen(zs_name,'w');
             
@@ -65,6 +65,8 @@ for e = 1:no_epochs
             
         else
         
+            fprintf(epoch_nos_list_fid,'%d\n',e);
+            
             fprintf(epoch_list_fid,'%s\n',epoch_name);
             
         end
