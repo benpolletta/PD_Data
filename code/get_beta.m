@@ -20,9 +20,9 @@ for fo = 2:length(folders)
     
     load([prefix,'_all_channel_data_dec.mat']);
    
-    beta_start_index = BetaTimes(fo,1)*sampling_freq
+    beta_start_index = BetaTimes(fo,1)*sampling_freq;
     
-    beta_end_index = min(length(PD_dec), BetaTimes(fo,2)*sampling_freq)
+    beta_end_index = min(length(PD_dec), BetaTimes(fo,2)*sampling_freq);
     
     beta_data = PD_dec(beta_start_index:beta_end_index,:);
     

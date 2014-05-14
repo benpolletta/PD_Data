@@ -25,8 +25,9 @@ p_hist = zeros(no_p_bins+1,no_f_bins);
 
 for f = 1:no_f_bins
     
-    freqs(f) = mean(f_bins(f),f_bins(f+1));
-    freq_legend{f} = [num2str(freqs(f)),' Hz'];
+    freqs(f) = mean(f_bins(f:f+1));
+    
+    freq_legend{f} = sprintf('%g Hz',freqs(f));
     
     f_phases = p_vec(f_bins(f) <= f_vec & f_vec < f_bins(f+1)); % Finding phases falling within a given frequency bin. 
     
@@ -46,19 +47,31 @@ for f = 1:no_f_bins
     
     MR_vec(f) = sum(exp(sqrt(-1)*f_phases))/length(f_phases);
     
+end
+    
 %     rose(phases,no_p_bins)
 
-    h1(f) = polar(phases',p_hist(:,f),'-s');
+polar_lim=polar(0,.7*max(max(MR_vec),max(max(p_hist))),'.'); % Dummy plot to set radial axis length.
+
+set(polar_lim,'Marker','none'); % Dummy plot disappears.
+
+hold on
+
+for f = 1:no_f_bins
+
+    h1(f) = polar(phases',p_hist(:,f),'-');
     
-    set(h1(f),'Color',c_order(f,:))
-    
-    hold on
+    set(h1(f),'Color',c_order(f,:),'LineWidth',2)
     
     h2(f) = compass(MR_vec(f));
     
-    set(h2(f),'Color',c_order(f,:))
+    set(h2(f),'Color',c_order(f,:),'LineWidth',2)
 
 end
 
-legend(h1,freq_legend)
+colormap(c_order)
+
+colorbar('YTick',(1:no_f_bins)+.5,'YTickLabel',freq_legend)
+
+% legend(h1,freq_legend)
 
