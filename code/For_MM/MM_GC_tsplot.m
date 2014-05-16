@@ -76,13 +76,13 @@ for file_no = 1:length(filenames)
             
             hold on
             
-            h(b) = plot(t,Bandwise_GC_spec(:,:,3),[color_order{b},'-*']);
+            h(b) = plot(t,Bandwise_GC_spec(:,:,a),[color_order{b},'-*']);
             
         end
         
         axis tight, box off
         
-        title([folder,', Observed Spectral Granger, ',labels{a},', Integrated'])
+        title([filename,', Observed Spectral Granger, ',labels{a},', Integrated'])
         
         legend(h,f_lim_label)
         
@@ -96,6 +96,6 @@ for file_no = 1:length(filenames)
         
     end
         
-    save_as_pdf(gcf,[GCname(1:end-4),'_',all_f_lim_label,'_ts_diff_only'])
+    save_as_pdf(gcf,[GCname(1:end-4),'_',all_f_lim_label,'_ts'])
     
 end

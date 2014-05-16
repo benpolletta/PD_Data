@@ -17,27 +17,33 @@ no_bands = length(band_names);
 
 no_files = length(filenames);
 
-[r,c] = size(marker_times);
-
-if r~=no_files 
+if ~isempty(marker_times)
     
-    if c==no_files
+    [r,c] = size(marker_times);
+    
+    if r~=no_files
         
-        marker_times = marker_times';
-        
-    else
-        
-        display('Number of rows of "marker_times" must be the same as the number of files.')
-        
-        return
+        if c==no_files
+            
+            marker_times = marker_times';
+            
+        else
+            
+            display('Number of rows of "marker_times" must be the same as the number of files.')
+            
+            return
+            
+        end
         
     end
     
+    no_markers = size(marker_times,2);
+    
+else
+    
+    no_markers = 0;
+    
 end
-
-no_markers = size(marker_times,2);
-    
-    
 
 for file_no = 1:no_files
     
@@ -45,15 +51,23 @@ for file_no = 1:no_files
 
     data = load(filename);
     
-    [r,c] = size(all_data);
-    
-    if r < c
+    if isstruct(data)
         
-        all_data = all_data';
+        fields = fieldnames(data);
+        
+        data = getfield(data,fields{1});
         
     end
     
-    [data_length, no_channels] = size(all_data);
+    [r,c] = size(data);
+    
+    if r < c
+        
+        data = data';
+        
+    end
+    
+    [data_length, no_channels] = size(data);
     
     t = (1:data_length)/sampling_freq;
     
@@ -89,7 +103,7 @@ for file_no = 1:no_files
 
     clear A_smooth A_pct_baseline A_plot
     
-    flip_length = conv_length*sampling_freq;
+    flip_length = min(conv_length*sampling_freq,data_length);
     
     for b = 1:no_bands
         
@@ -104,43 +118,43 @@ for file_no = 1:no_files
             A_smooth(:,ch) = A_conv((flip_length+1):(end-flip_length));
              
         end
-            
-        A_pct_baseline = 100*A_smooth*diag(1./mean(A_smooth(t<basetime,:))) - 100;
         
-        A_plot = A_smooth;%A_pct_baseline;
+        A_plot = A_smooth;
         
-        plot(t',A_plot)
+        ax = plotyy(t',A_plot(:,1),t',A_plot(:,2));
+        
+        axis(ax,'tight')
         
         legend({'Striatum','Motor Ctx.'})
         
         hold on
         
-        axis tight
-        
         box off
 
-        marker_time = marker_times(file_no,:);
-        
-        for m = 1:no_markers
+        if ~isempty(marker_times)
             
-            plot([marker_time(m) marker_time(m)]',[min(min(A_plot)) max(max(A_plot))]','r')
+            marker_time = marker_times(file_no,:);
+            
+            for m = 1:no_markers
+                
+                plot([marker_time(m) marker_time(m)]',[min(min(A_plot)) max(max(A_plot))]','r')
+                
+            end
             
         end
-
+        
         ylabel(sprintf('%s (%g - %g Hz) power',band_names{b},bands(b,1),bands(b,2)))
-%         ylabel({[band_names{b},' power'];'percent change'})
 
         xlabel('Time (s)')
         
         if b==1
             
-            title(folder)
+            title(filename)
             
         end
         
     end
 
-    save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_betaHAP'])
-%     save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_betaHAP_pct'])
+    save_as_pdf(gcf,[filename,'_all_channel_data_dec_betaHAP'])
 
 end

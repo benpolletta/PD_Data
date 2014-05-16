@@ -14,6 +14,14 @@ for file_no = 1:length(filenames)
     
     all_data = load(filename);
     
+    if isstruct(all_data)
+        
+        fields = fieldnames(all_data);
+        
+        all_data = getfield(all_data,fields{1});
+        
+    end
+    
     [r,c] = size(all_data);
     
     if r < c
@@ -24,7 +32,7 @@ for file_no = 1:length(filenames)
     
     [data_length, no_channels] = size(all_data);
     
-    data_format = makeformat(no_channels,'f');
+    data_format = make_format(no_channels,'f');
     
     if isempty(time_step)
         
@@ -71,7 +79,7 @@ for file_no = 1:length(filenames)
         start_index = max(start_sec*sampling_freq + 1, 1);
         
         end_index = min(end_sec*sampling_freq, length(all_data));
-        
+       
         if start_index < end_index
             
             data = all_data(start_index:end_index,:);

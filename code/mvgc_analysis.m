@@ -39,7 +39,7 @@ if spec_flag == 0
     if ~isempty(F)
         
         pval = mvgc_pval(F,morder,nobs,1,1,1,size(X,1)-2,''); % take careful note of arguments!
-        sig  = significance(pval,0.1,'FDR');
+        sig  = significance(pval,0.01,'FDR');
         
     else
         

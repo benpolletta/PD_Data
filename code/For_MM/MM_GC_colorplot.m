@@ -56,7 +56,7 @@ for file_no = 1:length(filenames)
     
     subplot(2,1,2)
     
-    plot(Orders,'*')
+    plot(Errors,'*')
     
     xlabel('Epoch Number')
     
@@ -84,7 +84,7 @@ for file_no = 1:length(filenames)
         
         axis xy, colorbar
         
-        title([folder,' Spectral Granger, Observed, ',labels{i}])
+        title([filename,' Spectral Granger, Observed, ',labels{i}])
         
     end
     
