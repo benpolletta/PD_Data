@@ -1,4 +1,4 @@
-function [MR_vec,p_hist,freqs]=rose_plot(p_vec,f_vec,no_p_bins,f_bins)
+function [MR_vec,p_hist,freqs]=rose_plot(p_vec,f_vec,no_p_bins,f_bins,plot_opt)
 
 % Produces a rose plot, with mean resultant vectors, from time series of
 % frequencies and phases.
@@ -48,30 +48,34 @@ for f = 1:no_f_bins
     MR_vec(f) = sum(exp(sqrt(-1)*f_phases))/length(f_phases);
     
 end
+
+if plot_opt ~= 0
     
-%     rose(phases,no_p_bins)
-
-polar_lim=polar(0,.7*max(max(MR_vec),max(max(p_hist))),'.'); % Dummy plot to set radial axis length.
-
-set(polar_lim,'Marker','none'); % Dummy plot disappears.
-
-hold on
-
-for f = 1:no_f_bins
-
-    h1(f) = polar(phases',p_hist(:,f),'-');
+    %     rose(phases,no_p_bins)
     
-    set(h1(f),'Color',c_order(f,:),'LineWidth',2)
+    polar_lim=polar(0,.7*max(max(MR_vec),max(max(p_hist))),'.'); % Dummy plot to set radial axis length.
     
-    h2(f) = compass(MR_vec(f));
+    set(polar_lim,'Marker','none'); % Dummy plot disappears.
     
-    set(h2(f),'Color',c_order(f,:),'LineWidth',2)
-
+    hold on
+    
+    for f = 1:no_f_bins
+        
+        h1(f) = polar(phases',p_hist(:,f),'-');
+        
+        set(h1(f),'Color',c_order(f,:),'LineWidth',2)
+        
+        h2(f) = compass(MR_vec(f));
+        
+        set(h2(f),'Color',c_order(f,:),'LineWidth',2)
+        
+    end
+    
+    colormap(c_order)
+    
+    colorbar('YTick',(1:no_f_bins)+.5,'YTickLabel',freq_legend)
+    
+    % legend(h1,freq_legend)
+    
 end
-
-colormap(c_order)
-
-colorbar('YTick',(1:no_f_bins)+.5,'YTickLabel',freq_legend)
-
-% legend(h1,freq_legend)
 

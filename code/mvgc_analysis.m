@@ -68,4 +68,39 @@ elseif spec_flag == 1
         
     end
     
+elseif spec_flag == 2
+    
+    % Get Granger from autocovariance.
+    F = autocov_to_pwcgc(G);
+    
+    varargout{1} = F;
+    
+    if ~isempty(F)
+        
+        % Significance test using theoretical null distribution, adjusting for multiple
+        % hypotheses.
+        pval = mvgc_pval(F,morder,nobs,1,1,1,size(X,1)-2,''); % take careful note of arguments!
+        sig  = significance(pval,0.01,'FDR');
+        
+        % Get spectral GC from autocovariance.
+        f = autocov_to_spwcgc(G,nobs);
+        
+    else
+        
+        F = nan(size(X,1)); pval = nan(size(X,1)); sig = nan(size(X,1));
+        
+        f = nan(size(X,1), size(X,1), size(X,2)+1);
+        
+    end
+        
+    varargout{1} = F; varargout{2} = pval; varargout{3} = sig;
+   
+    varargout{4} = f;
+    
+    if ~isempty(filename)
+        
+        save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig','f')
+        
+    end
+    
 end
