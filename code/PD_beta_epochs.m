@@ -106,9 +106,9 @@ for fo = 2:length(folders)
                 
                 P_name = [beta_name,'_epoch',num2str(e),'_P.txt'];
                 
-                epoch_start = beta_blocks(b,1) + e*step_size;
+                epoch_start = beta_blocks(b,1) + (e-1)*step_size;
                 
-                epoch_end = beta_blocks(b,1) + e*step_size + win_size;
+                epoch_end = beta_blocks(b,1) + (e-1)*step_size + win_size;
                 
                 fid = fopen(epoch_name,'w');
                 
@@ -126,7 +126,7 @@ for fo = 2:length(folders)
                 
                 fprintf(fid_P_list, '%s\n', P_name);
                 
-                fprintf(fid_win_list, '%d\n', round(mean([epoch_start; epoch_end])));
+                fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, epoch_start, epoch_end, median(beta_amp(epoch_start:epoch_end,:)));
                 
             end
             

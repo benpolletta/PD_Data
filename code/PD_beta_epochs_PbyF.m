@@ -4,11 +4,11 @@ folders = {'090312','130703','130709','130718','130725'};
 
 prefixes = {'09312','13703','13709','13718','13725'};
 
-varnames = {'f_datapoints','f_mean','f_std','mrv','ph_zstat','ph_pval'};
+varnames = {'f_datapoints','f_mean','f_std','f_med','mrv','ph_zstat','ph_pval'};
 
 f_bins = 7.5:5:32.5;
             
-no_f_bins = length(f_bins)-1; % Finding number of frequency bins.
+no_f_bins = length(f_bins); % Finding number of frequency bins.
 
 for fo = 2:length(folders)
     
@@ -26,7 +26,7 @@ for fo = 2:length(folders)
         
         no_epochs = length(beta_list);
         
-        PbyF_mat = nan(no_epochs, no_f_bins, 6, 2);
+        PbyF_mat = nan(no_epochs, no_f_bins, 7, 2);
         
         parfor e = 1:no_epochs
            

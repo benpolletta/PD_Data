@@ -14,7 +14,7 @@ F = diff(unwrap(P))/(2*pi*(1/sampling_freq));
 
 F_smooth = nan(size(F));
 
-pbf = nan(1, no_f_bins, 6, 2);
+pbf = nan(1, no_f_bins + 1, 7, 2);
 
 for ch = 1:2
     
@@ -32,15 +32,33 @@ for ch = 1:2
         
         pbf(1, f, 3, ch) = std(bin_freqs);
         
+        pbf(1, f, 4, ch) = median(bin_freqs);
+        
         bin_phases = P_diff(bin_indicator);
         
-        mrv = sum(exp(sqrt(-1)*bin_phases)); pbf(1, f, 4, ch) = mrv;
+        mrv = sum(exp(sqrt(-1)*bin_phases)); pbf(1, f, 5, ch) = mrv;
         
-        pbf(1, f, 5, ch) = abs(mrv)^2 / n;
+        pbf(1, f, 6, ch) = abs(mrv)^2 / n;
         
-        pbf(1, f, 6, ch) = exp(sqrt(1+4*n+4*(n^2-abs(mrv)^2))-(1+2*n));
+        pbf(1, f, 7, ch) = exp(sqrt(1+4*n+4*(n^2-abs(mrv)^2))-(1+2*n));
         
     end
+    
+    n = size(F_smooth,1);
+    
+    pbf(1, no_f_bins + 1, 1, ch) = n;
+    
+    pbf(1, no_f_bins + 1, 2, ch) = mean(F_smooth(:,ch));
+    
+    pbf(1, no_f_bins + 1, 3, ch) = std(F_smooth(:,ch));
+    
+    pbf(1, no_f_bins + 1, 4, ch) = median(F_smooth(:,ch));
+    
+    mrv = sum(exp(sqrt(-1)*P_diff)); pbf(1, no_f_bins + 1, 5, ch) = mrv;
+    
+    pbf(1, no_f_bins + 1, 6, ch) = abs(mrv)^2 / n;
+    
+    pbf(1, no_f_bins + 1, 7, ch) = exp(sqrt(1+4*n+4*(n^2-abs(mrv)^2))-(1+2*n));
     
 end
 
