@@ -2,15 +2,9 @@ function run_PD_pre(outlier_check)
 
 present_dir = pwd;
 
-folders = {'090312','130703','130709','130718','130725'};
+load('subjects.mat')
 
-prefixes = {'09312','13703','13709','13718','13725'};
-
-basetimes = [300 1200 1800 600 1800];
-
-infusetimes = [390 240 300 450 510];
-
-for fo = 5:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -19,12 +13,20 @@ for fo = 5:length(folders)
     cd (folder)
     
 %     PD_concatenate(prefix,1)
-    
+%     
 %     PD_decimate(prefix,1)
     
-    PD_epoch_list_artifacts(prefix,basetimes(fo),outlier_check)
+    PD_concatenate_channels(prefix,1)
     
-    PD_plot_artifacts(prefix)
+    PD_decimate_channels(prefix,1)
+    
+    if ~isempty(outlier_check)
+        
+        PD_epoch_list_artifacts(prefix,basetimes(fo),outlier_check)
+        
+        PD_plot_artifacts(prefix)
+        
+    end
 
     cd (present_dir)
     

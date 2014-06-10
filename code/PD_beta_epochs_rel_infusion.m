@@ -34,7 +34,7 @@ for fo = 2:length(folders)
         
         ba_flipped = [flipud(beta_amp(1:10*sampling_freq,ch)); beta_amp(:,ch); flipud(beta_amp((end-10*sampling_freq+1):end,ch))];
         
-        ba_conv = conv(ba_flipped,ones(10*sampling_freq,1)/(10*sampling_freq),'same');
+        ba_conv = conv(ba_flipped,ones(20*sampling_freq,1)/(20*sampling_freq),'same');
         
         ba_smooth = ba_conv((10*sampling_freq+1):(end-10*sampling_freq));
         
@@ -78,7 +78,7 @@ for fo = 2:length(folders)
             
             if beta_start(end) > beta_end(end)
                 
-                beta_end = [beta_end; size(beta_amp,1)];
+                beta_end = [beta_end; pd_limits(pd,2)];
                 
             end
             
