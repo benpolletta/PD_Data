@@ -72,51 +72,55 @@ for fo = 5:length(folders)
             
             beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
             
-            if beta_end(1) < beta_start(1)
+            if ~isempty(beta_end) && ~isempty(beta_start)
                 
-                beta_start = [pd_limits(pd,1); beta_start];
+                if beta_end(1) < beta_start(1)
+                    
+                    beta_start = [pd_limits(pd,1); beta_start];
+                    
+                end
                 
-            end
-            
-            if beta_start(end) > beta_end(end)
+                if beta_start(end) > beta_end(end)
+                    
+                    beta_end = [beta_end; pd_limits(pd,2)];
+                    
+                end
                 
-                beta_end = [beta_end; pd_limits(pd,2)];
+                beta_blocks = [beta_start beta_end];
                 
-            end
-            
-            beta_blocks = [beta_start beta_end];
-            
-            beta_lengths = diff(beta_blocks,[],2) + 1;
-            
-            beta_blocks(beta_lengths < win_size, :) = [];
-            
-            for b = 1:size(beta_blocks,1)
+                beta_lengths = diff(beta_blocks,[],2) + 1;
                 
-                plot(t(beta_blocks(b,1):beta_blocks(b,2)),beta_amp(beta_blocks(b,1):beta_blocks(b,2),ch),'g')
+                beta_blocks(beta_lengths < win_size, :) = [];
                 
-                plot(t(beta_blocks(b,1):beta_blocks(b,2)),ba_smooth(beta_blocks(b,1):beta_blocks(b,2)),'r')
-                
-                beta_name = [subj_name,'_ch',num2str(ch),'_beta_',pd_label{pd},'_block',num2str(b),'.txt'];
-                
-                P_name = [beta_name(1:end-4),'_P.txt'];
-                
-                fid = fopen(beta_name,'w');
-                
-                fprintf(fid, '%f\t%f\n', PD_dec(beta_blocks(b,1):beta_blocks(b,2), :)');
-                
-                fclose(fid);
-                
-                fid = fopen(P_name, 'w');
-                
-                fprintf(fid, '%f\t%f\n', P(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
-                
-                fclose(fid);
-                
-                fprintf(fid_list, '%s\n', beta_name);
-                
-                fprintf(fid_P_list, '%s\n', P_name);
-                
-                fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,:), median(beta_amp(beta_start:beta_end,:)));
+                for b = 1:size(beta_blocks,1)
+                    
+                    plot(t(beta_blocks(b,1):beta_blocks(b,2)),beta_amp(beta_blocks(b,1):beta_blocks(b,2),ch),'g')
+                    
+                    plot(t(beta_blocks(b,1):beta_blocks(b,2)),ba_smooth(beta_blocks(b,1):beta_blocks(b,2)),'r')
+                    
+                    beta_name = [subj_name,'_ch',num2str(ch),'_beta_',pd_label{pd},'_block',num2str(b),'.txt'];
+                    
+                    P_name = [beta_name(1:end-4),'_P.txt'];
+                    
+                    fid = fopen(beta_name,'w');
+                    
+                    fprintf(fid, '%f\t%f\n', PD_dec(beta_blocks(b,1):beta_blocks(b,2), :)');
+                    
+                    fclose(fid);
+                    
+                    fid = fopen(P_name, 'w');
+                    
+                    fprintf(fid, '%f\t%f\n', P(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
+                    
+                    fclose(fid);
+                    
+                    fprintf(fid_list, '%s\n', beta_name);
+                    
+                    fprintf(fid_P_list, '%s\n', P_name);
+                    
+                    fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,:), median(beta_amp(beta_start:beta_end,:)));
+                    
+                end
                 
             end
             

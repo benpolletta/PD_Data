@@ -5,10 +5,22 @@ function PD_beta_epochs_roseplot_by_datapoint
 load('st_m1_subjects.mat')
 
 sampling_freq = 1000;
+
+f_bins = 8:4:32;
   
 freq_labels = {'Striatal','Motor Ctx.'};
 
-for fo = 5:length(folders)
+fid_vec = nan(2,1); all_beta_name = cell(2,1);
+
+for ch = 1:2
+    
+    all_beta_name{ch} = ['PD_beta_ch',num2str(ch)];
+    
+    fid_vec(ch) = fopen([all_beta_name{ch},'_pbf_dp.txt'], 'w');
+    
+end
+
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -75,7 +87,7 @@ for fo = 5:length(folders)
                     
                 end
                 
-                fprintf(fid,'%f\t%f\t%f\t%f\n',[b*ones(size(Pd_smooth)) F_smooth Pd_smooth]');
+                fprintf(fid, '%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth]');
                 
                 subplot(3,1,1)
                 
@@ -101,7 +113,7 @@ for fo = 5:length(folders)
                     
                     subplot(2, 2, 2 + ch1)
                     
-                    rose_plot(P_diff, F_smooth(:,ch1), 20, 4:4:36);
+                    rose_plot(P_diff, F_smooth(:,ch1), 20, f_bins);
                     
                     title({[folder,' Block ',num2str(b)];['Phase Lag by ',freq_labels{ch1},' Freq.']})
                     
@@ -119,24 +131,56 @@ for fo = 5:length(folders)
         
         all_beta_data = load(beta_pbf_name);
         
-        all_Fs = all_beta_data(:,2:3);
+        fprintf(fid_vec(ch), '%f\t%f\t%f\t%f\n', all_beta_data');
         
-        all_Pds = all_beta_data(:,4);
-        
-        figure;
-        
-        for ch1 = 1:2
-        
-            subplot(1, 2, ch1)
-            
-            rose_plot(all_Pds, all_Fs(:,ch1), 20, 4:4:36);
-        
-            title({[folder,' ',freq_labels{ch},' High Beta Blocks'];['Phase Lag by ',freq_labels{ch1},' Freq.']})
-           
-        end
-        
-        save_as_pdf(gcf,[beta_listname(1:end-5),'_rose_dp'])
+%         all_Fs = all_beta_data(:,2:3);
+%         
+%         all_Pds = all_beta_data(:,4);
+%         
+%         figure;
+%         
+%         for ch1 = 1:2
+%         
+%             subplot(1, 2, ch1)
+%             
+%             rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
+%         
+%             title({[folder,' ',freq_labels{ch},' High Beta Blocks'];['Phase Lag by ',freq_labels{ch1},' Freq.']})
+%            
+%         end
+%         
+%         save_as_pdf(gcf,[beta_listname(1:end-5),'_rose_dp'])
         
     end
           
 end
+
+for ch = 1:2
+    
+    fclose(fid_vec(ch));
+    
+end
+
+figure;
+
+for ch = 1:2
+    
+    all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
+    
+    all_Fs = all_beta_data(:,2:3);
+    
+    all_Pds = all_beta_data(:,4);
+    
+    for ch1 = 1:2
+        
+        subplot(2, 2, (ch-1)*2 + ch1)
+        
+        rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
+        
+        title({[freq_labels{ch},' High Beta Blocks'];['Phase Lag by ',freq_labels{ch1},' Freq.']})
+        
+    end
+    
+end
+
+save_as_pdf(gcf,'PD_beta_rose_dp')
