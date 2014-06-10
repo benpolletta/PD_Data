@@ -1,16 +1,14 @@
-function PD_bandpass_channels
+function PD_bandpass_channels(subject_mat)
 
 present_dir = pwd;
 
-% load('initial_subjects.mat')
-
-load('st_m1_subjects.mat')
+load(subject_mat)
 
 bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
 band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
 no_bands = length(band_names);
 
-for fo = 5:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     

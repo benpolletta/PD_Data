@@ -1,12 +1,10 @@
-function PD_beta_epochs(sd_lim, win_size, step_size)
+function PD_beta_epochs(subject_mat, sd_lim, win_size, step_size)
 
-% load('initial_subjects.mat')
-
-load('st_m1_subjects.mat')
+load(subject_mat)
 
 sampling_freq = 1000;
 
-for fo = 5:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     

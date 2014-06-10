@@ -1,14 +1,12 @@
-function PD_beta_epochs_rel_infusion(sd_lim, win_size)
+function PD_beta_epochs_rel_infusion(subject_mat, sd_lim, win_size)
 
-% load('initial_subjects.mat')
-
-load('st_m1_subjects.mat')
+load(subject_mat)
 
 sampling_freq = 1000;
 
 pd_label = {'pre', 'post'};
 
-for fo = 5:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     

@@ -1,14 +1,12 @@
-function PD_beta_epochs_rel_infusion_roseplot_by_datapoint
+function PD_beta_epochs_rel_infusion_roseplot_by_datapoint(subject_mat)
 
-% load('initial_subjects.mat')
-
-load('st_m1_subjects.mat')
+load(subject_mat)
 
 sampling_freq = 1000;
 
 f_bins = 8:4:32;
 
-freq_labels = {'Striatal','Motor Ctx.'};
+chan_labels = {'Striatal','Motor Ctx.'};
 
 pd_label = {'pre','post'};
 
@@ -20,7 +18,7 @@ for ch = 1:2
    
     for pd = 1:length(pd_label)
     
-        all_beta_name{ch, pd} = ['PD_beta_ch',num2str(ch),'_',pd_label{pd}];
+        all_beta_name{ch, pd} = [subject_mat(1:(end-length('_subjects.mat'))),'_beta_ch',num2str(ch),'_',pd_label{pd}];
         
         fid_mat(ch, pd) = fopen([all_beta_name{ch, pd},'_pbf_dp.txt'], 'w');
     
@@ -125,7 +123,7 @@ for fo = 1:length(folders)
                 
                 rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
                 
-                title({[folder,' ',freq_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',freq_labels{ch1},' Freq.']})
+                title({[folder,' ',chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
                 
             end
             
@@ -165,7 +163,7 @@ for ch = 1:2
             
             rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
             
-            title({[freq_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',freq_labels{ch1},' Freq.']})
+            title({[chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
             
         end
         
