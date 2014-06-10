@@ -1,20 +1,12 @@
 function PD_beta_epochs(sd_lim, win_size, step_size)
 
-folders = {'090312','130703','130709','130718','130725'};
+% load('initial_subjects.mat')
 
-prefixes = {'09312','13703','13709','13718','13725'};
-
-% basetimes = [300 1200 1800 600 1800];
-% 
-% infusetimes = [390 240 300 450 510];
-
-% bands = [1 4; 4 12; 15 30; 30 60; 60 90; 90 110; 120 180];
-% band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
-% no_bands = length(band_names);
+load('st_m1_subjects.mat')
 
 sampling_freq = 1000;
 
-for fo = 2:length(folders)
+for fo = 5:length(folders)
     
     folder = folders{fo};
     

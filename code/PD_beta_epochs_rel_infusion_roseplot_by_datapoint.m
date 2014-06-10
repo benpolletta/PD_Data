@@ -1,6 +1,8 @@
 function PD_beta_epochs_rel_infusion_roseplot_by_datapoint
 
-load('subjects.mat')
+% load('initial_subjects.mat')
+
+load('st_m1_subjects.mat')
 
 sampling_freq = 1000;
 
@@ -10,7 +12,7 @@ pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-for fo = 2:length(folders)
+for fo = 5:length(folders)
     
     folder = folders{fo};
     

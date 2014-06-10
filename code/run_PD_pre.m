@@ -2,7 +2,9 @@ function run_PD_pre(outlier_check)
 
 present_dir = pwd;
 
-load('subjects.mat')
+% load('initial_subjects.mat')
+
+load('st_m1_subjects.mat')
 
 for fo = 1:length(folders)
     

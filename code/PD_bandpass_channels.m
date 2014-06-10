@@ -2,21 +2,15 @@ function PD_bandpass_channels
 
 present_dir = pwd;
 
-folders = {'090312','130703','130709','130718','130725'};
+% load('initial_subjects.mat')
 
-prefixes = {'09312','13703','13709','13718','13725'};
+load('st_m1_subjects.mat')
 
-basetimes = [300 1200 1800 600 1800];
-
-infusetimes = [390 240 300 450 510];
-
-% bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
-% band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
-bands = [10 20; 20 30];
-band_names = {'Low Beta','High Beta'};
+bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
+band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
 no_bands = length(band_names);
 
-for fo = 2:length(folders)
+for fo = 5:length(folders)
     
     folder = folders{fo};
     
@@ -34,7 +28,7 @@ for fo = 2:length(folders)
     A = nan(size(PD_dec,1),2,no_bands);
     P = nan(size(PD_dec,1),2,no_bands);
     
-    if isempty(dir([folder,'/',prefix,'_all_channel_data_dec_betaHAP.mat']))
+    if isempty(dir([folder,'/',prefix,'_all_channel_data_dec_HAP.mat']))
         
         BP = nan(length(PD_dec),2);
             
@@ -48,11 +42,11 @@ for fo = 2:length(folders)
             
         end
         
-        save([folder,'/',prefix,'_all_channel_data_dec_betaHAP.mat'],'H','A','P','bands','band_names')
+        save([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'],'H','A','P','bands','band_names')
         
     else
         
-        load([folder,'/',prefix,'_all_channel_data_dec_betaHAP.mat'])
+        load([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'])
         
     end
     
@@ -106,7 +100,7 @@ for fo = 2:length(folders)
         
     end
 
-    save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_betaHAP'])
-%     save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_betaHAP_pct'])
+    save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_HAP'])
+%     save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_HAP_pct'])
 
 end
