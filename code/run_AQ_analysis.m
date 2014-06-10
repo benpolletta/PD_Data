@@ -2,13 +2,7 @@ function BetaTimes = run_AQ_analysis
 
 present_dir = pwd;
 
-folders = {'090312','130703','130709','130718','130725'};
-
-prefixes = {'09312','13703','13709','13718','13725'};
-
-basetimes = [300 1200 1800 600 1800];
-
-infusetimes = [390 240 300 450 510];
+load('subjects.mat')
 
 BetaTimes = nan(length(folders),4);
 
@@ -73,7 +67,7 @@ for fo = 1:length(folders)
         
         BetaTimes(fo,:) = Park_pop_betapower_v3(chData.ch1, basetimes(fo), infusetimes(fo));
         
-        save_as_pdf(gcf,[prefix,'_PPBP.fig'])
+        save_as_pdf(gcf,[prefix,'_PPBP'])
         
     end
     

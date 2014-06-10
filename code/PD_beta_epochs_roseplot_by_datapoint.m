@@ -1,8 +1,6 @@
 function PD_beta_epochs_roseplot_by_datapoint
 
-folders = {'090312','130703','130709','130718','130725'};
-
-prefixes = {'09312','13703','13709','13718','13725'};
+load('subjects.mat')
 
 sampling_freq = 1000;
   

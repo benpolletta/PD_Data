@@ -2,9 +2,7 @@ function PD_beta_phase_by_freq(no_p_bins,f_bins)
 
 sampling_freq = 1000;
 
-folders = {'090312','130703','130709','130718','130725'};
-
-prefixes = {'09312','13703','13709','13718','13725'};
+load('subjects.mat')
 
 channel_label = {'Striatum','Motor Ctx.'};
 

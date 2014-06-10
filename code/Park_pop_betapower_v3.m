@@ -47,6 +47,9 @@ function BetaOut = Park_pop_betapower_v3 (chData, basetime, infusetime)
     end
     
     %% To eliminate false identified changes.
+    
+    BetaOutPut = nan(2,2);
+    
     for i=1:2
         
         if i==1
@@ -66,9 +69,12 @@ function BetaOut = Park_pop_betapower_v3 (chData, basetime, infusetime)
         TempBeta=horzcat(zeros(1, length(stringent)-1), TempBeta);
         
         TrueChange{i}=TempBeta>length(stringent)-2; % Want change to be over more than 6*winstep = 30 sec.
+        
         if ~any(TrueChange{i})>0
-            BetaOutPut(i,1)=NaN;  % Latency of beta change onset.
-            BetaOutPut(i,2)=NaN;  % Peak of beta power change.
+            
+            BetaOutPut{i,1}=NaN;  % Latency of beta change onset.
+            BetaOutPut{i,2}=NaN;  % Peak of beta power change.
+            
         else
             
             Change_diff = diff(TrueChange{i});
@@ -76,16 +82,24 @@ function BetaOut = Park_pop_betapower_v3 (chData, basetime, infusetime)
             Change_off = find(Change_diff == -1);
             
             Temp_meanbeta = Meanbeta;
-            Temp_meanbeta(TrueChange{i} == 0) = 0;
             
             if i==1
+                Temp_meanbeta(TrueChange{i} == 0) = mean(Meanbeta);
                 [~, BetaMaxIndex] = max(Temp_meanbeta);
             else
+                Temp_meanbeta(TrueChange{i} == 0) = mean(Meanbeta);
                 [~, BetaMaxIndex] = min(Temp_meanbeta);
             end
                 
-            Change_on_index = max(Change_on(Change_on <= BetaMaxIndex));
-            Change_off_index = min(Change_off(Change_off >= BetaMaxIndex));
+            figure;
+            plot((1:winstep:(length(Temp_meanbeta)*winstep))', Temp_meanbeta)
+            hold on, plot(repmat(Change_on*winstep - winstep,2,1), repmat([min(Temp_meanbeta) max(Temp_meanbeta)]',1,length(Change_on)), 'g')
+            hold on, plot(repmat(Change_off*winstep - winstep,2,1), repmat([min(Temp_meanbeta) max(Temp_meanbeta)]',1,length(Change_off)), 'r')
+            plot(BetaMaxIndex*winstep, Temp_meanbeta(BetaMaxIndex), 'k*')
+            axis tight
+            
+            Change_on_index = max([Change_on(Change_on <= BetaMaxIndex) 1]);
+            Change_off_index = min([Change_off(Change_off >= BetaMaxIndex) length(Temp_meanbeta)]); %Change_on_index));
             
             BetaOutPut(i,1) = Change_on_index*winstep-8*winstep; % This is a scalar.
             BetaOutPut(i,2) = Change_off_index*winstep-winstep;
