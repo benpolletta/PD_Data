@@ -34,11 +34,11 @@ for fo = 1:length(folders)
         
         fid_win_list = fopen([beta_listname(1:end-5),'_win.list'],'w');
        
-        ba_flipped = [flipud(beta_amp(1:10*sampling_freq,ch)); beta_amp(:,ch); flipud(beta_amp((end-10*sampling_freq+1):end,ch))];
+        ba_flipped = [flipud(beta_amp(1:sampling_freq,ch)); beta_amp(:,ch); flipud(beta_amp((end-sampling_freq+1):end,ch))];
         
-        ba_conv = conv(ba_flipped,ones(20*sampling_freq,1)/(20*sampling_freq),'same');
+        ba_conv = conv(ba_flipped, ones(sampling_freq,1)/(sampling_freq), 'same');
         
-        ba_smooth = ba_conv((10*sampling_freq+1):(end-10*sampling_freq));
+        ba_smooth = ba_conv((sampling_freq+1):(end-sampling_freq));
         
 %         beta_high = beta_amp(:,ch) >= beta_cutoff(ch);
         

@@ -6,8 +6,6 @@ sampling_freq = 1000;
 
 f_bins = 8:4:32;
 
-chan_labels = {'Striatal','Motor Ctx.'};
-
 pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
@@ -135,6 +133,8 @@ for fo = 1:length(folders)
     
 end
 
+close('all')
+
 for ch = 1:2
     
     for pd = 1:length(pd_label)
@@ -145,19 +145,33 @@ for ch = 1:2
     
 end
 
-figure;
+figure(1)
+
+index = 2;
 
 for ch = 1:2
-   
-    for pd = 1:length(pd_label)
-    
-        all_beta_data = load([all_beta_name{ch, pd},'_pbf_dp.txt']);
-    
-        all_Fs = all_beta_data(:,2:3);
+           
+    for ch1 = 1:2
         
-        all_Pds = all_beta_data(:,4);
+        figure(index)
         
-        for ch1 = 1:2
+        for pd = 1:length(pd_label)
+            
+            all_beta_data = load([all_beta_name{ch, pd},'_pbf_dp.txt']);
+            
+            all_Fs = all_beta_data(:,2:3);
+            
+            all_Pds = all_beta_data(:,4);
+            
+            figure(index)
+            
+            subplot(1, 2, pd)
+            
+            rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
+            
+            title({[chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
+            
+            figure(1)
             
             subplot(2, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
             
@@ -167,8 +181,13 @@ for ch = 1:2
             
         end
         
+        save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_ch',num2str(ch),'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
+        
+        index = index + 1;
+        
     end
     
 end
 
-save_as_pdf(gcf,'PD_beta_ri_rose_dp')
+
+save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_beta_ri_rose_dp'])

@@ -5,8 +5,6 @@ load(subject_mat)
 sampling_freq = 1000;
 
 f_bins = 8:4:32;
-  
-chan_labels = {'Striatal','Motor Ctx.'};
 
 fid_vec = nan(2,1); all_beta_name = cell(2,1);
 
@@ -131,23 +129,23 @@ for fo = 1:length(folders)
         
         fprintf(fid_vec(ch), '%f\t%f\t%f\t%f\n', all_beta_data');
         
-%         all_Fs = all_beta_data(:,2:3);
-%         
-%         all_Pds = all_beta_data(:,4);
-%         
-%         figure;
-%         
-%         for ch1 = 1:2
-%         
-%             subplot(1, 2, ch1)
-%             
-%             rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
-%         
-%             title({[folder,' ',chan_labels{ch},' High Beta Blocks'];['Phase Lag by ',chan_labels{ch1},' Freq.']})
-%            
-%         end
-%         
-%         save_as_pdf(gcf,[beta_listname(1:end-5),'_rose_dp'])
+        all_Fs = all_beta_data(:,2:3);
+        
+        all_Pds = all_beta_data(:,4);
+        
+        figure;
+        
+        for ch1 = 1:2
+        
+            subplot(1, 2, ch1)
+            
+            rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
+        
+            title({[folder,' ',chan_labels{ch},' High Beta Blocks'];['Phase Lag by ',chan_labels{ch1},' Freq.']})
+           
+        end
+        
+        save_as_pdf(gcf,[beta_listname(1:end-5),'_rose_dp'])
         
     end
           
@@ -181,4 +179,4 @@ for ch = 1:2
     
 end
 
-save_as_pdf(gcf,'PD_beta_rose_dp')
+save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_beta_rose_dp'])
