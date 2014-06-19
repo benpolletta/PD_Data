@@ -9,7 +9,7 @@ function [MR_vec,p_hist,freqs]=rose_plot(p_vec,f_vec,no_p_bins,f_bins)
 % f_bins = vector of bin edges. Frequencies will be pooled together inside
 % each bin.
 % OUTPUTS:
-% MRL_vec = mean resultant vectors for each frequency bin.
+% MR_vec = mean resultant vectors for each frequency bin.
 % freqs = center frequency for each bin.
 
 p_bins = linspace(-pi,pi,no_p_bins+1)-2*pi/(2*no_p_bins); % Making vector of phase bin edges.
@@ -90,8 +90,6 @@ end
 colormap(c_order)
 
 h = colorbar('YTick',(1:no_f_bins)+.5,'YTickLabel',freq_legend);
-
-freezeColors
 
 cbfreeze(h)
 
