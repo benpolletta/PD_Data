@@ -16,23 +16,27 @@ pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both'};
+chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2'};
+ch_index = {1, 2, 1:2, 1, 2, 1, 2};
 
-all_beta_name = cell(3,1);
+ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
-for ch = 1:3
+no_channels = length(ch_label);
+
+all_beta_name = cell(no_channels, 1);
+
+for ch = 1:no_channels
     
     all_beta_name{ch} = [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_',ch_label{ch}];
     
 end
 
-figure(1)
+% figure(1)
 
-index = 2;
+index = 1;%2;
 
-for ch = 1:3
+for ch = 1:no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
     
@@ -62,13 +66,13 @@ for ch = 1:3
             
             title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
             
-            figure(1)
-            
-            subplot(3, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
-            
-            rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
-            
-            title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
+            % figure(1)
+            % 
+            % subplot(3, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
+            % 
+            % rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
+            % 
+            % title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
                 
         end
         

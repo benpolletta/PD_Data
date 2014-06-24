@@ -1,8 +1,6 @@
-function PD_beta_epochs_GC_timeplot
+function PD_beta_epochs_GC_timeplot(subjects_mat)
 
-folders = {'090312','130703','130709','130718','130725'};
-
-prefixes = {'09312','13703','13709','13718','13725'};
+load(subjects_mat)
 
 f_bins = 7.5:5:32.5;
 

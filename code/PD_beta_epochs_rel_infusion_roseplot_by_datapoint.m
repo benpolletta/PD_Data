@@ -18,15 +18,19 @@ pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both'};
+chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2'};
+ch_index = {1, 2, 1:2, 1, 2, 1, 2};
 
-fid_mat = nan(3,1);
+ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
-all_beta_name = cell(3,1);
+no_channels = length(ch_label);
 
-for ch = 1:3
+fid_mat = nan(no_channels,1);
+
+all_beta_name = cell(no_channels,1);
+
+for ch = 1:no_channels
     
     all_beta_name{ch} = [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_',ch_label{ch}];
     
@@ -50,7 +54,7 @@ for fo = 1:length(folders)
     
     no_periods = size(periods,1);
     
-    for ch = 1:3
+    for ch = 1:no_channels
         
         beta_name = [subj_name,'_',ch_label{ch},'_beta'];
         
@@ -148,80 +152,8 @@ end
 
 close('all')
 
-for ch = 1:3
+for ch = 1:no_channels
     
     fclose(fid_mat(ch));
     
 end
-
-% figure(1)
-% 
-% index = 2;
-% 
-% for ch = 1:3
-%             
-%     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
-%     
-%     all_pd_index = all_beta_data(:,2);
-%     
-%     all_Fs = all_beta_data(:,3:4);
-%     
-%     all_Pds = all_beta_data(:,5);
-%            
-%     for ch1 = 1:2
-%         
-%         figure(index)
-%         
-%         for pd = 1:length(pd_label)
-%             
-%             figure(index)
-%             
-%             subplot(1, 2, pd)
-%             
-%             rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
-%             
-%             title({[chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
-%             
-%             figure(1)
-%             
-%             subplot(3, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
-%             
-%             rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
-%             
-%             title({[chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
-%             
-%         end
-%         
-%         save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
-%         
-%         index = index + 1;
-%         
-%     end
-%     
-% end
-% 
-% save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp'])
-% 
-% end
-% 
-% function F_c = categorize_freq(F, f_bins)
-%     
-%     [r, c] = size(F);
-%     
-%     F_c = zeros(r, c);
-%     
-%     no_f_bins = length(f_bins) - 1;
-%     
-%     for col = 1:c
-%         
-%         for f = 1:no_f_bins
-%             
-%             F_bin = F(:, col) >= f_bins(f) & F(:, col) < f_bins(f + 1);
-%             
-%             F_c(:, col) = F_c(:, col) + f*F_bin;
-%             
-%         end
-%         
-%     end
-%     
-% end

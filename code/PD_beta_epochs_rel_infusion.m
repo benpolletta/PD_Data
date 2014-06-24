@@ -10,15 +10,17 @@ pd_label = {'pre', 'post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both'};
+chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
-ch_index = {1, 2, 1:2};
+ch_index = {1, 2, 1:2, 1, 2, 1, 2};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2'};
+ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
-no_b_blocks = nan(length(folders), 3);
+no_channels = length(ch_label);
 
-no_dps = nan(length(folders), 3);
+no_b_blocks = nan(length(folders), no_channels);
+
+no_dps = nan(length(folders), no_channels);
 
 for fo = 1:length(folders)
     
@@ -36,7 +38,7 @@ for fo = 1:length(folders)
     
     t = (1:size(A,1))/sampling_freq;
     
-    beta_amp = A(:,:,3); ba_smooth = nan(size(beta_amp)); beta_high = nan(size(beta_amp));
+    beta_amp = A(:,:,3); ba_smooth = nan(size(beta_amp)); beta_high = nan(size(beta_amp)); beta_low = nan(size(beta_amp));
     
     pd_limits = [1 base_index; (base_index + 1) min(length(t), base_index + 1500*sampling_freq)];
     
@@ -54,17 +56,33 @@ for fo = 1:length(folders)
         
         ba_smooth(:, ch) = ba_conv((smooth_size+1):(end-smooth_size));
         
-        beta_cutoff = mean(ba_smooth(1:base_index, ch)) + sd_lim*std(ba_smooth(1:base_index, ch));
+        beta_h_cutoff = mean(ba_smooth(1:base_index, ch)) + sd_lim*std(ba_smooth(1:base_index, ch));
         
-        beta_high(:, ch) = ba_smooth(:, ch) >= beta_cutoff;
+        beta_l_cutoff = mean(ba_smooth(1:base_index, ch)) - sd_lim*std(ba_smooth(1:base_index, ch));
+        
+        % beta_h_cutoff = quantile(ba_smooth(1:base_index, ch), sd_lim);
+        % 
+        % beta_l_cutoff = quantile(ba_smooth(1:base_index, ch), 1 - sd_lim);
+        
+        beta_high(:, ch) = ba_smooth(:, ch) >= beta_h_cutoff & abs(norm_data(:, ch)) < outlier_lim;
+        
+        beta_low(:, ch) = ba_smooth(:, ch) <= beta_l_cutoff & abs(norm_data(:, ch)) < outlier_lim;
         
     end
     
-    beta_high(:,3) = sum(beta_high,2) >= 2;
+    beta_high(:, 3) = sum(beta_high, 2) >= 2;
+    
+    beta_high(:, 4) = beta_high(:, 1) & ~beta_high(:, 2);
+    
+    beta_high(:, 5) = ~beta_high(:, 1) & beta_high(:, 2);
+    
+    beta_high(:, 6) = beta_high(:, 1) & beta_low(:, 2);
+    
+    beta_high(:, 7) = beta_low(:, 1) & beta_high(:, 2);
     
     figure;
     
-    for ch = 1:3
+    for ch = 1:7
         
         for pd = 1:size(pd_limits,1)
             
@@ -72,13 +90,15 @@ for fo = 1:length(folders)
             
             fid_list = fopen(beta_listname, 'w');
             
+            fid_A_list = fopen([beta_listname(1:end-5), '_A.list'],'w');
+            
             fid_P_list = fopen([beta_listname(1:end-5), '_P.list'],'w');
             
             fid_win_list = fopen([beta_listname(1:end-5), '_win.list'],'w');
             
-            subplot(4, 2, (ch-1)*2 + pd)
+            subplot(no_channels + 1, 2, (ch-1)*2 + pd)
             
-            plot(t, beta_amp(:, ch_index{ch}),'k', t, ba_smooth(:, ch_index{ch}), 'b')
+            plot(t, beta_amp(:, ch_index{ch}), 'k', t, ba_smooth(:, ch_index{ch}), 'b')
             
             % plot(t(pd_limits(pd,1):pd_limits(pd,2)), beta_amp(pd_limits(pd,1):pd_limits(pd,2), ch_index{ch}), 'k',...
             %     t(pd_limits(pd,1):pd_limits(pd,2)), ba_smooth(pd_limits(pd,1):pd_limits(pd,2), ch_index{ch}), 'b')
@@ -131,79 +151,89 @@ for fo = 1:length(folders)
                         
                     beta_name = [subj_name,'_',par_name,'_ch',num2str(ch),'_beta_',pd_label{pd},'_block',num2str(b),'.txt'];
                     
-                    if any(abs(norm_data(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch})) > outlier_lim)
+                    % if any(abs(norm_data(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch})) > outlier_lim)
+                    % 
+                    %     beta_out(index) = b;
+                    % 
+                    %     plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'c')
+                    % 
+                    %     plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'm')
+                    % 
+                    %     index = index + 1;
+                    % 
+                    % else
                         
-                        beta_out(index) = b;
+                    plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'g')
+
+                    plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'r')
+
+                    A_name = [beta_name(1:end-4),'_A.txt'];
+
+                    P_name = [beta_name(1:end-4),'_P.txt'];
+
+                    fid = fopen(beta_name,'w');
+
+                    fprintf(fid, '%f\t%f\n', PD_dec(beta_blocks(b,1):beta_blocks(b,2), :)');
+
+                    fclose(fid);
+
+                    fid = fopen(A_name, 'w');
+
+                    fprintf(fid, '%f\t%f\n', A(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
+
+                    fclose(fid);
+
+                    fid = fopen(P_name, 'w');
+
+                    fprintf(fid, '%f\t%f\n', P(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
+
+                    fclose(fid);
+
+                    fprintf(fid_list, '%s\n', beta_name);
+
+                    fprintf(fid_A_list, '%s\n', A_name);
+
+                    fprintf(fid_P_list, '%s\n', P_name);
+
+                    fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,:), median(beta_amp(beta_start:beta_end, :)));
                         
-                        plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'c')
-                        
-                        plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'm')
-                        
-                        index = index + 1;
-                        
-                    else
-                        
-                        plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'g')
-                        
-                        plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'r')
-                        
-                        P_name = [beta_name(1:end-4),'_P.txt'];
-                        
-                        fid = fopen(beta_name,'w');
-                        
-                        fprintf(fid, '%f\t%f\n', PD_dec(beta_blocks(b,1):beta_blocks(b,2), :)');
-                        
-                        fclose(fid);
-                        
-                        fid = fopen(P_name, 'w');
-                        
-                        fprintf(fid, '%f\t%f\n', P(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
-                        
-                        fclose(fid);
-                        
-                        fprintf(fid_list, '%s\n', beta_name);
-                        
-                        fprintf(fid_P_list, '%s\n', P_name);
-                        
-                        fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,:), median(beta_amp(beta_start:beta_end, :)));
-                        
-                    end
+                    % end
                     
                 end
                     
-                no_outs = length(beta_out);
-                
-                if no_outs > 0
-                    
-                    figure;
-                    
-                    [s_r, s_c] = subplot_size(no_outs);
-                    
-                    for o = 1:no_outs
-                        
-                        bo = beta_out(o);
-                        
-                        subplot(s_r, s_c, o)
-                        
-                        plot(t(beta_blocks(bo,1):beta_blocks(bo,2)), norm_data(beta_blocks(bo,1):beta_blocks(bo,2), ch_index{ch}))
-                        
-                        if o == 1
-                           
-                            title([folder, ' ', chan_labels{ch}, ' Outlier Segments ', period_label{pd}])
-                            
-                        end
-                        
-                        axis tight
-                        
-                    end
-                    
-                    save_as_pdf(gcf, [beta_listname(1:end-5),'_out'])
-                    
-                    close(gcf)
-                    
-                    beta_blocks(beta_out, :) = [];
-                    
-                end
+                % no_outs = length(beta_out);
+                % 
+                % if no_outs > 0
+                % 
+                %     figure;
+                % 
+                %     [s_r, s_c] = subplot_size(no_outs);
+                % 
+                %     for o = 1:no_outs
+                % 
+                %         bo = beta_out(o);
+                % 
+                %         subplot(s_r, s_c, o)
+                % 
+                %         plot(t(beta_blocks(bo,1):beta_blocks(bo,2)), norm_data(beta_blocks(bo,1):beta_blocks(bo,2), ch_index{ch}))
+                % 
+                %         if o == 1
+                % 
+                %             title([folder, ' ', chan_labels{ch}, ' Outlier Segments ', period_label{pd}])
+                % 
+                %         end
+                % 
+                %         axis tight
+                % 
+                %     end
+                % 
+                %     save_as_pdf(gcf, [beta_listname(1:end-5),'_out'])
+                % 
+                %     close(gcf)
+                % 
+                %     beta_blocks(beta_out, :) = [];
+                % 
+                % end
                 
                 no_b_blocks(fo, ch, pd) = size(beta_blocks, 1);
                 
@@ -217,23 +247,23 @@ for fo = 1:length(folders)
         
     end
     
-    subplot(4, 2, 7)
+    subplot(no_channels + 1, 2, 15)
     
-    bar(reshape(no_b_blocks(fo, :, :), 3, 2))
+    bar(reshape(no_b_blocks(fo, :, :), no_channels, 2))
     
     title([folder, ' Number Beta Segments'])
     
-    set(gca,'XTickLabel',chan_labels)
+    set(gca,'XTickLabel',ch_label)
     
     legend(period_label)
     
-    subplot(4, 2, 8)
+    subplot(no_channels + 1, 2, 16)
     
-    bar(reshape(no_dps(fo, :)/sampling_freq, 3, 2))
+    bar(reshape(no_dps(fo, :)/sampling_freq, no_channels, 2))
     
     title([folder, ' Length Beta Segments (s)'])
     
-    set(gca,'XTickLabel',chan_labels)
+    set(gca,'XTickLabel',ch_label)
     
     legend(period_label)
     
@@ -245,21 +275,21 @@ figure
 
 subplot(1, 2, 1)
 
-bar(reshape(sum(no_b_blocks), 3, 2))
+bar(reshape(sum(no_b_blocks), no_channels, 2))
     
 title(['Total Number Beta Segments'])
 
-set(gca,'XTickLabel',chan_labels)
+set(gca,'XTickLabel',ch_label)
 
 legend(period_label)
 
 subplot(1, 2, 2)
 
-bar(reshape(sum(no_dps)/sampling_freq, 3, 2))
+bar(reshape(sum(no_dps)/sampling_freq, no_channels, 2))
 
 title(['Total Length Beta Segments (s)'])
 
-set(gca,'XTickLabel',chan_labels)
+set(gca,'XTickLabel',ch_label)
 
 legend(period_label)
 
