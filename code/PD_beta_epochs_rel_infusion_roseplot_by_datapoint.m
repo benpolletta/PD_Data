@@ -69,7 +69,7 @@ for fo = 1:length(folders)
             
             beta_pbf_name = [beta_listname(1:end-5),'_pbf_dp.txt'];
             
-            if isempty(dir(beta_pbf_name))
+            % if isempty(dir(beta_pbf_name))
                 
                 fid = fopen(beta_pbf_name, 'w');
                 
@@ -79,7 +79,7 @@ for fo = 1:length(folders)
                 
                 for b = 1:no_blocks
                     
-                    P_block = unwrap(P(beta_starts:beta_ends,:,3));
+                    P_block = unwrap(P(beta_starts(b):beta_ends(b), :, 3));
                     
                     P_diff = -diff(P_block,[],2);
                     
@@ -112,7 +112,7 @@ for fo = 1:length(folders)
                 
                 fclose(fid);
                 
-            end
+            % end
             
             all_beta_data = load(beta_pbf_name);
                 

@@ -9,9 +9,9 @@ function MM_bandpass(filenames, sampling_freq, conv_length, marker_times)
 % same # of rows as # files; each column contains data for a separate
 % sequence of markers.
 
-bands = [10 20; 20 30];
+bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
 
-band_names = {'Low Beta','High Beta'};
+band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
 
 no_bands = length(band_names);
 
@@ -75,7 +75,7 @@ for file_no = 1:no_files
     A = nan(data_length,no_channels,no_bands);
     P = nan(data_length,no_channels,no_bands);
     
-    if isempty(dir([filename,'_betaHAP.mat']))
+    if isempty(dir([filename,'_HAP.mat']))
         
         clear BP
             
@@ -89,11 +89,11 @@ for file_no = 1:no_files
             
         end
         
-        save([filename,'_betaHAP.mat'],'H','A','P','bands','band_names')
+        save([filename,'_HAP.mat'],'H','A','P','bands','band_names')
         
     else
         
-        load([filename,'_betaHAP.mat'])
+        load([filename,'_HAP.mat'])
         
     end
     
@@ -154,7 +154,7 @@ for file_no = 1:no_files
         end
         
     end
-
-    save_as_pdf(gcf,[filename,'_all_channel_data_dec_betaHAP'])
-
+    
+    save_as_pdf(gcf,[filename,'_HAP'])
+    
 end
