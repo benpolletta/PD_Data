@@ -18,7 +18,7 @@ period_label = {'Pre-Infusion','Post-Infusion'};
 
 chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
-ch_index = {1, 2, 1:2, 1, 2, 1, 2};
+% ch_index = {1, 2, 1:2, 1, 2, 1, 2};
 
 ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
@@ -40,13 +40,21 @@ for ch = 1:no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
     
-    all_pd_index = all_beta_data(:,1);
-    
-    all_Fs = all_beta_data(:,3:4);
-    
-    all_Fc = categorize_freq(all_Fs, f_bins);
-    
-    all_Pds = all_beta_data(:,5);
+    if ~isempty(all_beta_data)
+        
+        all_pd_index = all_beta_data(:,1);
+        
+        all_Fs = all_beta_data(:,3:4);
+        
+        all_Fc = categorize_freq(all_Fs, f_bins);
+        
+        all_Pds = all_beta_data(:,5);
+        
+    else
+       
+        all_pd_index = nan; all_Fs = nan(1, 2); all_FC = nan(1, 2); all_Pds = nan;
+        
+    end
            
     for ch1 = 1:2
         
@@ -55,6 +63,8 @@ for ch = 1:no_channels
         figure(index)
         
         MR_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
+        
+        %% Plotting rose plots by period (pre- vs. post-infusion).
         
         for pd = 1:length(pd_label)
             
@@ -75,6 +85,8 @@ for ch = 1:no_channels
             % title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
                 
         end
+        
+        %% Testing phasese pre- vs. post-infusion.
         
         conc_pval = nan(no_f_bins, 1); angle_pval = nan(no_f_bins, 1);
         
@@ -100,7 +112,10 @@ for ch = 1:no_channels
             
         end
         
+        % Bonferroni correcting p-values.
         conc_pval = min(conc_pval*no_f_bins, 1); angle_pval = min(angle_pval*no_f_bins, 1);
+        
+        %% Testing phases of frequency pairs.
         
         f_pairs = nchoosek(1:no_f_bins, 2);
         
@@ -124,9 +139,33 @@ for ch = 1:no_channels
         
         end
         
+        % Bonferroni correcting tests.
         f_conc_pval = min(f_conc_pval*no_f_pairs, 1); f_angle_pval = min(f_angle_pval*no_f_pairs, 1);
             
         figure(index)
+        
+        %% Testing phases against zero.
+        
+        zero_test = nan(no_f_bins, 2);
+        
+        for f = 1:no_f_bins
+            
+            for pd = 1:2
+                
+                phi = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f);
+                
+                if ~isempty(phi)
+                
+                   zero_test(f, pd) = circ_mtest(phi, 0);
+    
+                end
+                   
+            end
+            
+        end
+        
+        % Bonferroni correcting p-values.
+        zero_test = min(zero_test*2*no_f_bins, 1);
         
         %% Plotting number of datapoints pre vs. post by freq.
         
@@ -168,7 +207,7 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
-        %% Plotting phas angle pre vs. post by freq.
+        %% Plotting phase angle pre vs. post by freq.
         
         subplot(3, 3, 3 + 3)
         
@@ -198,7 +237,7 @@ for ch = 1:no_channels
         
         %% Plotting concentration by frequency, pre and post.
         
-        subplot(3, 2, 4 + 1)
+        subplot(3, 3, 2*3 + 1)
         
         h = bar(abs(MR_mat)');
         
@@ -250,7 +289,7 @@ for ch = 1:no_channels
         
         %% Plotting phase angle by frequency, pre and post.
         
-        subplot(3, 2, 4 + 2)
+        subplot(3, 3, 2*3 + 2)
         
         h = bar(angle(MR_mat)');
         
@@ -293,6 +332,24 @@ for ch = 1:no_channels
         sigstar(f_bar_pairs, f_angle_pval(f_angle_indicator == 1)')
         
         title('Phase Angle (Striatum - Motor) by Freq.')
+        
+        h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
+
+        % cbfreeze(h)
+        
+        set(gca, 'XTickLabel', period_label)
+        
+        %% Plotting phase angle by frequency, pre and post, only if significantly different from zero.
+        
+        subplot(3, 3, 2*3 + 3)
+        
+        real_angles = angle(MR_mat);
+        
+        real_angles(zero_test == 0) = nan;
+        
+        h = bar(real_angles');
+        
+        title({'Phase Angle (Striatum - Motor) by Freq.';'Significantly Different from Zero'})
         
         h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
 
