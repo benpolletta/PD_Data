@@ -48,6 +48,8 @@ for fo = 1:length(folders)
     
     subj_name = [folder,'/',prefix];
     
+    load([subj_name,'_all_channel_data_dec.mat'])
+    
     load([subj_name,'_all_channel_data_dec_HAP.mat'])
     
     periods = [1 base_index; (base_index + 1) size(A,1)];
@@ -58,7 +60,7 @@ for fo = 1:length(folders)
         
         beta_name = [subj_name,'_',ch_label{ch},'_beta'];
         
-        figure;
+        % figure;
         
         for pd = 1:no_periods
             
@@ -78,6 +80,10 @@ for fo = 1:length(folders)
                 %% Computing smoothed frequency and phase difference for each block.
                 
                 for b = 1:no_blocks
+                    
+                    LFP_block = PD_dec(beta_starts(b):beta_ends(b), :);
+                    
+                    A_block = A(beta_starts(b):beta_ends(b), :, 3);
                     
                     P_block = unwrap(P(beta_starts(b):beta_ends(b), :, 3));
                     
@@ -106,7 +112,7 @@ for fo = 1:length(folders)
                         
                     end
                     
-                    fprintf(fid, '%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth]');
+                    fprintf(fid, '%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth A_block LFP_block]');
                     
                 end
                 
@@ -116,36 +122,36 @@ for fo = 1:length(folders)
             
             all_beta_data = load(beta_pbf_name);
                 
-            fprintf(fid_mat(ch), '%f\t%f\t%f\t%f\t%f\t%f\n', [pd*ones(size(all_beta_data, 1), 1) all_beta_data...
-                str2double(folder)*ones(size(all_beta_data, 1), 1)]');
+            fprintf(fid_mat(ch), '%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t$f\t%f\n', [pd*ones(size(all_beta_data, 1), 1) all_beta_data...
+                str2double(folder)*ones(size(all_beta_data, 1), 1) ]');
             
-            if ~isempty(all_beta_data)
-                
-                all_Fs = all_beta_data(:,2:3);
-                
-                all_Pds = all_beta_data(:,4);
-                
-            else
-                
-                all_Fs = [nan nan];
-                
-                all_Pds = nan;
-                
-            end
-            
-            for ch1 = 1:2
-                
-                subplot(2, 2, (pd - 1)*2 + ch1)
-                
-                rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
-                
-                title({[folder,' ',chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
-                
-            end
+            % if ~isempty(all_beta_data)
+            % 
+            %     all_Fs = all_beta_data(:,2:3);
+            % 
+            %     all_Pds = all_beta_data(:,4);
+            % 
+            % else
+            % 
+            %     all_Fs = [nan nan];
+            % 
+            %     all_Pds = nan;
+            % 
+            % end
+            % 
+            % for ch1 = 1:2
+            % 
+            %     subplot(2, 2, (pd - 1)*2 + ch1)
+            % 
+            %     rose_plot(all_Pds, all_Fs(:,ch1), 20, f_bins);
+            % 
+            %     title({[folder,' ',chan_labels{ch},' High Beta Blocks, ',period_label{pd}];['Phase Lag by ',chan_labels{ch1},' Freq.']})
+            % 
+            % end
             
         end
         
-        save_as_pdf(gcf,[beta_name,'_ri_rose_dp'])
+        % save_as_pdf(gcf,[beta_name,'_ri_rose_dp'])
         
     end
     

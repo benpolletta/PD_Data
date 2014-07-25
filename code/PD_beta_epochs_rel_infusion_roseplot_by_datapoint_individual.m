@@ -42,7 +42,7 @@ for ch = 1:no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
         
-    all_subjects = all_beta_data(:,6);
+    all_subjects = all_beta_data(:, end);
     
     for s = 1:no_subs
         
