@@ -10,11 +10,11 @@ pd_label = {'pre', 'post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
+chan_labels = {chan_labels{:}, 'Both', 'Either', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
-ch_index = {1, 2, 1:2, 1, 2, 1, 2};
+ch_index = {1, 2, 1:2, 1:2, 1, 2, 1, 2};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
+ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
 no_channels = length(ch_label);
 
@@ -72,17 +72,19 @@ for fo = 1:length(folders)
     
     beta_high(:, 3) = sum(beta_high, 2) >= 2;
     
-    beta_high(:, 4) = beta_high(:, 1) & ~beta_high(:, 2);
+    beta_high(:, 4) = sum(beta_high, 2) >= 1;
     
-    beta_high(:, 5) = ~beta_high(:, 1) & beta_high(:, 2);
+    beta_high(:, 5) = beta_high(:, 1) & ~beta_high(:, 2);
     
-    beta_high(:, 6) = beta_high(:, 1) & beta_low(:, 2);
+    beta_high(:, 6) = ~beta_high(:, 1) & beta_high(:, 2);
     
-    beta_high(:, 7) = beta_low(:, 1) & beta_high(:, 2);
+    beta_high(:, 7) = beta_high(:, 1) & beta_low(:, 2);
+    
+    beta_high(:, 8) = beta_low(:, 1) & beta_high(:, 2);
     
     figure;
     
-    for ch = 1:7
+    for ch = 1:no_channels
         
         for pd = 1:size(pd_limits,1)
             

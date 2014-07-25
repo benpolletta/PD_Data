@@ -290,13 +290,17 @@ for norm = 1:no_norms
         
         subplot(no_norms + 2, no_periods, (no_norms + 2)*no_periods)
         
-        plot(all_lags(:, 1), all_lags(:, 2), '*')
+        plot([1 2], all_lags', '-*')
+        
+        set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
+        
+        xlim([.75 2.25])
+        
+        ylim([-15, 15])
         
         title('Time Lag, Pre- and Post-Infusion')
         
-        xlabel(period_label{1})
-        
-        ylabel(period_label{2})
+        ylabel('Time Lag (ms)')
         
     end
     

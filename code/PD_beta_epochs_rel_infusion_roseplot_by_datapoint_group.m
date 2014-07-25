@@ -16,11 +16,11 @@ pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
+chan_labels = {chan_labels{:}, 'Both', 'Either', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
 % ch_index = {1, 2, 1:2, 1, 2, 1, 2};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
+ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
 no_channels = length(ch_label);
 
@@ -229,7 +229,7 @@ for ch = 1:no_channels
         
         sigstar(bar_pairs, angle_pval(angle_pval < 0.05))
         
-        title('Mean Phase Angle (Striatum - Motor) by Freq.')
+        title(['Mean Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
         
         % legend(period_label, 'Location', 'SouthEast')
         
@@ -331,7 +331,7 @@ for ch = 1:no_channels
         
         sigstar(f_bar_pairs, f_angle_pval(f_angle_indicator == 1)')
         
-        title('Phase Angle (Striatum - Motor) by Freq.')
+        title(['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
         
         h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
 
@@ -349,7 +349,7 @@ for ch = 1:no_channels
         
         h = bar(real_angles');
         
-        title({'Phase Angle (Striatum - Motor) by Freq.';'Significantly Different from Zero'})
+        title({['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'];'Significantly Different from Zero'})
         
         h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
 
