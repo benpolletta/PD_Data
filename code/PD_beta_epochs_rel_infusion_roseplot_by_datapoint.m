@@ -10,9 +10,9 @@ smooth_winsize = 50;
 
 f_bins = 8:4:32;
 
-f_labels = textscan(num2str(f_bins), '%s', 'delimiter', ' ');
-f_labels = cellstr(f_labels{1});
-f_labels = f_labels(1:2:end);
+% f_labels = textscan(num2str(f_bins), '%s', 'delimiter', ' ');
+% f_labels = cellstr(f_labels{1});
+% f_labels = f_labels(1:2:end);
 
 pd_label = {'pre','post'};
 
@@ -116,7 +116,8 @@ for fo = 1:length(folders)
             
             all_beta_data = load(beta_pbf_name);
                 
-            fprintf(fid_mat(ch), '%f\t%f\t%f\t%f\t%f\n', [pd*ones(size(all_beta_data, 1), 1) all_beta_data]');
+            fprintf(fid_mat(ch), '%f\t%f\t%f\t%f\t%f\t%f\n', [pd*ones(size(all_beta_data, 1), 1) all_beta_data...
+                str2double(folder)*ones(size(all_beta_data, 1), 1)]');
             
             if ~isempty(all_beta_data)
                 
