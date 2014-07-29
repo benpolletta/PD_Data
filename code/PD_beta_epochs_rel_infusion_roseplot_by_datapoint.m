@@ -112,7 +112,7 @@ for fo = 1:length(folders)
                         
                     end
                     
-                    fprintf(fid, '%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth A_block LFP_block]');
+                    fprintf(fid, '%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth]');
                     
                 end
                 
@@ -121,8 +121,10 @@ for fo = 1:length(folders)
             % end
             
             all_beta_data = load(beta_pbf_name);
+            
+            format = make_format(size(all_beta_data, 2) + 2, 'f');
                 
-            fprintf(fid_mat(ch), '%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t$f\t%f\n', [pd*ones(size(all_beta_data, 1), 1) all_beta_data...
+            fprintf(fid_mat(ch), format, [pd*ones(size(all_beta_data, 1), 1) all_beta_data...
                 str2double(folder)*ones(size(all_beta_data, 1), 1) ]');
             
             % if ~isempty(all_beta_data)

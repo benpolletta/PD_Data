@@ -204,9 +204,3 @@ for fo = 1:length(folders)
     close('all')
     
 end
-
-for ch = 1:no_channels
-    
-    fclose(fid_mat(ch));
-    
-end

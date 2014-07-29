@@ -62,7 +62,7 @@ for ch = 1:no_channels
             
         else
             
-            all_pd_index = nan; all_Fs = nan(1, 2); all_FC = nan(1, 2); all_Pds = nan; all_subjects = nan;
+            all_pd_index = nan; all_Fs = nan(1, 2); all_Fc = nan(1, 2); all_Pds = nan; all_subjects = nan;
             
         end
         
