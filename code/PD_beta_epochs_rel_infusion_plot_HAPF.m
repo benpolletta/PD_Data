@@ -63,21 +63,25 @@ for fo = 1:length(folders)
                 
                 fid = fopen(beta_pbf_name, 'w');
                 
-                no_blocks = length(blocks);
+                no_blocks = max(blocks);
                 
                 %% Computing smoothed frequency and phase difference for each block.
                 
                 for b = 1:no_blocks
                     
-                    t = (beta_starts(b):beta_ends(b))/sampling_freq;
+                    beta_start = min(beta_starts(blocks == b));
                     
-                    LFP_block = PD_dec(beta_starts(b):beta_ends(b), :);
+                    beta_end = max(beta_ends(blocks == b));
                     
-                    H_block = H(beta_starts(b):beta_ends(b), :, 3);
+                    t = (beta_start:beta_end)/sampling_freq;
                     
-                    A_block = A(beta_starts(b):beta_ends(b), :, 3);
+                    LFP_block = PD_dec(beta_start:beta_end, :);
                     
-                    P_block = unwrap(P(beta_starts(b):beta_ends(b), :, 3));
+                    H_block = H(beta_start:beta_end, :, 3);
+                    
+                    A_block = A(beta_start:beta_end, :, 3);
+                    
+                    P_block = unwrap(P(beta_start:beta_end, :, 3));
                     
                     P_diff = -diff(P_block,[],2);
                     
@@ -181,7 +185,7 @@ for fo = 1:length(folders)
                     
                     for ch1 = 1:2
                         
-                        subplot(5, 2, 4*2 + ch1)
+                        subplot(5, 4, 4*4 + ch1)
                         
                         [MRV_vec, ~, ~, conf_vec] = rose_plot(Pd_smooth, F_smooth(:,ch1), 20, f_bins);
                         
@@ -189,18 +193,46 @@ for fo = 1:length(folders)
                         
                     end
                     
+                    
+                    freezeColors
+                    
+                    %% Plot Colorplots.
+                    
+                    colormap('jet')
+                    
+                    for ch1 = 1:2
+                        
+                        subplot(5, 4, 4*4 + 2 + ch1)
+                        
+                        [histogram, bins] = hist3([Pd_smooth F_smooth(:,ch1)], [50 50]);
+                        
+                        imagesc(bins{2}, bins{1}, histogram)
+                        
+                        axis xy
+                        
+                        xlim([10 30])
+                        
+                        xlabel('Freq. (Hz)')
+                        
+                        ylabel('\Delta \phi (rad)')
+                        
+                        title(['\Delta \phi by ',chan_labels{ch1},' Freq.'])
+                        
+                    end
+                    
+                    
                     %%
                     
                     save_as_pdf(gcf,[beta_name,'_',pd_label{pd},'_',par_name,'_block',num2str(b)])
                     
                 end
                 
+                close('all')
+                
             % end
             
         end
         
     end
-    
-    close('all')
     
 end

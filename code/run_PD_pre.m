@@ -4,7 +4,9 @@ present_dir = pwd;
 
 % load('initial_subjects.mat')
 
-load('st_m1_subjects.mat')
+% load('st_m1_subjects.mat')
+
+load('st_stn_subjects.mat')
 
 for fo = 1:length(folders)
     

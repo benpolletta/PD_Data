@@ -62,7 +62,33 @@ for ch = 1:no_channels
         
         figure(index)
         
-        MR_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
+        MR_mat = nan(no_f_bins, 2); conf_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
+            
+        %% Plotting 2d histogram by period (pre- vs. post-infusion).
+        
+        for pd = 1:length(pd_label)
+            
+            figure(index)
+            
+            subplot(4, 2, pd)
+            
+            [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], [50 50]);
+            
+            imagesc(bins{2}, bins{1}, histogram)
+            
+            axis xy
+            
+            xlim([10 30])
+            
+            xlabel('Frequency (Hz)')
+            
+            ylabel('Phase Lag (rad)')
+            
+            title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];[' Phase Lag by ', chan_labels{ch1}, ' Freq.']})
+            
+            freezeColors
+            
+        end
         
         %% Plotting rose plots by period (pre- vs. post-infusion).
         
@@ -70,9 +96,9 @@ for ch = 1:no_channels
             
             figure(index)
             
-            subplot(3, 2, pd)
+            subplot(4, 2, 2 + pd)
             
-            MR_mat(:, pd) = rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
+            [MR_mat(:, pd), ~, ~, conf_mat(:, pd)] = rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
             
             title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
             
@@ -85,6 +111,8 @@ for ch = 1:no_channels
             % title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
                 
         end
+        
+        freezeColors
         
         %% Testing phasese pre- vs. post-infusion.
         
@@ -169,7 +197,7 @@ for ch = 1:no_channels
         
         %% Plotting number of datapoints pre vs. post by freq.
         
-        subplot(3, 3, 3 + 1)
+        subplot(4, 3, 2*3 + 1)
         
         bar(no_dps)
         
@@ -179,9 +207,11 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
+        colormap('jet')
+        
         %% Plotting concentration pre vs. post by freq.
         
-        subplot(3, 3, 3 + 2)
+        subplot(4, 3, 2*3 + 2)
         
         h = bar(abs(MR_mat));
         
@@ -207,11 +237,13 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
+        colormap('jet')
+        
         %% Plotting phase angle pre vs. post by freq.
         
-        subplot(3, 3, 3 + 3)
+        subplot(4, 3, 2*3 + 3)
         
-        h = bar(angle(MR_mat));
+        h = barwitherr(conf_mat, angle(MR_mat));
         
         bar_pos = get_bar_pos(h);
         
@@ -235,9 +267,13 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
+        colormap('jet')
+        
+        freezeColors
+        
         %% Plotting concentration by frequency, pre and post.
         
-        subplot(3, 3, 2*3 + 1)
+        subplot(4, 2, 3*2 + 1)
         
         h = bar(abs(MR_mat)');
         
@@ -281,17 +317,17 @@ for ch = 1:no_channels
         
         title('Phase Concentration by Freq.')
         
+        colormap(c_order)
+        
         h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-
-        % cbfreeze(h)
         
         set(gca, 'XTickLabel', period_label)
         
         %% Plotting phase angle by frequency, pre and post.
         
-        subplot(3, 3, 2*3 + 2)
+        subplot(4, 2, 3*2 + 2)
         
-        h = bar(angle(MR_mat)');
+        h = barwitherr(conf_mat', angle(MR_mat)');
         
         bar_pos = get_bar_pos(h);
         
@@ -333,29 +369,29 @@ for ch = 1:no_channels
         
         title(['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
         
+        colormap(c_order)
+        
         h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-
-        % cbfreeze(h)
         
         set(gca, 'XTickLabel', period_label)
         
-        %% Plotting phase angle by frequency, pre and post, only if significantly different from zero.
-        
-        subplot(3, 3, 2*3 + 3)
-        
-        real_angles = angle(MR_mat);
-        
-        real_angles(zero_test == 0) = nan;
-        
-        h = bar(real_angles');
-        
-        title({['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'];'Significantly Different from Zero'})
-        
-        h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-
-        % cbfreeze(h)
-        
-        set(gca, 'XTickLabel', period_label)
+        % %% Plotting phase angle by frequency, pre and post, only if significantly different from zero.
+        % 
+        % subplot(3, 3, 2*3 + 3)
+        % 
+        % real_angles = angle(MR_mat);
+        % 
+        % real_angles(zero_test == 0) = nan;
+        % 
+        % h = bar(real_angles');
+        % 
+        % title({['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'];'Significantly Different from Zero'})
+        % 
+        % h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
+        % 
+        % % cbfreeze(h)
+        % 
+        % set(gca, 'XTickLabel', period_label)
         
         %%
         

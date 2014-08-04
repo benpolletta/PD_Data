@@ -75,17 +75,21 @@ for fo = 1:length(folders)
                 
                 fid = fopen(beta_pbf_name, 'w');
                 
-                no_blocks = length(blocks);
+                no_blocks = max(blocks);
                 
                 %% Computing smoothed frequency and phase difference for each block.
                 
                 for b = 1:no_blocks
                     
-                    LFP_block = PD_dec(beta_starts(b):beta_ends(b), :);
+                    block_start = min(beta_starts(blocks == b));
                     
-                    A_block = A(beta_starts(b):beta_ends(b), :, 3);
+                    block_end = max(beta_ends(blocks == b)); 
                     
-                    P_block = unwrap(P(beta_starts(b):beta_ends(b), :, 3));
+                    LFP_block = PD_dec(block_start:block_end, :);
+                    
+                    A_block = A(block_start:block_end, :, 3);
+                    
+                    P_block = unwrap(P(block_start:block_end, :, 3));
                     
                     P_diff = -diff(P_block,[],2);
                     

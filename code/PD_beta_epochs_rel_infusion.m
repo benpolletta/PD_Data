@@ -22,7 +22,7 @@ no_b_blocks = nan(length(folders), no_channels);
 
 no_dps = nan(length(folders), no_channels);
 
-for fo = 7:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -139,13 +139,15 @@ for fo = 7:length(folders)
                     
                 end
                 
-                beta_end(end) = min(beta_end(end), pd_limits(pd, 2));
+                beta_end(end) = min(beta_end(end), length(t));
                 
                 beta_blocks = [beta_start beta_end];
                 
-                beta_lengths = diff(beta_blocks,[],2) + 1;
+                beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
                 beta_blocks(beta_lengths < win_size, :) = [];
+                
+                beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
                 for b = 1:size(beta_blocks,1)
                         
@@ -169,7 +171,7 @@ for fo = 7:length(folders)
                         
                         epoch_end = beta_blocks(b,1) + e*win_size;
                         
-                        fid = fopen(epoch_name,'w');
+                        fid = fopen(epoch_name, 'w');
                         
                         fprintf(fid, '%f\t%f\n', PD_dec(epoch_start:epoch_end, :)');
                         
@@ -193,7 +195,7 @@ for fo = 7:length(folders)
                         
                         fprintf(fid_P_list, '%s\n', P_name);
                         
-                        fprintf(fid_win_list, '%d\t%d\t%d\t%d\t%f\t%f\n', b, e, epoch_start, epoch_end, median(beta_amp(epoch_start:epoch_end,:)));
+                        fprintf(fid_win_list, '%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,1), beta_blocks(b,2), e, epoch_start, epoch_end, median(beta_amp(epoch_start:epoch_end,:)));
                         
                     end
                     

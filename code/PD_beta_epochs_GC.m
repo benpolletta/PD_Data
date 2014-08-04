@@ -45,7 +45,7 @@ for fo = 1:length(folders)
                 
                 All_GC_spec = nan(no_epochs, f_length, 2);
                 
-                for e = 1:no_epochs
+                parfor e = 1:no_epochs
                     
                     data_name = beta_list{e};
                     

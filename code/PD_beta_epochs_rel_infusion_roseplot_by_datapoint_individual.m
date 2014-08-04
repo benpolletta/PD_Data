@@ -38,12 +38,28 @@ end
 
 index = 1;%2;
 
+All_MR_mat = nan(no_f_bins, 2, no_subs, no_channels, 2);
+
+All_conf_mat = nan(no_f_bins, 2, no_subs, no_channels, 2);
+
+h_bins = {linspace(-pi, pi, 50), linspace(8, 32, 50)};
+
+All_histograms = nan(50, 50, no_subs, 2, no_channels, 2);
+
+All_slopes = nan(no_subs, 2, no_channels, 2);
+
 for ch = 1:no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
         
-    all_subjects = all_beta_data(:, end);
+    if isempty(all_beta_data)
+        
+        all_beta_data = nan(1, 6);
+        
+    end
     
+    all_subjects = all_beta_data(:, end);
+        
     for s = 1:no_subs
         
         subject = str2double(folders{s});
@@ -68,19 +84,73 @@ for ch = 1:no_channels
         
         for ch1 = 1:2
             
+            %% Computing Slope of Dphi/F.
+            
+            for pd = 1:length(pd_label)
+                
+                if ~isempty(all_Pds(all_pd_index == pd))
+               
+                    [line_params, ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
+                
+                else
+                    
+                    line_params = nan;
+                    
+                end
+                
+                All_slopes(s, pd, ch, ch1) = line_params(1);
+                
+            end
+            
             % [pval, stats] = circ_hktest(all_Pds, all_pd_index, all_Fc, 1, {period_label{:}, f_labels{:}});
             
             figure(index)
             
-            MR_mat = nan(no_f_bins, 2); conf_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
-            
-            %% Plotting rose plots by period (pre- vs. post-infusion).
+            %% Plotting 2d histogram by period (pre- vs. post-infusion).
             
             for pd = 1:length(pd_label)
                 
                 figure(index)
                 
-                subplot(3, 2, pd)
+                subplot(4, 2, pd)
+                
+                if ~isempty(all_Pds(all_pd_index == pd))
+                    
+                    [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], 'Edges', h_bins);
+                    
+                else
+                    
+                    histogram = nan(50, 50); bins{1} = nan(1, 50); bins{2} = nan(1, 50);
+                    
+                end
+                
+                All_histograms(:, :, s, pd, ch, ch1) = histogram;
+                
+                imagesc(bins{2}, bins{1}, histogram)
+                
+                axis xy
+                
+                xlim([10 30])
+                
+                xlabel('Frequency (Hz)')
+                
+                ylabel('Phase Lag (rad)')
+                
+                title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];[num2str(subject), ' Phase Lag by ', chan_labels{ch1}, ' Freq.']})
+                
+                freezeColors
+                
+            end
+            
+            %% Plotting rose plots by period (pre- vs. post-infusion).
+            
+            MR_mat = nan(no_f_bins, 2); conf_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
+            
+            for pd = 1:length(pd_label)
+                
+                figure(index)
+                
+                subplot(4, 2, 2 + pd)
                 
                 [MR_mat(:, pd), ~, ~, conf_mat(:, pd)] = rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
                 
@@ -88,13 +158,15 @@ for ch = 1:no_channels
                 
                 % figure(1)
                 %
-                % subplot(3, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
+                % subplot(4, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
                 %
                 % rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
                 %
                 % title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
                 
             end
+            
+            All_MR_mat(:, :, s, ch, ch1) = MR_mat; All_conf_mat(:, :, s, ch, ch1) = conf_mat;
             
             %% Testing phases pre- vs. post-infusion.
             
@@ -170,32 +242,32 @@ for ch = 1:no_channels
             
             figure(index)
             
-            %% Testing phases against zero.
-            
-            zero_test = nan(no_f_bins, 2);
-            
-            for f = 1:no_f_bins
-                
-                for pd = 1:2
-                    
-                    phi = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f);
-                    
-                    if ~isempty(phi)
-                        
-                        zero_test(f, pd) = circ_mtest(phi, 0);
-                        
-                    end
-                    
-                end
-                
-            end
-            
-            % Bonferroni correcting p-values.
-            zero_test = min(zero_test*2*no_f_bins, 1);
+            % %% Testing phases against zero.
+            % 
+            % zero_test = nan(no_f_bins, 2);
+            % 
+            % for f = 1:no_f_bins
+            % 
+            %     for pd = 1:2
+            % 
+            %         phi = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f);
+            % 
+            %         if ~isempty(phi)
+            % 
+            %             zero_test(f, pd) = circ_mtest(phi, 0);
+            % 
+            %         end
+            % 
+            %     end
+            % 
+            % end
+            % 
+            % % Bonferroni correcting p-values.
+            % zero_test = min(zero_test*2*no_f_bins, 1);
             
             %% Plotting number of datapoints pre vs. post by freq.
             
-            subplot(3, 3, 3 + 1)
+            subplot(4, 3, 2*3 + 1)
             
             bar(no_dps)
             
@@ -205,9 +277,11 @@ for ch = 1:no_channels
             
             set(gca, 'XTickLabel', f_centers)
             
+            freezeColors
+            
             %% Plotting concentration pre vs. post by freq.
             
-            subplot(3, 3, 3 + 2)
+            subplot(4, 3, 2*3 + 2)
             
             h = bar(abs(MR_mat));
             
@@ -233,9 +307,11 @@ for ch = 1:no_channels
             
             set(gca, 'XTickLabel', f_centers)
             
+            freezeColors
+            
             %% Plotting phase angle pre vs. post by freq.
             
-            subplot(3, 3, 3 + 3)
+            subplot(4, 3, 2*3 + 3)
             
             h = barwitherr(conf_mat, angle(MR_mat));
             
@@ -261,9 +337,15 @@ for ch = 1:no_channels
             
             set(gca, 'XTickLabel', f_centers)
             
+            freezeColors
+            
             %% Plotting concentration by frequency, pre and post.
             
-            subplot(3, 2, 2*2 + 1)%3, 2*3 + 1)
+            c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
+            
+            colormap(c_order)
+            
+            subplot(4, 2, 3*2 + 1)%3, 2*3 + 1)
             
             h = bar(abs(MR_mat)');
             
@@ -315,7 +397,7 @@ for ch = 1:no_channels
             
             %% Plotting phase angle by frequency, pre and post.
             
-            subplot(3, 2, 2*2 + 2)%3, 2*3 + 2)
+            subplot(4, 2, 3*2 + 2)%3, 2*3 + 2)
             
             h = barwitherr(conf_mat', angle(MR_mat)');
             
@@ -359,15 +441,13 @@ for ch = 1:no_channels
             
             title([num2str(subject),' Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
             
-            h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-            
-            % cbfreeze(h)
+            colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
             
             set(gca, 'XTickLabel', period_label)
             
             % %% Plotting phase angle by frequency, pre and post, only if significantly different from zero.
             % 
-            % subplot(3, 3, 2*3 + 3)
+            % subplot(4, 3, 2*3 + 3)
             % 
             % real_angles = angle(MR_mat);
             % 
@@ -395,7 +475,7 @@ for ch = 1:no_channels
     
 end
 
-% save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp'])
+save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'],'All_slopes','All_MR_mat','All_conf_mat','All_histograms','bins')
 
 end
 
@@ -423,14 +503,14 @@ end
 
 function pos_bars = get_bar_pos(handle)
 
-for i = 1:length(handle)
-    
-    x = get(get(handle(i), 'children'), 'xdata');
-    
-    x = mean(x([1 3],:));
-    
-    pos_bars(i,:) = x;
-    
-end
+    for i = 1:length(handle)
+
+        x = get(get(handle(i), 'children'), 'xdata');
+
+        x = mean(x([1 3],:));
+
+        pos_bars(i,:) = x;
+
+    end
 
 end

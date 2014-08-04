@@ -6,7 +6,7 @@ if isempty(dir(datalist))
     
     file_fid = fopen(datalist,'w');
     
-    for digit=1:9
+    for digit = 0:9
         
         file = dir([prefix,'*',num2str(digit),'.mat']);
         
