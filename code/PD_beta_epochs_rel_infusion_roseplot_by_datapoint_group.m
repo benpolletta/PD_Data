@@ -8,6 +8,8 @@ f_bins = 8:4:32; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
+c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
+
 f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
 f_labels = cellstr(f_labels{1});
 f_labels = f_labels(1:2:end);
@@ -72,7 +74,15 @@ for ch = 1:no_channels
             
             subplot(4, 2, pd)
             
-            [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], [50 50]);
+            if ~isempty(all_Pds(all_pd_index == pd))
+            
+                [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], [50 50]);
+            
+            else
+               
+                histogram = nan(50, 50); bins{1} = nan(50, 1); bins{2} = nan(50, 1);
+                
+            end
             
             imagesc(bins{2}, bins{1}, histogram)
             
@@ -199,6 +209,8 @@ for ch = 1:no_channels
         
         subplot(4, 3, 2*3 + 1)
         
+        colormap('jet')
+        
         bar(no_dps)
         
         title('Datapoints by Freq.')
@@ -207,11 +219,13 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
-        colormap('jet')
+        freezeColors
         
         %% Plotting concentration pre vs. post by freq.
         
         subplot(4, 3, 2*3 + 2)
+        
+        colormap('jet')
         
         h = bar(abs(MR_mat));
         
@@ -237,11 +251,13 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
-        colormap('jet')
+        freezeColors
         
         %% Plotting phase angle pre vs. post by freq.
         
         subplot(4, 3, 2*3 + 3)
+        
+        colormap('jet')
         
         h = barwitherr(conf_mat, angle(MR_mat));
         
@@ -266,8 +282,6 @@ for ch = 1:no_channels
         % legend(period_label, 'Location', 'SouthEast')
         
         set(gca, 'XTickLabel', f_centers)
-        
-        colormap('jet')
         
         freezeColors
         

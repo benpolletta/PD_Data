@@ -44,6 +44,12 @@ All_conf_mat = nan(no_f_bins, 2, no_subs, no_channels, 2);
 
 h_bins = {linspace(-pi, pi, 50), linspace(8, 32, 50)};
 
+for i = 1:2
+
+    h_centers{1} = (h_bins{i}(2:end) + h_bins{i}(1:(end - 1)))/2;
+
+end
+    
 All_histograms = nan(50, 50, no_subs, 2, no_channels, 2);
 
 All_slopes = nan(no_subs, 2, no_channels, 2);
@@ -476,6 +482,8 @@ for ch = 1:no_channels
 end
 
 save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'],'All_slopes','All_MR_mat','All_conf_mat','All_histograms','bins')
+
+close('all')
 
 end
 

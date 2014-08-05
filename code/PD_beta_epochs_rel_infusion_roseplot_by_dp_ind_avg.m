@@ -14,6 +14,14 @@ f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
 f_labels = cellstr(f_labels{1});
 f_labels = f_labels(1:2:end);
 
+h_bins = {linspace(-pi, pi, 50), linspace(8, 32, 50)};
+
+for i = 1:2
+
+    h_centers{i} = (h_bins{i}(2:end) + h_bins{i}(1:(end - 1)))/2;
+
+end
+
 pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
@@ -40,7 +48,7 @@ for ch = 1:no_channels
             
             subplot(2, 2, pd)
             
-            imagesc(bins{2}, bins{1}, mean_histogram(:, :, :, pd, ch, ch1))
+            imagesc(h_centers{2}, h_centers{1}, mean_histogram(:, :, :, pd, ch, ch1))
             
             axis xy
             
@@ -104,13 +112,13 @@ for ch = 1:no_channels
         
         title('Slope of Regression Line, Phase Angle vs. Freq.')
         
-        set(gca, 'XTickLabel', period_label)
+        set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
         
-        save_as_pdf(gcf, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
+        save_as_pdf(gcf, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_ind'])
         
     end
     
 end
 
-close('all')
+% close('all')
     
