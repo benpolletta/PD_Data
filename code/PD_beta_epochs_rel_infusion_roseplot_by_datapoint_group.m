@@ -4,7 +4,7 @@ par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),
 
 load(subject_mat)
 
-f_bins = 8:4:32; no_f_bins = length(f_bins) - 1;
+f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -80,11 +80,11 @@ for ch = 1:no_channels
             
             else
                
-                histogram = nan(50, 50); bins{1} = nan(50, 1); bins{2} = nan(50, 1);
+                histogram = nan(50, 50); bins{1} = nan(1, 50); bins{2} = nan(1, 50);
                 
             end
-            
-            imagesc(bins{2}, bins{1}, histogram)
+                
+            imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1)) %imagesc(bins{2}, bins{1}, histogram)
             
             axis xy
             
@@ -124,7 +124,36 @@ for ch = 1:no_channels
         
         freezeColors
         
-        %% Testing phasese pre- vs. post-infusion.
+        %% Testing phases for uniformity.
+        
+        rao_test = nan(no_f_bins, 2);
+        
+        rayleigh_test = nan(no_f_bins, 2);
+        
+        for f = 1:no_f_bins
+            
+            for pd = 1:2
+                
+                phi = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f);
+                
+                if ~isempty(phi)
+                
+                   rao_test(f, pd) = circ_raotest(phi);
+                   
+                   rayleigh_test(f, pd) = circ_rtest(phi);
+    
+                end
+                   
+            end
+            
+        end
+        
+        % Bonferroni correcting p-values.
+        rao_test = min(rao_test*2*no_f_bins, 1);
+        
+        rayleigh_test = min(rayleigh_test*2*no_f_bins, 1);
+        
+        %% Testing phases pre- vs. post-infusion.
         
         conc_pval = nan(no_f_bins, 1); angle_pval = nan(no_f_bins, 1);
         

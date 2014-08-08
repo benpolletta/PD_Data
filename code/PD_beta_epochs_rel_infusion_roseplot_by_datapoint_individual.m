@@ -6,7 +6,7 @@ load(subject_mat)
 
 no_subs = length(folders);
 
-f_bins = 8:4:32; no_f_bins = length(f_bins) - 1;
+f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -54,6 +54,8 @@ All_histograms = nan(50, 50, no_subs, 2, no_channels, 2);
 
 All_slopes = nan(no_subs, 2, no_channels, 2);
 
+All_intercepts = nan(no_subs, 2, no_channels, 2);
+
 for ch = 1:no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
@@ -96,15 +98,19 @@ for ch = 1:no_channels
                 
                 if ~isempty(all_Pds(all_pd_index == pd))
                
-                    [line_params, ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
+                    % [line_params, ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
+               
+                    [line_params, ~] = circ_on_linear(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 100, 1);
                 
                 else
                     
-                    line_params = nan;
+                    line_params = [nan nan];
                     
                 end
                 
                 All_slopes(s, pd, ch, ch1) = line_params(1);
+                
+                All_intercepts(s, pd, ch, ch1) = line_params(2);
                 
             end
             
@@ -132,7 +138,7 @@ for ch = 1:no_channels
                 
                 All_histograms(:, :, s, pd, ch, ch1) = histogram;
                 
-                imagesc(bins{2}, bins{1}, histogram)
+                imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1))
                 
                 axis xy
                 
@@ -481,7 +487,7 @@ for ch = 1:no_channels
     
 end
 
-save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'],'All_slopes','All_MR_mat','All_conf_mat','All_histograms','bins')
+save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'],'All_slopes','All_intercepts','All_MR_mat','All_conf_mat','All_histograms','bins')
 
 close('all')
 

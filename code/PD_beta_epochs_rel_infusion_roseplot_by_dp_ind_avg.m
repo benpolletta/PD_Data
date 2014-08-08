@@ -6,7 +6,7 @@ load(subject_mat)
 
 no_subs = length(folders);
 
-f_bins = 8:4:32; no_f_bins = length(f_bins) - 1;
+f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -48,7 +48,7 @@ for ch = 1:no_channels
             
             subplot(2, 2, pd)
             
-            imagesc(h_centers{2}, h_centers{1}, mean_histogram(:, :, :, pd, ch, ch1))
+            imagesc(h_centers{2}, [h_centers{1} (h_centers{1} + 2*pi)], repmat(mean_histogram(:, :, :, pd, ch, ch1), 2, 1)) %imagesc(h_centers{2}, h_centers{1}, mean_histogram(:, :, :, pd, ch, ch1))
             
             axis xy
             

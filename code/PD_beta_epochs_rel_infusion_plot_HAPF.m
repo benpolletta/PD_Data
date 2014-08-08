@@ -89,7 +89,7 @@ for fo = 1:length(folders)
                     
                     Pd_flipped = [flipud(P_diff(1:smooth_winsize)); P_diff; flipud(P_diff((end-smooth_winsize+1):end))];
                     
-                    Pd_conv = conv(Pd_flipped,hann(smooth_winsize)/sum(hann(smooth_winsize)),'same');
+                    Pd_conv = angle(conv(exp(sqrt(-1)*Pd_flipped), hann(smooth_winsize)/sum(hann(smooth_winsize)), 'same'));
                     
                     Pd_smooth = Pd_conv((smooth_winsize + 1):(end - smooth_winsize));
                     
