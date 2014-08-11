@@ -46,7 +46,7 @@ for ch = 1:no_channels
         
         for pd = 1:2
             
-            subplot(2, 2, pd)
+            subplot(3, 2, pd)
             
             imagesc(h_centers{2}, [h_centers{1} (h_centers{1} + 2*pi)], repmat(mean_histogram(:, :, :, pd, ch, ch1), 2, 1)) %imagesc(h_centers{2}, h_centers{1}, mean_histogram(:, :, :, pd, ch, ch1))
             
@@ -78,7 +78,7 @@ for ch = 1:no_channels
       
         c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
         
-        subplot(2, 3, 3 + 1)
+        subplot(3, 2, 2 + 1)
         
         barwitherr(mean_conf, mean_DP)
         
@@ -92,7 +92,7 @@ for ch = 1:no_channels
             
         freezeColors
         
-        subplot(2, 3, 3 + 2)
+        subplot(3, 2, 2 + 2)
         
         barwitherr(mean_conf', mean_DP')
        
@@ -104,13 +104,23 @@ for ch = 1:no_channels
         
         set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
         
-        subplot(2, 3, 3 + 3)
+        subplot(3, 2, 4 + 1)
         
         plot(cumsum(ones(size(All_slopes, 1), 2), 2)', All_slopes(:, :, ch, ch1)', '*-')
         
         xlim([.8 2.2])
         
         title('Slope of Regression Line, Phase Angle vs. Freq.')
+        
+        set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
+        
+        subplot(3, 2, 4 + 2)
+        
+        plot(cumsum(ones(size(All_intercepts, 1), 2), 2)', All_intercepts(:, :, ch, ch1)', '*-')
+        
+        xlim([.8 2.2])
+        
+        title('Intercept of Regression Line, Phase Angle vs. Freq.')
         
         set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
         

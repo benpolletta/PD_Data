@@ -186,31 +186,41 @@ for ch = 1:no_channels
             
             for f = 1:no_f_bins
                 
-                phi_pre = all_Pds(all_pd_index == 1 & all_Fc(:, ch1) == f);
-                
-                phi_post = all_Pds(all_pd_index == 2 & all_Fc(:, ch1) == f);
-                
-                no_dps(f, 1) = size(phi_pre, 1); no_dps(f, 2) = size(phi_post, 1);
-                
-                conc_pval(f) = circ_ktest(phi_pre, phi_post);
-                
-                %             if conc_pval(f) > 0.01/(length(f_bins) - 1)
-                
-                if ~isempty(phi_pre) && ~isempty(phi_post)
-                
-                    angle_pval(f) = circ_wwtest(phi_pre, phi_post);
-                
+                if ~isnan(any(MR_mat(f, :)))
+                    
+                    phi_pre = all_Pds(all_pd_index == 1 & all_Fc(:, ch1) == f);
+                    
+                    phi_post = all_Pds(all_pd_index == 2 & all_Fc(:, ch1) == f);
+                    
+                    no_dps(f, 1) = size(phi_pre, 1); no_dps(f, 2) = size(phi_post, 1);
+                    
+                    conc_pval(f) = circ_ktest(phi_pre, phi_post);
+                    
+                    %             if conc_pval(f) > 0.01/(length(f_bins) - 1)
+                    
+                    if ~isempty(phi_pre) && ~isempty(phi_post)
+                        
+                        angle_pval(f) = circ_wwtest(phi_pre, phi_post);
+                        
+                    else
+                        
+                        angle_pval(f) = 1;
+                        
+                    end
+                    
+                    %             else
+                    %
+                    %                 angle_pval(f) = circ_cmtest(phi_pre, phi_post);
+                    %
+                    %             end
+                    
                 else
+                    
+                    conc_pval(f) = 1;
                     
                     angle_pval(f) = 1;
                     
                 end
-                    
-                %             else
-                %
-                %                 angle_pval(f) = circ_cmtest(phi_pre, phi_post);
-                %
-                %             end
                 
             end
             
@@ -229,17 +239,27 @@ for ch = 1:no_channels
                 
                 for pd = 1:2
                     
-                    phi1 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 1));
-                    
-                    phi2 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 2));
-                    
-                    f_conc_pval(fp, pd) = circ_ktest(phi1, phi2);
-                    
-                    if ~isempty(phi1) && ~isempty(phi2)
-                    
-                        f_angle_pval(fp, pd) = circ_wwtest(phi1, phi2);
-                    
+                    if ~isnan(MR_mat(f_pairs(fp, 1), pd)) && ~isnan(MR_mat(f_pairs(fp, 2), pd))
+                        
+                        phi1 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 1));
+                        
+                        phi2 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 2));
+                        
+                        f_conc_pval(fp, pd) = circ_ktest(phi1, phi2);
+                        
+                        if ~isempty(phi1) && ~isempty(phi2)
+                            
+                            f_angle_pval(fp, pd) = circ_wwtest(phi1, phi2);
+                            
+                        else
+                            
+                            f_angle_pval(fp, pd) = 1;
+                            
+                        end
+                        
                     else
+                        
+                        f_conc_pval(fp, pd) = 1;
                         
                         f_angle_pval(fp, pd) = 1;
                         
@@ -281,11 +301,13 @@ for ch = 1:no_channels
             
             subplot(4, 3, 2*3 + 1)
             
+            colormap('summer')
+            
             bar(no_dps)
             
             title('Datapoints by Freq.')
             
-            legend(period_label, 'Location', 'NorthEast')
+            % legend(period_label, 'Location', 'NorthEast')
             
             set(gca, 'XTickLabel', f_centers)
             
@@ -294,6 +316,8 @@ for ch = 1:no_channels
             %% Plotting concentration pre vs. post by freq.
             
             subplot(4, 3, 2*3 + 2)
+            
+            colormap('summer')
             
             h = bar(abs(MR_mat));
             
@@ -324,6 +348,8 @@ for ch = 1:no_channels
             %% Plotting phase angle pre vs. post by freq.
             
             subplot(4, 3, 2*3 + 3)
+            
+            colormap('summer')
             
             h = barwitherr(conf_mat, angle(MR_mat));
             
