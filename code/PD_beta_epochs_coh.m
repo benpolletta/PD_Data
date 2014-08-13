@@ -29,9 +29,9 @@ for fo = 1:length(folders)
             
             no_epochs = length(beta_list);
             
-            All_coh = nan(no_epochs, window_length);
+            All_coh = nan(no_epochs, win_size);
             
-            for e = 1:no_epochs
+            parfor e = 1:no_epochs
                 
                 data_name = beta_list{e};
                 
@@ -41,7 +41,9 @@ for fo = 1:length(folders)
                 
                 data_xspec = data_hat(:, 1) .* conj(data_hat(:, 2));
                 
-                data_xspec_norm = data_xspec * diag(1 ./ sum(data_hat .* conj(data_hat)));
+                data_spec = sqrt(data_hat .* conj(data_hat));
+                
+                data_xspec_norm = data_xspec ./ prod(data_spec, 2);
                 
                 All_coh(e, :) = data_xspec_norm';
                 
