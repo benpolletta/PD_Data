@@ -29,9 +29,9 @@ for fo = 1:length(folders)
             
             no_epochs = length(beta_list);
             
-            All_coh = nan(no_epochs, win_size);
+            All_coh = nan(no_epochs, win_size + 1);
             
-            parfor e = 1:no_epochs
+            for e = 1:no_epochs
                 
                 data_name = beta_list{e};
                 
