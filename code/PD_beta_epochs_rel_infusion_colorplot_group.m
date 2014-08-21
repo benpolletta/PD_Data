@@ -1,18 +1,14 @@
 function PD_beta_epochs_rel_infusion_colorplot_group(subject_mat, outlier_lim, sd_lim, win_size, smooth_size)
 
+bands = [10 18; 18 22; 22 30];
+
+no_bands = size(bands,1);
+
+colors = [.5 .5 .5; .5 .5 .5; .5 .5 .5]; %[1 1 1; 0 0 0; .5 .5 .5; .5 .5 .5; .5 .5 .5];
+
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 load(subject_mat)
-
-f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
-
-f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
-
-c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
-
-f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
-f_labels = cellstr(f_labels{1});
-f_labels = f_labels(1:2:end);
 
 pd_label = {'pre','post'};
 
@@ -34,9 +30,15 @@ for ch = 1:no_channels
     
 end
 
-% figure(1)
+h_bins = {linspace(-pi, pi, 50), linspace(8, 32, 50)};
 
-index = 1;%2;
+for i = 1:2
+
+    h_centers{i} = (h_bins{i}(2:end) + h_bins{i}(1:(end - 1)))/2;
+
+end
+
+index = 1;
 
 for ch = 1:no_channels
             
@@ -48,43 +50,35 @@ for ch = 1:no_channels
         
         all_Fs = all_beta_data(:,3:4);
         
-        all_Fc = categorize_freq(all_Fs, f_bins);
-        
         all_Pds = all_beta_data(:,5);
         
     else
        
-        all_pd_index = nan; all_Fs = nan(1, 2); all_FC = nan(1, 2); all_Pds = nan;
+        all_pd_index = nan; all_Fs = nan(1, 2); all_Pds = nan;
         
     end
            
     for ch1 = 1:2
         
-        % [pval, stats] = circ_hktest(all_Pds, all_pd_index, all_Fc, 1, {period_label{:}, f_labels{:}});
-        
         figure(index)
-        
-        MR_mat = nan(no_f_bins, 2); conf_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
-            
-        %% Plotting 2d histogram by period (pre- vs. post-infusion).
         
         for pd = 1:length(pd_label)
             
-            figure(index)
-            
-            subplot(4, 2, pd)
+            subplot(1, 2, pd)
             
             if ~isempty(all_Pds(all_pd_index == pd))
-            
-                [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], [50 50]);
-            
+                
+                [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], 'Edges', h_bins);
+                
             else
-               
+                
                 histogram = nan(50, 50); bins{1} = nan(1, 50); bins{2} = nan(1, 50);
                 
             end
-                
-            imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1)) %imagesc(bins{2}, bins{1}, histogram)
+            
+            imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1))
+            
+            hold on
             
             axis xy
             
@@ -94,56 +88,54 @@ for ch = 1:no_channels
             
             ylabel('Phase Lag (rad)')
             
-            title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];[' Phase Lag by ', chan_labels{ch1}, ' Freq.']})
+            title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
             
             freezeColors
             
+            %% Computing Slope of Dphi/F.
+                
+            line_params = nan(no_bands, 2);
+            
+            if ~isempty(all_Pds(all_pd_index == pd))
+                
+                % [line_params(1, :), ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
+                
+                % [line_params(2, :), ~] = circ_on_linear(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 100, 0);
+                
+                for b = 1:no_bands
+                    
+                    freq_index = all_pd_index == pd & all_Fs(:, ch1) <= bands(b, 2) & all_Fs(:, ch1) >= bands(b, 1);
+                    
+                    [line_params(b, :), ~] = polyfit(all_Fs(freq_index, ch1), all_Pds(freq_index), 1); %[line_params(2 + b, :), ~]
+                    
+                end
+                
+            end
+            
+            % Plotting.
+            
+            for b = 1:no_bands %(no_bands + 2)
+                
+                line_x_vals = h_centers{2};
+                
+                % if b >= 3
+                    
+                line_x_vals = line_x_vals(line_x_vals <= bands(b, 2) & line_x_vals >= bands(b, 1)); %bands(b - 2, 2)
+                    
+                % end
+                
+                line_y_vals = polyval(line_params(b, :), line_x_vals);
+                
+                plot(line_x_vals, line_y_vals, 'Color', colors(b, :), 'LineWidth', 3)
+                
+            end
+            
         end
         
-        save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
+        save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_cplot'])
         
         index = index + 1;
         
     end
     
-end
-
-save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp'])
-
-end
-
-function F_c = categorize_freq(F, f_bins)
-    
-    [r, c] = size(F);
-    
-    F_c = zeros(r, c);
-    
-    no_f_bins = length(f_bins) - 1;
-    
-    for col = 1:c
-        
-        for f = 1:no_f_bins
-            
-            F_bin = F(:, col) >= f_bins(f) & F(:, col) < f_bins(f + 1);
-            
-            F_c(:, col) = F_c(:, col) + f*F_bin;
-            
-        end
-        
-    end
-    
-end
-
-function pos_bars = get_bar_pos(handle)
-
-for i = 1:length(handle)
-    
-    x = get(get(handle(i), 'children'), 'xdata');
-    
-    x = mean(x([1 3],:));
-    
-    pos_bars(i,:) = x;
-    
-end
-
 end

@@ -1,5 +1,11 @@
 function PD_beta_epochs_rel_infusion_colorplot_individual(subject_mat, outlier_lim, sd_lim, win_size, smooth_size)
 
+bands = [10 18; 18 22; 22 30];
+
+no_bands = size(bands,1);
+
+colors = [1 1 1; 0 0 0; .5 .5 .5; .5 .5 .5; .5 .5 .5];
+
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 load(subject_mat)
@@ -34,7 +40,7 @@ h_bins = {linspace(-pi, pi, 50), linspace(8, 32, 50)};
 
 for i = 1:2
 
-    h_centers{1} = (h_bins{i}(2:end) + h_bins{i}(1:(end - 1)))/2;
+    h_centers{i} = (h_bins{i}(2:end) + h_bins{i}(1:(end - 1)))/2;
 
 end
     
@@ -117,11 +123,21 @@ for ch = 1:no_channels
                 %% Computing Slope of Dphi/F.
                 
                 if ~isempty(all_Pds(all_pd_index == pd))
+                    
+                    line_params = nan(no_bands + 2, 2);
                
-                    % [line_params, ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
+                    [line_params(1, :), ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
                
-                    [line_params, ~] = circ_on_linear(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 100, 1);
+                    [line_params(2, :), ~] = circ_on_linear(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 100, 0);
                 
+                    for b = 1:no_bands
+                       
+                        freq_index = all_pd_index == pd & all_Fs(:, ch1) <= bands(b, 2) & all_Fs(:, ch1) >= bands(b, 1);
+                        
+                        [line_params(2 + b, :), ~] = polyfit(all_Fs(freq_index, ch1), all_Pds(freq_index), 1);
+                        
+                    end
+                    
                 else
                     
                     line_params = [nan nan];
@@ -134,9 +150,21 @@ for ch = 1:no_channels
                 
                 % Plotting.
 
-                line_y_vals = polyval(line_params, bins{2});
+                for b = 1:(no_bands + 2)
+                
+                    line_x_vals = h_centers{2};
+                    
+                    if b >= 3
+                        
+                        line_x_vals = line_x_vals(line_x_vals <= bands(b - 2, 2) & line_x_vals >= bands(b - 2, 1));
+                    
+                    end
+                        
+                    line_y_vals = polyval(line_params(b, :), line_x_vals);
 
-                plot(bins{2}, line_y_vals, 'w', 'LineWidth', 3)
+                    plot(line_x_vals, line_y_vals, 'Color', colors(b, :), 'LineWidth', 3)
+                    
+                end
                 
             end
             
@@ -150,10 +178,4 @@ for ch = 1:no_channels
         
     end
     
-end
-
-save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'],'All_slopes','All_intercepts','All_MR_mat','All_conf_mat','All_histograms','bins')
-
-close('all')
-
 end
