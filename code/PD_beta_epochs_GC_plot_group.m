@@ -43,7 +43,7 @@ for pd = 1:2
     end
 end
 
-for ch = 7:no_channels
+for ch = 1:no_channels
     
     for list = 1:no_lists
         

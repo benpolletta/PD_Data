@@ -15,7 +15,7 @@ pd_label = {'pre', 'post'};
 
 f = 1000*(0:win_size)/win_size;
 
-f_indices = f <= 35 & f >= 5;
+f_indices = f <= 32 & f >= 8; %f <= 100;
 
 measure_label = {'Coherence','Phase of Coherence'};
 no_measures = length(measure_label);
@@ -43,13 +43,25 @@ for ch = 1:no_channels
             
             no_epochs = size(All_coh, 1);
             
+            if no_epochs > 2
+            
+                All_jack = jackknife(@nanmean, All_coh);
+                
+            else
+                
+                All_jack = jackknife(@nanmean, [All_coh; nan(3 - no_epochs, size(All_coh, 2))]);
+                
+            end
+            
+            no_epochs = size(All_coh, 1);
+            
             subject_coh(:, pd, 1, 1) = abs(nanmean(All_coh))';
             
-            subject_coh(:, pd, 2, 1) = abs(nanstd(All_coh))'/sqrt(no_epochs);
+            subject_coh(:, pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
             
             subject_coh(:, pd, 1, 2) = angle(nanmean(All_coh))';
             
-            subject_coh(:, pd, 2, 2) = angle(nanstd(All_coh))'/sqrt(no_epochs);
+            subject_coh(:, pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
             
         end
         
@@ -68,7 +80,7 @@ for ch = 1:no_channels
             
             axis tight
             
-            title({[folder, ', ', chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];[measure_label{measure}]})
+            title({[folder, ', ', chan_labels{ch}, ' High Beta Blocks'];[measure_label{measure}]})
             
         end
         

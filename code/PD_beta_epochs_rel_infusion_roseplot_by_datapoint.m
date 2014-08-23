@@ -67,7 +67,7 @@ for fo = 1:length(folders)
             beta_listname = [beta_name,'_',pd_label{pd},'_',par_name,'.list'];
             
             % Loading block numbers, epoch start and end indices.
-            [blocks, beta_starts, beta_ends] = text_read([beta_listname(1:end-5),'_win.list'],'%f%f%f%*[^\n]');
+            [blocks, beta_starts, beta_ends, epochs, epoch_starts, epoch_ends] = text_read([beta_listname(1:end-5),'_win.list'],'%f%f%f%*[^\n]');
             
             beta_pbf_name = [beta_listname(1:end-5),'_pbf_dp.txt'];
             
@@ -117,6 +117,30 @@ for fo = 1:length(folders)
                     end
                     
                     fprintf(fid, '%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth]');
+                        
+                    beta_name = [subj_name,'_',par_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_block',num2str(b)];
+                    
+                    no_epochs = max(epochs(blocks == b));
+                    
+                    block_e_starts = epoch_starts(blocks == b);
+                    
+                    block_e_ends = epoch_ends(blocks == b);
+                    
+                    for e = 1:no_epochs
+                        
+                        e_start = block_e_starts(e);
+                        
+                        e_end = block_e_ends(e);
+                       
+                        epoch_name = [beta_name,'_epoch',num2str(e),'_F.txt'];
+                        
+                        fid = fopen(epoch_name, 'w');
+                        
+                        fprintf(fid, '%f\t%f\n', F_smooth(e_start:e_end, :)');
+                        
+                        fclose(fid);
+                        
+                    end
                     
                 end
                 
