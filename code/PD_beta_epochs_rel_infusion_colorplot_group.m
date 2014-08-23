@@ -76,7 +76,7 @@ for ch = 1:no_channels
                 
             end
             
-            imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1))
+            imagesc(bins{2}, bins{1}, histogram) %[bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1))
             
             hold on
             

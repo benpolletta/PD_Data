@@ -4,7 +4,7 @@ bands = [10 18; 18 22; 22 30];
 
 no_bands = size(bands,1);
 
-colors = [1 1 1; 0 0 0; .5 .5 .5; .5 .5 .5; .5 .5 .5];
+colors = [.5 .5 .5; .5 .5 .5; .5 .5 .5]; %[1 1 1; 0 0 0; .5 .5 .5; .5 .5 .5; .5 .5 .5];
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -15,6 +15,8 @@ no_subs = length(folders);
 pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
+
+no_pds = length(pd_label);
 
 chan_labels = {chan_labels{:}, 'Both', 'Either', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
@@ -43,12 +45,6 @@ for i = 1:2
     h_centers{i} = (h_bins{i}(2:end) + h_bins{i}(1:(end - 1)))/2;
 
 end
-    
-All_histograms = nan(50, 50, no_subs, 2, no_channels, 2);
-
-All_slopes = nan(no_subs, 2, no_channels, 2);
-
-All_intercepts = nan(no_subs, 2, no_channels, 2);
 
 for ch = 1:no_channels
             
@@ -61,32 +57,36 @@ for ch = 1:no_channels
     end
     
     all_subjects = all_beta_data(:, end);
+    
+    for ch1 = 1:2
+    
+        All_histograms = nan(50, 50, no_subs, 2);
         
-    for s = 1:no_subs
+        All_params = nan(no_subs, no_bands*2, 2);
         
-        subject = str2double(folders{s});
-        
-        sub_indicator = all_subjects == subject;
-        
-        if ~isempty(sub_indicator)
+        for s = 1:no_subs
             
-            all_pd_index = all_beta_data(sub_indicator, 1);
+            subject = str2double(folders{s});
             
-            all_Fs = all_beta_data(sub_indicator, 3:4);
+            sub_indicator = all_subjects == subject;
             
-            all_Pds = all_beta_data(sub_indicator, 5);
-            
-        else
-            
-            all_pd_index = nan; all_Fs = nan(1, 2); all_Pds = nan; all_subjects = nan;
-            
-        end
-        
-        for ch1 = 1:2
+            if ~isempty(sub_indicator)
+                
+                all_pd_index = all_beta_data(sub_indicator, 1);
+                
+                all_Fs = all_beta_data(sub_indicator, 3:4);
+                
+                all_Pds = all_beta_data(sub_indicator, 5);
+                
+            else
+                
+                all_pd_index = nan; all_Fs = nan(1, 2); all_Pds = nan; all_subjects = nan;
+                
+            end
 
             %% Plotting 2d histogram by period (pre- vs. post-infusion).
             
-            for pd = 1:length(pd_label)
+            for pd = 1:no_pds
                 
                 figure(index)
                 
@@ -102,9 +102,9 @@ for ch = 1:no_channels
                     
                 end
                 
-                All_histograms(:, :, s, pd, ch, ch1) = histogram;
+                All_histograms(:, :, s, pd) = histogram;
                 
-                imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1))
+                imagesc(bins{2}, bins{1}, histogram) %[bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1))
 
                 hold on
                 
@@ -122,43 +122,37 @@ for ch = 1:no_channels
 
                 %% Computing Slope of Dphi/F.
                 
+                line_params = nan(no_bands, 2); %nan(no_bands + 2, 2);
+                
                 if ~isempty(all_Pds(all_pd_index == pd))
-                    
-                    line_params = nan(no_bands + 2, 2);
                
-                    [line_params(1, :), ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
+                    % [line_params(1, :), ~] = polyfit(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 1);
                
-                    [line_params(2, :), ~] = circ_on_linear(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 100, 0);
+                    % [line_params(2, :), ~] = circ_on_linear(all_Fs(all_pd_index == pd, ch1), all_Pds(all_pd_index == pd), 100, 0);
                 
                     for b = 1:no_bands
                        
                         freq_index = all_pd_index == pd & all_Fs(:, ch1) <= bands(b, 2) & all_Fs(:, ch1) >= bands(b, 1);
                         
-                        [line_params(2 + b, :), ~] = polyfit(all_Fs(freq_index, ch1), all_Pds(freq_index), 1);
+                        [line_params(b, :), ~] = polyfit(all_Fs(freq_index, ch1), all_Pds(freq_index), 1); %[line_params(2 + b, :), ~]
                         
                     end
-                    
-                else
-                    
-                    line_params = [nan nan];
                     
                 end
 
-                All_slopes(s, pd, ch, ch1) = line_params(1);
-                
-                All_intercepts(s, pd, ch, ch1) = line_params(2);
+                All_params(s, :, pd) = reshape(line_params, no_bands*2, 1);
                 
                 % Plotting.
 
-                for b = 1:(no_bands + 2)
+                for b = 1:no_bands %(no_bands + 2)
                 
                     line_x_vals = h_centers{2};
                     
-                    if b >= 3
+                    % if b >= 3
                         
-                        line_x_vals = line_x_vals(line_x_vals <= bands(b - 2, 2) & line_x_vals >= bands(b - 2, 1));
+                    line_x_vals = line_x_vals(line_x_vals <= bands(b, 2) & line_x_vals >= bands(b, 1)); % bands(b -2, 2)
                     
-                    end
+                    % end
                         
                     line_y_vals = polyval(line_params(b, :), line_x_vals);
 
@@ -175,6 +169,45 @@ for ch = 1:no_channels
             index = index + 1;
             
         end
+
+        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_','_beta_cplot.mat'],'All_params','All_histograms')
+        
+        figure
+        
+        for b = 1:no_bands
+        
+            % Slope.
+            
+            [~, p] = ttest(All_params(:, b, 1), All_params(:, b, 2));
+            
+            subplot(2, no_bands, b)
+        
+            plot(cumsum(ones(size(All_params, 1), 2), 2)', reshape(All_params(:, b, :), no_subs, 2)', '*-')
+        
+            xlim([.8 2.2])
+        
+            title({'Slope of Regression Line, Phase Angle vs. Freq.';[num2str(bands(b,1)),' Hz to ',num2str(bands(b,2)),' Hz, Pre vs Post: p = ',num2str(p)]})
+        
+            set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
+        
+            % Intercept.
+            
+            [~, p] = ttest(All_params(:, no_bands + b, 1), All_params(:, no_bands + b, 2));
+            
+            subplot(2, no_bands, no_bands + b)
+        
+            plot(cumsum(ones(size(All_params, 1), 2), 2)', reshape(All_params(:, no_bands + b, :), no_subs, 2)', '*-')
+        
+            xlim([.8 2.2])
+        
+            title({'Intercept of Regression Line, Phase Angle vs. Freq.';[num2str(bands(b,1)),' Hz to ',num2str(bands(b,2)),' Hz, Pre vs Post: p = ',num2str(p)]})
+        
+            set(gca, 'XTick', [1 2], 'XTickLabel', period_label)
+            
+        end
+        
+        save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_','_beta_line_params'])
+        
         
     end
     
