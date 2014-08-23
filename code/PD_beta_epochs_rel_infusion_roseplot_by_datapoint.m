@@ -67,7 +67,7 @@ for fo = 1:length(folders)
             beta_listname = [beta_name,'_',pd_label{pd},'_',par_name,'.list'];
             
             % Loading block numbers, epoch start and end indices.
-            [blocks, beta_starts, beta_ends, epochs, epoch_starts, epoch_ends] = text_read([beta_listname(1:end-5),'_win.list'],'%f%f%f%*[^\n]');
+            [blocks, beta_starts, beta_ends, epochs, epoch_starts, epoch_ends] = text_read([beta_listname(1:end-5),'_win.list'],'%f%f%f%f%f%f%*[^\n]');
             
             beta_pbf_name = [beta_listname(1:end-5),'_pbf_dp.txt'];
             
@@ -85,9 +85,12 @@ for fo = 1:length(folders)
                     
                     block_end = max(beta_ends(blocks == b)); 
                     
-                    LFP_block = PD_dec(block_start:block_end, :);
+                    % LFP_block = PD_dec(block_start:block_end, :);
                     
-                    A_block = A(block_start:block_end, :, 3);
+                    % A_block = A(block_start:block_end, :, 3);
+                    
+                    % Calculating smoothed phase difference between
+                    % channels.
                     
                     P_block = unwrap(P(block_start:block_end, :, 3));
                     
@@ -100,6 +103,9 @@ for fo = 1:length(folders)
                     Pd_conv = angle(conv(exp(sqrt(-1)*Pd_flipped), hann(smooth_winsize)/sum(hann(smooth_winsize)), 'same'));
                     
                     Pd_smooth = Pd_conv((smooth_winsize + 1):(end - smooth_winsize));
+                    
+                    % Calculating smoothed instantaneous frequency of each
+                    % channel.
                     
                     F = diff(P_block)/(2*pi*(1/sampling_freq));
                     
@@ -116,15 +122,19 @@ for fo = 1:length(folders)
                         
                     end
                     
+                    % Printing frequency by block.
+                    
                     fprintf(fid, '%f\t%f\t%f\t%f\n', [b*ones(size(Pd_smooth)) F_smooth Pd_smooth]');
-                        
-                    beta_name = [subj_name,'_',par_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_block',num2str(b)];
+                    
+                    % Printing frequency by epoch.
+                    
+                    block_name = [subj_name,'_',par_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_block',num2str(b)];
                     
                     no_epochs = max(epochs(blocks == b));
                     
-                    block_e_starts = epoch_starts(blocks == b);
+                    block_e_starts = epoch_starts(blocks == b) - min(epoch_starts(blocks == b)) + 1;
                     
-                    block_e_ends = epoch_ends(blocks == b);
+                    block_e_ends = epoch_ends(blocks == b) - min(epoch_starts(blocks == b)) + 1;
                     
                     for e = 1:no_epochs
                         
@@ -132,13 +142,13 @@ for fo = 1:length(folders)
                         
                         e_end = block_e_ends(e);
                        
-                        epoch_name = [beta_name,'_epoch',num2str(e),'_F.txt'];
+                        epoch_name = [block_name,'_epoch',num2str(e),'_F.txt'];
                         
-                        fid = fopen(epoch_name, 'w');
+                        fid_epoch = fopen(epoch_name, 'w');
                         
-                        fprintf(fid, '%f\t%f\n', F_smooth(e_start:e_end, :)');
+                        fprintf(fid_epoch, '%f\t%f\n', F_smooth(e_start:e_end, :)');
                         
-                        fclose(fid);
+                        fclose(fid_epoch);
                         
                     end
                     
