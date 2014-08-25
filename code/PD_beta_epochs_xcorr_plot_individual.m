@@ -1,4 +1,4 @@
-function PD_beta_epochs_xcorr_plot_individual(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, suffix)
+function PD_beta_epochs_xcorr_plot_individual(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, suffix, suffix_name)
 
 % Default suffix.
 if nargin < 6
@@ -45,25 +45,37 @@ for ch = 1:no_channels
             
             no_epochs = size(All_xcorr, 1);
             
-            subplot(1, 3, pd)
-            
-            plot(t, All_xcorr')
-            
-            xlim([min(t) max(t)])
-            
-            if pd == 1
-               
-                ylabel('Cross Correlation')
+            if no_epochs > 0
+                
+                subplot(1, 3, pd)
+                
+                plot(t, All_xcorr')
+                
+                xlim([min(t) max(t)])
+                
+                if pd == 1
+                    
+                    ylabel('Cross Correlation')
+                    
+                end
+                
+                xlabel('Time Lag (ms)')
+                
+                title({[folder, ', ', chan_labels{ch}, ' High Beta Blocks'];['Cross-Correlation of ',suffix_name,', ', period_label{pd}]})
+                
+                if no_epochs > 1
+                    
+                    subject_coh(:, pd, 1) = nanmean(All_xcorr)';
+                    
+                    subject_coh(:, pd, 2) = nanstd(All_xcorr)'/sqrt(no_epochs);
+                    
+                else
+                    
+                    subject_coh(:, pd, 1) = All_xcorr';
+                    
+                end
                 
             end
-        
-            xlabel('Time Lag (ms)')
-            
-            title({[folder, ', ', chan_labels{ch}, ' High Beta Blocks'];['Cross-Correlation of ',suffix_name,', ', period_label{pd}]})
-            
-            subject_coh(:, pd, 1) = nanmean(All_xcorr)';
-            
-            subject_coh(:, pd, 2) = nanstd(All_xcorr)'/sqrt(no_epochs);
             
         end
         

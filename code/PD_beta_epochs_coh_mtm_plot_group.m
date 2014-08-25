@@ -36,9 +36,17 @@ for ch = 1:no_channels
         
         All_coh = All_coh_r + sqrt(-1)*All_coh_i;
         
-        All_jack = jackknife(@nanmean, All_coh);
-        
         no_epochs = size(All_coh, 1);
+        
+        if no_epochs > 2
+            
+            All_jack = jackknife(@nanmean, All_coh);
+            
+        else
+            
+            All_jack = jackknife(@nanmean, [All_coh; nan(3 - no_epochs, size(All_coh, 2))]);
+            
+        end
         
         channel_coh(:, pd, 1, 1) = abs(nanmean(All_coh))';
         
