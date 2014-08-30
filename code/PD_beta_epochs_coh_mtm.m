@@ -1,4 +1,6 @@
-function PD_beta_epochs_coh_mtm(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, thb)
+function PD_beta_epochs_coh_mtm(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+
+% Takes typical arguments, plus time-bandwidth product.
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -37,13 +39,13 @@ for fo = 1:length(folders)
                 
                 data = load(data_name);
                 
-                data_xspec_norm = xspec_mtm(data(:, 1), data(:, 2), thb);
+                data_xspec_norm = xspec_mtm(data(:, 1), data(:, 2), tbw);
                 
                 All_coh(e, :) = data_xspec_norm';
                 
             end
             
-            save([beta_listname(1:end-5),'_coh_mtm.mat'], 'All_coh')
+            save([beta_listname(1:end-5), '_coh_mtm_', num2str(tbw), 'tbw.mat'], 'All_coh')
             
         end
         
@@ -54,6 +56,8 @@ end
 end
 
 function xc_mtm = xspec_mtm(x, y, tbw)
+
+% Takes x and y data (to be cross-correlated) and time-bandwidth product.
 
 length_x = length(x); length_y = length(y);
 

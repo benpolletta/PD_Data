@@ -17,6 +17,12 @@ no_channels = length(ch_label);
 
 pd_label = {'pre', 'post'};
 
+xcorr_length = 2*win_size + 1;
+
+data_length = win_size + 1;
+
+norm = data_length - abs((1:xcorr_length) - data_length);
+
 for fo = 1:length(folders)
     
     folder = folders{fo};
@@ -44,9 +50,9 @@ for fo = 1:length(folders)
                 
                 data = load(data_name);
                 
-                data_xcorr = xcorr(data(:, 1), data(:, 2), 'unbiased');
+                data_xcorr = xcorr(data(:, 1), data(:, 2), 'coeff');
                 
-                All_xcorr(e, :) = data_xcorr';
+                All_xcorr(e, :) = data_xcorr' ./ norm;
                 
             end
             
