@@ -85,13 +85,17 @@ for fo = 1:length(folders)
                 
                 lag_fid = fopen(beta_lag_name, 'w');
                 
-                no_blocks = length(blocks);
+                no_blocks = max(blocks);
                 
                 %% Computing amplitude and covariance sequence for each block.
                 
                 for b = 1:no_blocks
                     
-                    A_block = A(beta_starts(b):beta_ends(b), :, 3);
+                    beta_start = min(beta_starts(blocks == b));
+                    
+                    beta_end = max(beta_ends(blocks == b));
+                    
+                    A_block = A(beta_start:beta_end, :, 3);
                     
                     % A_smooth = nan(size(A_block, 1), 2);
                     % 
