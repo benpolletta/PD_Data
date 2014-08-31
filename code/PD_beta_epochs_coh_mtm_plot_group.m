@@ -1,6 +1,6 @@
-function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, ~, ~, win_size, ~, tbw)
 
-par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
+% par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 load(subjects_mat)
 
@@ -17,6 +17,7 @@ f = 1000*(0:win_size)/win_size;
 
 f_indices = f <= 32 & f >= 8;
 
+m_label = {'coh','phase'};
 measure_label = {'Coherence','Phase of Coherence'};
 no_measures = length(measure_label);
 
@@ -74,6 +75,8 @@ for ch = 1:no_channels
         axis tight
         
         title({[chan_labels{ch}, ' High Beta Blocks'];[measure_label{measure}]})
+        
+        save([listname, '_', m_label{measure}], 'mean_data', 'std_data')
         
     end
     

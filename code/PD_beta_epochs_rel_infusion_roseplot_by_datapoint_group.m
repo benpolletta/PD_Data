@@ -254,6 +254,11 @@ for ch = 1:no_channels
         % Bonferroni correcting p-values.
         zero_test = min(zero_test*2*no_f_bins, 1);
         
+        %% Saving plot data.
+        
+        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp.mat'],...
+            'MR_mat', 'conf_mat', 'rao_test', 'rayleigh_test', 'conc_pval', 'angle_pval', 'f_conc_pval', 'f_angle_pval', 'zero_test')
+        
         %% Plotting number of datapoints pre vs. post by freq.
         
         subplot(4, 3, 2*3 + 1)
