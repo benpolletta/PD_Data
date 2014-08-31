@@ -1,4 +1,4 @@
-function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -28,7 +28,7 @@ for ch = 1:no_channels
     
     for pd = 1:2
         
-        listname = ['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch}, '_', pd_label{pd}, '_coh_mtm'];
+        listname = ['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch}, '_', pd_label{pd}, '_coh_mtm_', num2str(tbw), 'tbw'];
         
         All_coh_r = load([listname, '_r.txt']);
         

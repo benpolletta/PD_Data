@@ -1,4 +1,4 @@
-function PD_beta_epochs_coh_mtm_plot_individual(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_coh_mtm_plot_individual(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -39,7 +39,7 @@ for ch = 1:no_channels
             beta_listname = [subj_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_',par_name,'.list'];
             % beta_listname = [subj_name,'_ch',num2str(ch), '_beta.list'];
             
-            load([beta_listname(1:end-5),'_coh_mtm.mat'])
+            load([beta_listname(1:end-5), '_coh_mtm_', num2str(tbw), 'tbw.mat'])
             
             no_epochs = size(All_coh, 1);
             
@@ -84,7 +84,7 @@ for ch = 1:no_channels
             
         end
         
-        save_as_pdf(gcf, [beta_listname(1:end-5), '_coh_mtm'])
+        save_as_pdf(gcf, [beta_listname(1:end-5), '_coh_mtm_', num2str(tbw), 'tbw'])
         
     end
     
