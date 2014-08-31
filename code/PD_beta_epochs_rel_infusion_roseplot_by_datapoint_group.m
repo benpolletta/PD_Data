@@ -8,6 +8,10 @@ f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
+f_pairs = nchoosek(1:no_f_bins, 2);
+
+no_f_pairs = size(f_pairs, 1);
+
 c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
 
 f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
@@ -193,10 +197,6 @@ for ch = 1:no_channels
         conc_pval = min(conc_pval*no_f_bins, 1); angle_pval = min(angle_pval*no_f_bins, 1);
         
         %% Testing phases of frequency pairs.
-        
-        f_pairs = nchoosek(1:no_f_bins, 2);
-        
-        no_f_pairs = size(f_pairs, 1);
         
         f_conc_pval = nan(no_f_pairs, 2); f_angle_pval = nan(no_f_pairs, 2);
         

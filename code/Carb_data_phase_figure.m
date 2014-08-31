@@ -6,6 +6,8 @@ par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),
 
 f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
 
+f_pairs = nchoosek(1:no_f_bins, 2); no_f_pairs = size(f_pairs, 1);
+
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
 c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
@@ -13,6 +15,8 @@ c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,
 f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
 f_labels = cellstr(f_labels{1});
 f_labels = f_labels(1:2:end);
+
+win_size = 2000;
 
 f = 1000*(0:win_size)/win_size;
 
@@ -22,7 +26,7 @@ pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-record_label = {'st_m1', 'st_stn'};
+record_label = {'st_m1', 'st_stn'}; record_chan_labels = {'_ch2_by_ch1_', '_ch1_by_ch2_'};
 
 figure;
 
@@ -30,13 +34,15 @@ figure;
 
 for r = 1:2
     
-    load([record_label, '_subjects.mat'])
+    record_multiplier = (-1)^(r + 1);
     
-    load([record_label, '_', par_name, '_ch1_by_ch2_beta_ri_rose_dp.mat']);
+    load([record_label{r}, '_subjects.mat'])
+    
+    load([record_label{r}, '_', par_name, record_chan_labels{r}, 'beta_ri_rose_dp.mat']);
     
     subplot(2, 2, r)
     
-    h = barwitherr(conf_mat', angle(MR_mat)');
+    h = barwitherr(conf_mat', record_multiplier*angle(MR_mat)');
     
     bar_pos = get_bar_pos(h);
     
@@ -76,7 +82,7 @@ for r = 1:2
     
     sigstar(f_bar_pairs, f_angle_pval(f_angle_indicator == 1)')
     
-    title(['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
+    title(['Phase Angle (', chan_labels{r}, ' - ', chan_labels{3 - r}, ') by Freq.'])
     
     colormap(c_order)
     
@@ -88,11 +94,15 @@ for r = 1:2
     
     subplot(2, 2, 2 + r)
 
-    coh_listname = ['All_', record_label, '_ch', num2str(2 - r), '_', pd_label{pd}, '_coh_mtm_4tbw'];
+    coh_listname = ['All_', record_label{r}, '_ch', num2str(3 - r), '_', pd_label{pd}, '_coh_mtm_4tbw_phase.mat'];
     
     load(coh_listname)
     
-    boundedline(f(f_indices)', mean_data(f_indices, :), std_data(f_indices, :, :))
+    boundedline(f(f_indices)', record_multiplier*mean_data(f_indices, :), std_data(f_indices, :, :))
+    
+    hold on
+    
+    plot(f(f_indices)', zeros(length(f(f_indices)), 1), '--k')
     
     legend(period_label)
     
@@ -100,7 +110,7 @@ for r = 1:2
     
     xlabel('Frequency (Hz)')
     
-    title({[chan_labels{2 - r}, ' High Beta Blocks'];'Phase of Coherence'})
+    title({[chan_labels{3 - r}, ' High Beta Blocks'];'Phase of Coherence'})
 
 end
 
