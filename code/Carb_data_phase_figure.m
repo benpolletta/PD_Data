@@ -10,7 +10,9 @@ f_pairs = nchoosek(1:no_f_bins, 2); no_f_pairs = size(f_pairs, 1);
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
-c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
+f_center_indices = f_centers <= 25;
+
+% c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
 
 f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
 f_labels = cellstr(f_labels{1});
@@ -20,7 +22,7 @@ win_size = 2000;
 
 f = 1000*(0:win_size)/win_size;
 
-f_indices = f <= 32 & f >= 8;
+f_indices = f <= 26 & f >= 9;
 
 pd_label = {'pre','post'};
 
@@ -38,63 +40,87 @@ for r = 1:2
     
     load([record_label{r}, '_subjects.mat'])
     
-    load([record_label{r}, '_', par_name, record_chan_labels{r}, 'beta_ri_rose_dp.mat']);
+    load([record_label{r}, '_', par_name, record_chan_labels{r}, 'beta_ri_rose_dp_group.mat']);
     
     subplot(2, 2, r)
     
-    h = barwitherr(conf_mat', record_multiplier*angle(MR_mat)');
+    conf_mat = reshape(conf_mat, size(conf_mat, 1), 1, size(conf_mat, 2));
     
-    bar_pos = get_bar_pos(h);
+    conf_mat = repmat(conf_mat, [1 2 1]);
     
-    f_bar_pairs = {};
+    h = boundedline(f_centers(f_center_indices)', record_multiplier*angle(MR_mat(f_center_indices, :)), conf_mat(f_center_indices, :, :));
     
-    f_angle_indicator = nan(size(f_angle_pval));
+    set(h, 'Marker', 's')
+   
+    axis tight
     
-    for pd = 1:2
-        
-        % Choose whichever is smaller - significant pairs or
-        % insignificant pairs.
-        if sum(f_angle_pval(:, pd) < 0.05) <= no_f_pairs/2
-            
-            f_angle_indicator(:, pd) = f_angle_pval(:, pd) < 0.05;
-            
-        else
-            
-            f_angle_indicator(:, pd) = f_angle_pval(:, pd) >= 0.05;
-            
-        end
-        
-        for fp = 1:no_f_pairs
-            
-            if f_angle_indicator(fp, pd)
-                
-                f_bar_pairs = {f_bar_pairs{:}, [bar_pos((pd - 1)*no_f_bins + f_pairs(fp, 1)), bar_pos((pd - 1)*no_f_bins + f_pairs(fp, 2))]};
-                
-            end
-            
-        end
+    hold on
+    
+    plot(f(f_indices)', zeros(length(f(f_indices)), 1), '--k')
+    
+    if r == 1
+    
+        legend(period_label, 'Location', 'SouthEast')
         
     end
     
-    f_angle_pval = reshape(f_angle_pval, 2*no_f_pairs, 1);
+    axis tight
     
-    f_angle_indicator = reshape(f_angle_indicator, 2*no_f_pairs, 1);
+    xlabel('Frequency (Hz)')
     
-    sigstar(f_bar_pairs, f_angle_pval(f_angle_indicator == 1)')
+    % h = barwitherr(conf_mat', record_multiplier*angle(MR_mat)');
+    % 
+    % bar_pos = get_bar_pos(h);
+    % 
+    % f_bar_pairs = {};
+    % 
+    % f_angle_indicator = nan(size(f_angle_pval));
+    % 
+    % for pd = 1:2
+    % 
+    %     % Choose whichever is smaller - significant pairs or
+    %     % insignificant pairs.
+    %     if sum(f_angle_pval(:, pd) < 0.05) <= no_f_pairs/2
+    % 
+    %         f_angle_indicator(:, pd) = f_angle_pval(:, pd) < 0.05;
+    % 
+    %     else
+    % 
+    %         f_angle_indicator(:, pd) = f_angle_pval(:, pd) >= 0.05;
+    % 
+    %     end
+    % 
+    %     for fp = 1:no_f_pairs
+    % 
+    %         if f_angle_indicator(fp, pd)
+    % 
+    %             f_bar_pairs = {f_bar_pairs{:}, [bar_pos((pd - 1)*no_f_bins + f_pairs(fp, 1)), bar_pos((pd - 1)*no_f_bins + f_pairs(fp, 2))]};
+    % 
+    %         end
+    % 
+    %     end
+    % 
+    % end
+    % 
+    % f_angle_pval = reshape(f_angle_pval, 2*no_f_pairs, 1);
+    % 
+    % f_angle_indicator = reshape(f_angle_indicator, 2*no_f_pairs, 1);
+    % 
+    % sigstar(f_bar_pairs, f_angle_pval(f_angle_indicator == 1)')
     
-    title(['Phase Angle (', chan_labels{r}, ' - ', chan_labels{3 - r}, ') by Freq.'])
+    title({[chan_labels{3 - r}, ' High Beta Blocks']; ['Mean Phase Angle (', chan_labels{r}, ' - ', chan_labels{3 - r}, ') by ', chan_labels{r}, ' Freq.']})
     
-    colormap(c_order)
-    
-    colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-    
-    set(gca, 'XTickLabel', period_label)
+    % colormap(c_order)
+    % 
+    % colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
+    % 
+    % set(gca, 'XTickLabel', period_label)
     
     %% Plotting coherence.
     
     subplot(2, 2, 2 + r)
 
-    coh_listname = ['All_', record_label{r}, '_ch', num2str(3 - r), '_', pd_label{pd}, '_coh_mtm_4tbw_phase.mat'];
+    coh_listname = ['All_', record_label{r}, '_ch', num2str(3 - r), '_post_coh_mtm_4tbw_phase.mat'];
     
     load(coh_listname)
     
@@ -104,8 +130,12 @@ for r = 1:2
     
     plot(f(f_indices)', zeros(length(f(f_indices)), 1), '--k')
     
-    legend(period_label)
+    if r == 1
+   
+        legend(period_label, 'Location', 'NorthWest')
     
+    end
+        
     axis tight
     
     xlabel('Frequency (Hz)')

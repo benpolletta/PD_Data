@@ -8,8 +8,6 @@ sampling_freq = 1000;
 
 smooth_winsize = 50;
 
-f_bins = 8:4:32;
-
 % f_labels = textscan(num2str(f_bins), '%s', 'delimiter', ' ');
 % f_labels = cellstr(f_labels{1});
 % f_labels = f_labels(1:2:end);

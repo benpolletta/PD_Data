@@ -6,7 +6,7 @@ load(subject_mat)
 
 no_subs = length(folders);
 
-f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9:1:31; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -55,6 +55,8 @@ All_histograms = nan(50, 50, no_subs, 2, no_channels, 2);
 All_slopes = nan(no_subs, 2, no_channels, 2);
 
 All_intercepts = nan(no_subs, 2, no_channels, 2);
+
+All_dps = nan(no_f_bins, 2, no_subs, no_channels);
 
 for ch = 1:no_channels
             
@@ -223,6 +225,8 @@ for ch = 1:no_channels
                 end
                 
             end
+            
+            All_dps(:, :, s, ch) = no_dps;
             
             % Bonferroni correcting p-values.
             conc_pval = min(conc_pval*no_f_bins, 1); angle_pval = min(angle_pval*no_f_bins, 1);
@@ -513,7 +517,8 @@ for ch = 1:no_channels
     
 end
 
-save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'],'All_slopes','All_intercepts','All_MR_mat','All_conf_mat','All_histograms','bins')
+save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp_ind.mat'],...
+    'All_slopes','All_intercepts','All_MR_mat','All_conf_mat','All_histograms','All_dps','bins')
 
 close('all')
 

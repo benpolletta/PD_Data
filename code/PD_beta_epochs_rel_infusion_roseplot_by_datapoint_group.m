@@ -4,7 +4,7 @@ par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),
 
 load(subject_mat)
 
-f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9:1:31; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -256,7 +256,7 @@ for ch = 1:no_channels
         
         %% Saving plot data.
         
-        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp.mat'],...
+        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_group.mat'],...
             'MR_mat', 'conf_mat', 'rao_test', 'rayleigh_test', 'conc_pval', 'angle_pval', 'f_conc_pval', 'f_angle_pval', 'zero_test')
         
         %% Plotting number of datapoints pre vs. post by freq.
