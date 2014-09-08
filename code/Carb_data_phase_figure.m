@@ -4,7 +4,7 @@ outlier_lim = 7; sd_lim = 2; win_size = 333; smooth_size = 20000;
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
-f_bins = 9:1:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
 
 f_pairs = nchoosek(1:no_f_bins, 2); no_f_pairs = size(f_pairs, 1);
 
