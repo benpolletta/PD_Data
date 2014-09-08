@@ -4,7 +4,7 @@ outlier_lim = 7; sd_lim = 2; win_size = 333; smooth_size = 20000;
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
-f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9:1:31; no_f_bins = length(f_bins) - 1;
 
 f_pairs = nchoosek(1:no_f_bins, 2); no_f_pairs = size(f_pairs, 1);
 
@@ -29,6 +29,8 @@ pd_label = {'pre','post'};
 period_label = {'Pre-Infusion','Post-Infusion'};
 
 record_label = {'st_m1', 'st_stn'}; record_chan_labels = {'_ch2_by_ch1_', '_ch1_by_ch2_'};
+    
+rad_deg = 180/pi;
 
 figure;
 
@@ -48,7 +50,7 @@ for r = 1:2
     
     conf_mat = repmat(conf_mat, [1 2 1]);
     
-    h = boundedline(f_centers(f_center_indices)', record_multiplier*angle(MR_mat(f_center_indices, :)), conf_mat(f_center_indices, :, :));
+    h = boundedline(f_centers(f_center_indices)', rad_deg*record_multiplier*angle(MR_mat(f_center_indices, :)), rad_deg*conf_mat(f_center_indices, :, :));
     
     set(h, 'Marker', 's')
    
@@ -124,7 +126,7 @@ for r = 1:2
     
     load(coh_listname)
     
-    boundedline(f(f_indices)', record_multiplier*mean_data(f_indices, :), std_data(f_indices, :, :))
+    boundedline(f(f_indices)', rad_deg*record_multiplier*mean_data(f_indices, :), rad_deg*std_data(f_indices, :, :))
     
     hold on
     

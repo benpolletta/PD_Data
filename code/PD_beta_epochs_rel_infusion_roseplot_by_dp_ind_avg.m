@@ -32,7 +32,7 @@ ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_
 
 no_channels = length(ch_label);
 
-load([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_','_beta_ri_rose_dp.mat'])
+load([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp.mat'])
 
 mean_histogram = nanmean(All_histograms, 3);
 
