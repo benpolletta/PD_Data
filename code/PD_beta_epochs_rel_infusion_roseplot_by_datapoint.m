@@ -81,11 +81,7 @@ for fo = 1:length(folders)
                     
                     block_start = min(beta_starts(blocks == b));
                     
-                    block_end = max(beta_ends(blocks == b)); 
-                    
-                    % LFP_block = PD_dec(block_start:block_end, :);
-                    
-                    % A_block = A(block_start:block_end, :, 3);
+                    block_end = max(beta_ends(blocks == b));
                     
                     % Calculating smoothed phase difference between
                     % channels.

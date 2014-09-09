@@ -30,11 +30,11 @@ pd_label = {'pre', 'post'};
 
 period_label = {'Pre-Infusion', 'Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
+chan_labels = {chan_labels{:}, 'Both', 'Either', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
-ch_index = {1, 2, 1:2, 1, 2, 1, 2};
+ch_index = {1, 2, 1:2, 1:2, 1, 2, 1, 2};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
+ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
 no_channels = length(ch_label);
 
@@ -92,17 +92,19 @@ for fi = 1:length(filenames)
     
     beta_high(:, 3) = sum(beta_high, 2) >= 2;
     
-    beta_high(:, 4) = beta_high(:, 1) & ~beta_high(:, 2);
+    beta_high(:, 4) = sum(beta_high, 2) >= 1;
     
-    beta_high(:, 5) = ~beta_high(:, 1) & beta_high(:, 2);
+    beta_high(:, 5) = beta_high(:, 1) & ~beta_high(:, 2);
     
-    beta_high(:, 6) = beta_high(:, 1) & beta_low(:, 2);
+    beta_high(:, 6) = ~beta_high(:, 1) & beta_high(:, 2);
     
-    beta_high(:, 7) = beta_low(:, 1) & beta_high(:, 2);
+    beta_high(:, 7) = beta_high(:, 1) & beta_low(:, 2);
+    
+    beta_high(:, 8) = beta_low(:, 1) & beta_high(:, 2);
     
     figure;
     
-    for ch = 1:7
+    for ch = 1:no_channels
         
         for pd = 1:size(pd_limits,1)
             
@@ -157,103 +159,67 @@ for fi = 1:length(filenames)
                     
                 end
                 
+                beta_end(end) = min(beta_end(end), length(t));
+                
                 beta_blocks = [beta_start beta_end];
                 
-                beta_lengths = diff(beta_blocks,[],2) + 1;
+                beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
                 beta_blocks(beta_lengths < win_size, :) = [];
                 
-                % beta_out = [];
-                
-                % index = 1;
+                beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
                 for b = 1:size(beta_blocks,1)
                         
                     beta_name = [filename,'_',par_name,'_ch',num2str(ch),'_beta_',pd_label{pd},'_block',num2str(b),'.txt'];
-                    
-                    % if any(abs(norm_data(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch})) > outlier_lim)
-                    % 
-                    %     beta_out(index) = b;
-                    % 
-                    %     plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'c')
-                    % 
-                    %     plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'm')
-                    % 
-                    %     index = index + 1;
-                    % 
-                    % else
                         
                     plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'g')
 
                     plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'r')
-
-                    A_name = [beta_name(1:end-4),'_A.txt'];
-
-                    P_name = [beta_name(1:end-4),'_P.txt'];
-
-                    fid = fopen(beta_name,'w');
-
-                    fprintf(fid, '%f\t%f\n', data(beta_blocks(b,1):beta_blocks(b,2), :)');
-
-                    fclose(fid);
-
-                    fid = fopen(A_name, 'w');
-
-                    fprintf(fid, '%f\t%f\n', A(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
-
-                    fclose(fid);
-
-                    fid = fopen(P_name, 'w');
-
-                    fprintf(fid, '%f\t%f\n', P(beta_blocks(b,1):beta_blocks(b,2), :, 3)');
-
-                    fclose(fid);
-
-                    fprintf(fid_list, '%s\n', beta_name);
-
-                    fprintf(fid_A_list, '%s\n', A_name);
-
-                    fprintf(fid_P_list, '%s\n', P_name);
-
-                    fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,:), median(beta_amp(beta_start:beta_end, :)));
+                    
+                    no_epochs = floor(beta_lengths(b)/win_size);
+                    
+                    for e = 1:no_epochs
                         
-                    % end
+                        epoch_name = [beta_name,'_epoch',num2str(e),'.txt'];
+                        
+                        A_name = [beta_name,'_epoch',num2str(e),'_A.txt'];
+                        
+                        P_name = [beta_name,'_epoch',num2str(e),'_P.txt'];
+                        
+                        epoch_start = beta_blocks(b,1) + (e-1)*win_size;
+                        
+                        epoch_end = beta_blocks(b,1) + e*win_size;
+                        
+                        fid = fopen(epoch_name, 'w');
+                        
+                        fprintf(fid, '%f\t%f\n', PD_dec(epoch_start:epoch_end, :)');
+                        
+                        fclose(fid);
+                        
+                        fid = fopen(A_name, 'w');
+                        
+                        fprintf(fid, '%f\t%f\n', A(epoch_start:epoch_end, :, 3)');
+                        
+                        fclose(fid);
+                        
+                        fid = fopen(P_name, 'w');
+                        
+                        fprintf(fid, '%f\t%f\n', P(epoch_start:epoch_end, :, 3)');
+                        
+                        fclose(fid);
+                        
+                        fprintf(fid_list, '%s\n', epoch_name);
+                        
+                        fprintf(fid_A_list, '%s\n', A_name);
+                        
+                        fprintf(fid_P_list, '%s\n', P_name);
+                        
+                        fprintf(fid_win_list, '%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,1), beta_blocks(b,2), e, epoch_start, epoch_end, median(beta_amp(epoch_start:epoch_end,:)));
+                        
+                    end
                     
                 end
-                    
-                % no_outs = length(beta_out);
-                % 
-                % if no_outs > 0
-                % 
-                %     figure;
-                % 
-                %     [s_r, s_c] = subplot_size(no_outs);
-                % 
-                %     for o = 1:no_outs
-                % 
-                %         bo = beta_out(o);
-                % 
-                %         subplot(s_r, s_c, o)
-                % 
-                %         plot(t(beta_blocks(bo,1):beta_blocks(bo,2)), norm_data(beta_blocks(bo,1):beta_blocks(bo,2), ch_index{ch}))
-                % 
-                %         if o == 1
-                % 
-                %             title([filename, ' ', chan_labels{ch}, ' Outlier Segments ', period_label{pd}])
-                % 
-                %         end
-                % 
-                %         axis tight
-                % 
-                %     end
-                % 
-                %     save_as_pdf(gcf, [beta_listname(1:end-5),'_out'])
-                % 
-                %     close(gcf)
-                % 
-                %     beta_blocks(beta_out, :) = [];
-                % 
-                % end
                 
                 no_b_blocks(fi, ch, pd) = size(beta_blocks, 1);
                 

@@ -1,9 +1,13 @@
 function MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, chan_labels, outlier_lim, sd_lim, win_size, smooth_size)
 
+% Constructs group plots and runs statistics for analysis of phase
+% difference by instantaneous frequecy.
+%
 % SAMPLE CALL:
 % MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group({'file1.txt','file2.txt'},{'Striatum','Motor
 % Ctx.'},7,2,333,20000)
 % 
+% INPUTS:
 % 'filenames' is a cell of strings, which are the filenames of files 
 % containing data for picking beta segments. The data should contain two
 % channels, as columns.
@@ -77,13 +81,21 @@ for ch = 1:no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
     
-    all_pd_index = all_beta_data(:,1);
-    
-    all_Fs = all_beta_data(:,3:4);
-    
-    all_Fc = categorize_freq(all_Fs, f_bins);
-    
-    all_Pds = all_beta_data(:,5);
+    if ~isempty(all_beta_data)
+        
+        all_pd_index = all_beta_data(:,1);
+        
+        all_Fs = all_beta_data(:,3:4);
+        
+        all_Fc = categorize_freq(all_Fs, f_bins);
+        
+        all_Pds = all_beta_data(:,5);
+        
+    else
+       
+        all_pd_index = nan; all_Fs = nan(1, 2); all_FC = nan(1, 2); all_Pds = nan;
+        
+    end
            
     for ch1 = 1:2
         
@@ -91,15 +103,51 @@ for ch = 1:no_channels
         
         figure(index)
         
-        MR_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
+        MR_mat = nan(no_f_bins, 2); conf_mat = nan(no_f_bins, 2); no_dps = nan(no_f_bins, 2);
+            
+        %% Plotting 2d histogram by period (pre- vs. post-infusion).
         
         for pd = 1:length(pd_label)
             
             figure(index)
             
-            subplot(3, 2, pd)
+            subplot(4, 2, pd)
             
-            MR_mat(:, pd) = rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
+            if ~isempty(all_Pds(all_pd_index == pd))
+            
+                [histogram, bins] = hist3([all_Pds(all_pd_index == pd) all_Fs(all_pd_index == pd, ch1)], [50 50]);
+            
+            else
+               
+                histogram = nan(50, 50); bins{1} = nan(1, 50); bins{2} = nan(1, 50);
+                
+            end
+                
+            imagesc(bins{2}, [bins{1} (bins{1} + 2*pi)], repmat(histogram, 2, 1)) %imagesc(bins{2}, bins{1}, histogram)
+            
+            axis xy
+            
+            xlim([10 30])
+            
+            xlabel('Frequency (Hz)')
+            
+            ylabel('Phase Lag (rad)')
+            
+            title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];[' Phase Lag by ', chan_labels{ch1}, ' Freq.']})
+            
+            freezeColors
+            
+        end
+        
+        %% Plotting rose plots by period (pre- vs. post-infusion).
+        
+        for pd = 1:length(pd_label)
+            
+            figure(index)
+            
+            subplot(4, 2, 2 + pd)
+            
+            [MR_mat(:, pd), ~, ~, conf_mat(:, pd)] = rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
             
             title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
             
@@ -113,35 +161,77 @@ for ch = 1:no_channels
                 
         end
         
+        freezeColors
+        
+        %% Testing phases for uniformity.
+        
+        rao_test = nan(no_f_bins, 2);
+        
+        rayleigh_test = nan(no_f_bins, 2);
+        
+        for f = 1:no_f_bins
+            
+            for pd = 1:2
+                
+                phi = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f);
+                
+                if ~isempty(phi)
+                
+                   rao_test(f, pd) = circ_raotest(phi);
+                   
+                   rayleigh_test(f, pd) = circ_rtest(phi);
+    
+                end
+                   
+            end
+            
+        end
+        
+        % Bonferroni correcting p-values.
+        rao_test = min(rao_test*2*no_f_bins, 1);
+        
+        rayleigh_test = min(rayleigh_test*2*no_f_bins, 1);
+        
+        %% Testing phases pre- vs. post-infusion.
+        
         conc_pval = nan(no_f_bins, 1); angle_pval = nan(no_f_bins, 1);
         
         for f = 1:no_f_bins
             
-            phi_pre = all_Pds(all_pd_index == 1 & all_Fc(:, ch1) == f);
-            
-            phi_post = all_Pds(all_pd_index == 2 & all_Fc(:, ch1) == f);
-            
-            no_dps(f, 1) = size(phi_pre, 1); no_dps(f, 2) = size(phi_post, 1);
-            
-            conc_pval(f) = circ_ktest(phi_pre, phi_post);
-            
-%             if conc_pval(f) > 0.01/(length(f_bins) - 1)
-            
-            angle_pval(f) = circ_wwtest(phi_pre, phi_post);
+            if ~isnan(any(MR_mat(f, :)))
                 
-%             else
-%                 
-%                 angle_pval(f) = circ_cmtest(phi_pre, phi_post); 
-%                 
-%             end
+                phi_pre = all_Pds(all_pd_index == 1 & all_Fc(:, ch1) == f);
+                
+                phi_post = all_Pds(all_pd_index == 2 & all_Fc(:, ch1) == f);
+                
+                no_dps(f, 1) = size(phi_pre, 1); no_dps(f, 2) = size(phi_post, 1);
+                
+                conc_pval(f) = circ_ktest(phi_pre, phi_post);
+                
+                % if conc_pval(f) > 0.01/(length(f_bins) - 1)
+                
+                angle_pval(f) = circ_wwtest(phi_pre, phi_post);
+                
+                % else
+                % 
+                %     angle_pval(f) = circ_cmtest(phi_pre, phi_post); 
+                % 
+                % end
+                
+            else
+                
+                conc_pval(f) = 1;
+                
+                angle_pval(f) = 1;
+                
+            end
             
         end
         
+        % Bonferroni correcting p-values.
         conc_pval = min(conc_pval*no_f_bins, 1); angle_pval = min(angle_pval*no_f_bins, 1);
         
-        f_pairs = nchoosek(1:no_f_bins, 2);
-        
-        no_f_pairs = size(f_pairs, 1);
+        %% Testing phases of frequency pairs.
         
         f_conc_pval = nan(no_f_pairs, 2); f_angle_pval = nan(no_f_pairs, 2);
         
@@ -149,37 +239,82 @@ for ch = 1:no_channels
             
             for pd = 1:2
                 
-                phi1 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 1));
-                
-                phi2 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 2));
-                
-                f_conc_pval(fp, pd) = circ_ktest(phi1, phi2);
-                
-                f_angle_pval(fp, pd) = circ_wwtest(phi1, phi2);
+                if ~isnan(MR_mat(f_pairs(fp, 1), pd)) && ~isnan(MR_mat(f_pairs(fp, 2), pd))
+                    
+                    phi1 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 1));
+                    
+                    phi2 = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f_pairs(fp, 2));
+                    
+                    f_conc_pval(fp, pd) = circ_ktest(phi1, phi2);
+                    
+                    f_angle_pval(fp, pd) = circ_wwtest(phi1, phi2);
+                    
+                else
+                    
+                    f_conc_pval(fp, pd) = 1;
+                    
+                    f_angle_pval(fp, pd) = 1;
+                    
+                end
                 
             end
         
         end
         
+        % Bonferroni correcting tests.
         f_conc_pval = min(f_conc_pval*no_f_pairs, 1); f_angle_pval = min(f_angle_pval*no_f_pairs, 1);
             
         figure(index)
         
+        %% Testing phases against zero.
+        
+        zero_test = nan(no_f_bins, 2);
+        
+        for f = 1:no_f_bins
+            
+            for pd = 1:2
+                
+                phi = all_Pds(all_pd_index == pd & all_Fc(:, ch1) == f);
+                
+                if ~isempty(phi)
+                
+                   zero_test(f, pd) = circ_mtest(phi, 0);
+    
+                end
+                   
+            end
+            
+        end
+        
+        % Bonferroni correcting p-values.
+        zero_test = min(zero_test*2*no_f_bins, 1);
+        
+        %% Saving plot data.
+        
+        save([file_label,'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_group.mat'],...
+            'MR_mat', 'conf_mat', 'rao_test', 'rayleigh_test', 'conc_pval', 'angle_pval', 'f_conc_pval', 'f_angle_pval', 'zero_test')
+        
         %% Plotting number of datapoints pre vs. post by freq.
         
-        subplot(3, 3, 3 + 1)
+        subplot(4, 3, 2*3 + 1)
+        
+        colormap('summer')
         
         bar(no_dps)
         
         title('Datapoints by Freq.')
         
-        legend(period_label, 'Location', 'NorthEast')
+        % legend(period_label, 'Location', 'NorthEast')
         
         set(gca, 'XTickLabel', f_centers)
         
+        freezeColors
+        
         %% Plotting concentration pre vs. post by freq.
         
-        subplot(3, 3, 3 + 2)
+        subplot(4, 3, 2*3 + 2)
+        
+        colormap('summer')
         
         h = bar(abs(MR_mat));
         
@@ -205,11 +340,15 @@ for ch = 1:no_channels
         
         set(gca, 'XTickLabel', f_centers)
         
-        %% Plotting phas angle pre vs. post by freq.
+        freezeColors
         
-        subplot(3, 3, 3 + 3)
+        %% Plotting phase angle pre vs. post by freq.
         
-        h = bar(angle(MR_mat));
+        subplot(4, 3, 2*3 + 3)
+        
+        colormap('summer')
+        
+        h = barwitherr(conf_mat, angle(MR_mat));
         
         bar_pos = get_bar_pos(h);
         
@@ -227,15 +366,17 @@ for ch = 1:no_channels
         
         sigstar(bar_pairs, angle_pval(angle_pval < 0.05))
         
-        title('Mean Phase Angle (Striatum - Motor) by Freq.')
+        title(['Mean Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
         
         % legend(period_label, 'Location', 'SouthEast')
         
         set(gca, 'XTickLabel', f_centers)
         
+        freezeColors
+        
         %% Plotting concentration by frequency, pre and post.
         
-        subplot(3, 2, 4 + 1)
+        subplot(4, 2, 3*2 + 1)
         
         h = bar(abs(MR_mat)');
         
@@ -279,17 +420,17 @@ for ch = 1:no_channels
         
         title('Phase Concentration by Freq.')
         
-        h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-
-        cbfreeze(h)
+        colormap(c_order)
+        
+        colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels)
         
         set(gca, 'XTickLabel', period_label)
         
         %% Plotting phase angle by frequency, pre and post.
         
-        subplot(3, 2, 4 + 2)
+        subplot(4, 2, 3*2 + 2)
         
-        h = bar(angle(MR_mat)');
+        h = barwitherr(conf_mat', angle(MR_mat)');
         
         bar_pos = get_bar_pos(h);
         
@@ -329,17 +470,35 @@ for ch = 1:no_channels
         
         sigstar(f_bar_pairs, f_angle_pval(f_angle_indicator == 1)')
         
-        title('Phase Angle (Striatum - Motor) by Freq.')
+        title(['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'])
         
-        h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
-
-        cbfreeze(h)
+        colormap(c_order)
+        
+        colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels)
         
         set(gca, 'XTickLabel', period_label)
         
+        % %% Plotting phase angle by frequency, pre and post, only if significantly different from zero.
+        % 
+        % subplot(3, 3, 2*3 + 3)
+        % 
+        % real_angles = angle(MR_mat);
+        % 
+        % real_angles(zero_test == 0) = nan;
+        % 
+        % h = bar(real_angles');
+        % 
+        % title({['Phase Angle (', chan_labels{1}, ' - ', chan_labels{2}, ') by Freq.'];'Significantly Different from Zero'})
+        % 
+        % h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
+        % 
+        % % cbfreeze(h)
+        % 
+        % set(gca, 'XTickLabel', period_label)
+        
         %%
         
-        save_as_pdf(index, [filenames(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
+        save_as_pdf(index, [file_label,'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
         
         index = index + 1;
         
@@ -347,7 +506,7 @@ for ch = 1:no_channels
     
 end
 
-save_as_pdf(gcf,[filenames(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp'])
+save_as_pdf(gcf,[file_label,'_',par_name,'_beta_ri_rose_dp'])
 
 end
 

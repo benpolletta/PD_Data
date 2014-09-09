@@ -243,7 +243,7 @@ subplot(1, 2, 1)
 
 bar(reshape(sum(no_b_blocks), no_channels, 2))
     
-title(['Total Number Beta Segments'])
+title('Total Number Beta Segments')
 
 set(gca,'XTickLabel',ch_label)
 
@@ -253,7 +253,7 @@ subplot(1, 2, 2)
 
 bar(reshape(sum(no_dps)/sampling_freq, no_channels, 2))
 
-title(['Total Length Beta Segments (s)'])
+title('Total Length Beta Segments (s)')
 
 set(gca,'XTickLabel',ch_label)
 
