@@ -4,7 +4,7 @@ par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),
 
 load(subject_mat)
 
-f_bins = 9:1:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9.5:1:30.5; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 

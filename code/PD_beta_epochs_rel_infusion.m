@@ -169,7 +169,7 @@ for fo = 1:length(folders)
                         
                         epoch_start = beta_blocks(b,1) + (e-1)*win_size;
                         
-                        epoch_end = beta_blocks(b,1) + e*win_size;
+                        epoch_end = beta_blocks(b,1) + e*win_size - 1;
                         
                         fid = fopen(epoch_name, 'w');
                         
