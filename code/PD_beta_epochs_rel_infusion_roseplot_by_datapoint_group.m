@@ -1,10 +1,37 @@
-function PD_beta_epochs_rel_infusion_roseplot_by_datapoint_group(subject_mat, outlier_lim, sd_lim, win_size, smooth_size)
+function MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size)
+
+% Constructs group plots and runs statistics for analysis of phase
+% difference by instantaneous frequecy.
+%
+% SAMPLE CALL:
+% MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group({'file1.txt','file2.txt'},{'Striatum','Motor
+% Ctx.'},7,2,333,20000)
+% 
+% INPUTS:
+% 'filenames' is a cell of strings, which are the filenames of files 
+% containing data for picking beta segments. The data should contain two
+% channels, as columns.
+% 'chan_labels' is a cell of strings, which are the labels of channels
+% inside each file containing data.
+% 'infusion_times' is a vector, with length the same as 'filenames', 
+% containing the times (in datapoints) at which each data file switches
+% from control to Parkinsonian behavior (or the time of carbachol
+% infusion).
+% 'outlier_lim' is the number of standard deviations beyond which a spike
+% in the LFP is considered an outlier.
+% 'sd_lim' is the number of standard deviations defining the cutoff of high
+% beta power.
+% 'win_size' is the minimum duration (in datapoints, so s*sampling_freq) 
+% for which beta must be elevated above the cutoff, to be considered a 
+% high beta segment.
+% 'smooth_size' is the length of time (in datapoints, so s*sampling_freq)
+% over which beta power is smoothed before applying the cutoff.
+
+close('all')
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
-load(subject_mat)
-
-f_bins = 9:1:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9.5:1:30.5; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -30,11 +57,27 @@ ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_
 
 no_channels = length(ch_label);
 
+% Creating name to call the analysis by - either name of single file in
+% 'filenames', or 'All'. NB: will be over-written each time you run a
+% multi-file analysis, so should be renamed after running.
+
+if length(filenames) == 1
+    
+    file_label = filenames{1};
+    
+else
+
+    file_label = 'All';
+    
+end
+
+% Name for each channel.
+
 all_beta_name = cell(no_channels, 1);
 
 for ch = 1:no_channels
     
-    all_beta_name{ch} = [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_',ch_label{ch}];
+    all_beta_name{ch} = [file_label,'_',par_name,'_beta_',ch_label{ch}];
     
 end
 
@@ -42,7 +85,7 @@ end
 
 index = 1;%2;
 
-for ch = 1:no_channels
+for ch = 1:4 %no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
     
@@ -256,7 +299,7 @@ for ch = 1:no_channels
         
         %% Saving plot data.
         
-        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_group.mat'],...
+        save([file_label,'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_group.mat'],...
             'MR_mat', 'conf_mat', 'rao_test', 'rayleigh_test', 'conc_pval', 'angle_pval', 'f_conc_pval', 'f_angle_pval', 'zero_test')
         
         %% Plotting number of datapoints pre vs. post by freq.
@@ -387,7 +430,7 @@ for ch = 1:no_channels
         
         colormap(c_order)
         
-        h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
+        colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels)
         
         set(gca, 'XTickLabel', period_label)
         
@@ -439,7 +482,7 @@ for ch = 1:no_channels
         
         colormap(c_order)
         
-        h = colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels);
+        colorbar('YTick',1:no_f_bins,'YTickLabel',f_labels)
         
         set(gca, 'XTickLabel', period_label)
         
@@ -463,7 +506,7 @@ for ch = 1:no_channels
         
         %%
         
-        save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
+        save_as_pdf(index, [file_label,'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
         
         index = index + 1;
         
@@ -471,12 +514,14 @@ for ch = 1:no_channels
     
 end
 
-save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp'])
+save_as_pdf(gcf,[file_label,'_',par_name,'_beta_ri_rose_dp'])
 
 end
 
 function F_c = categorize_freq(F, f_bins)
     
+    % Replaces continuous instantaneous frequency data with categorical frequency data.
+
     [r, c] = size(F);
     
     F_c = zeros(r, c);
@@ -499,14 +544,16 @@ end
 
 function pos_bars = get_bar_pos(handle)
 
-for i = 1:length(handle)
-    
-    x = get(get(handle(i), 'children'), 'xdata');
-    
-    x = mean(x([1 3],:));
-    
-    pos_bars(i,:) = x;
-    
-end
+    % Getting x-axis position of bars from barplot.
+
+    for i = 1:length(handle)
+
+        x = get(get(handle(i), 'children'), 'xdata');
+
+        x = mean(x([1 3],:));
+
+        pos_bars(i,:) = x;
+
+    end
 
 end

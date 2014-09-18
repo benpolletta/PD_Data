@@ -1,38 +1,96 @@
-function PD_bandpass_channels(subject_mat)
+function MM_bandpass(filenames, sampling_freq, channel_labels, marker_times, ~, ~, ~, ~)
 
-present_dir = pwd;
+% Bandpasses two-channel data (each channel is a separate column), using
+% eegfilt.
+%
+% SAMPLE CALL: MM_bandpass({'file1.txt','file2.txt'},1000,{'Striatum','Motor
+% Ctx.'},[3000,5000])
+%
+% INPUTS:
+% 'filenames' is a list of filenames containing data for plotting beta power.
+% 'sampling_freq' is the sampling frequency of the data.
+% 'channel_labels' is a cell containing the names of the channels in the
+% data (one channel per row).
+% 'marker_times' is a list of times to be marked on the resulting power
+% time series plots, again to be multiplied by sampling freq. Must have the
+% same # of rows as # files; each column contains data for a separate
+% sequence of markers.
 
-load(subject_mat)
+conv_length = .05; %Timescale of smoothing of power (will be multiplied by sampling freq., so enter in seconds, say, for sampling freq. in Hz).
 
-bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
-band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
+bands = [10 30; 10 30; 10 30]; %[1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
+
+band_names = {'beta', 'beta', 'beta'}; %{'delta','theta','beta','lgamma','hgamma','HFO'};
+
 no_bands = length(band_names);
 
-for fo = 1:length(folders)
-    
-    folder = folders{fo};
-    
-    prefix = prefixes{fo};
-    
-    basetime = basetimes(fo);
-    
-    infusetime = infusetimes(fo);
+no_files = length(filenames);
 
-    load([folder,'/',prefix,'_all_channel_data_dec.mat'])
+if ~isempty(marker_times)
     
-    t = (1:length(PD_dec))/sampling_freq;
+    [r,c] = size(marker_times);
     
-    H = nan(size(PD_dec,1),2,no_bands);
-    A = nan(size(PD_dec,1),2,no_bands);
-    P = nan(size(PD_dec,1),2,no_bands);
-    
-    if isempty(dir([folder,'/',prefix,'_all_channel_data_dec_HAP.mat']))
+    if r~=no_files
         
-        BP = nan(length(PD_dec),2);
+        if c==no_files
+            
+            marker_times = marker_times';
+            
+        else
+            
+            display('Number of rows of "marker_times" must be the same as the number of files.')
+            
+            return
+            
+        end
+        
+    end
+    
+    no_markers = size(marker_times,2);
+    
+else
+    
+    no_markers = 0;
+    
+end
+
+for file_no = 1:no_files
+    
+    filename = filenames{file_no};
+
+    data = load(filename);
+    
+    if isstruct(data)
+        
+        fields = fieldnames(data);
+        
+        data = getfield(data,fields{1});
+        
+    end
+    
+    [r,c] = size(data);
+    
+    if r < c
+        
+        data = data';
+        
+    end
+    
+    [data_length, no_channels] = size(data);
+    
+    t = (1:data_length)/sampling_freq;
+    
+    H = nan(data_length,no_channels,no_bands);
+    A = nan(data_length,no_channels,no_bands);
+    P = nan(data_length,no_channels,no_bands);
+    
+    if isempty(dir([filename,'_HAP.mat']))
+        
+        clear BP
             
         for b = 1:no_bands
             
-            BP = eegfilt(PD_dec',sampling_freq,bands(b,1),bands(b,2));
+            BP = eegfilt(data',sampling_freq,bands(b,1),bands(b,2));
             
             H(:,:,b) = hilbert(BP');
             A(:,:,b) = abs(H(:,:,b));
@@ -40,11 +98,11 @@ for fo = 1:length(folders)
             
         end
         
-        save([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'],'H','A','P','bands','band_names')
+        save([filename,'_HAP.mat'],'H','A','P','bands','band_names')
         
     else
         
-        load([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'])
+        load([filename,'_HAP.mat'])
         
     end
     
@@ -54,51 +112,58 @@ for fo = 1:length(folders)
 
     clear A_smooth A_pct_baseline A_plot
     
+    flip_length = min(conv_length*sampling_freq,data_length);
+    
     for b = 1:no_bands
         
         subplot(c,r,b)
         
-        for ch = 1:2
+        for ch = 1:no_channels
         
-            A_flipped = [flipud(A(1:10*sampling_freq,ch,b)); A(:,ch,b); flipud(A((end-10*sampling_freq+1):end,ch,b))];
+            A_flipped = [flipud(A(1:flip_length,ch,b)); A(:,ch,b); flipud(A((end-flip_length+1):end,ch,b))];
             
-            A_conv = conv(A_flipped,ones(20*sampling_freq,1)/(20*sampling_freq),'same');
+            A_conv = conv(A_flipped,ones(flip_length,1)/(flip_length),'same');
         
-            A_smooth(:,ch) = A_conv((10*sampling_freq+1):(end-10*sampling_freq));
+            A_smooth(:,ch) = A_conv((flip_length+1):(end-flip_length));
              
         end
-            
-        A_pct_baseline = 100*A_smooth*diag(1./mean(A_smooth(t<basetime,:))) - 100;
         
-        A_plot = A_smooth;%A_pct_baseline;
+        A_plot = A_smooth;
         
-        plot(t',A_plot)
+        ax = plotyy(t',A_plot(:,1),t',A_plot(:,2));
         
-        legend({'Striatum','Motor Ctx.'})
+        axis(ax,'tight')
+        
+        legend(channel_labels)
         
         hold on
         
-        axis tight
-        
         box off
-        
-        plot([basetime basetime]',[min(min(A_plot)) max(max(A_plot))]','r')
-        plot([basetime+infusetime basetime+infusetime]',[min(min(A_plot)) max(max(A_plot))]','r')
 
+        if ~isempty(marker_times)
+            
+            marker_time = marker_times(file_no,:);
+            
+            for m = 1:no_markers
+                
+                plot([marker_time(m) marker_time(m)]',[min(min(A_plot)) max(max(A_plot))]','r')
+                
+            end
+            
+        end
+        
         ylabel(sprintf('%s (%g - %g Hz) power',band_names{b},bands(b,1),bands(b,2)))
-%         ylabel({[band_names{b},' power'];'percent change'})
 
         xlabel('Time (s)')
         
         if b==1
             
-            title(folder)
+            title(filename)
             
         end
         
     end
-
-    save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_HAP'])
-%     save_as_pdf(gcf,[folder,'/',prefix,'_all_channel_data_dec_HAP_pct'])
-
+    
+    save_as_pdf(gcf,[filename,'_HAP'])
+    
 end

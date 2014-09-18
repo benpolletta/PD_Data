@@ -1,14 +1,50 @@
-function PD_beta_epochs_rel_infusion(subject_mat, outlier_lim, sd_lim, win_size, smooth_size)
+function MM_beta_epochs_rel_infusion(filenames, sampling_freq, chan_labels, infusion_times, outlier_lim, sd_lim, win_size, smooth_size)
+
+% SAMPLE CALL:
+% MM_beta_epochs_rel_infusion({'file1.txt','file2.txt'},1000,{'Striatum','Motor
+% Ctx.'},[3000,5000],7,2,333,20000)
+% 
+% 'filenames' is a cell of strings, which are the filenames of files 
+% containing data for picking beta segments. The data should contain two
+% channels, as columns.
+% 'sampling_freq' is the sampling frequency of the data.
+% 'chan_labels' is a cell of strings, which are the labels of channels
+% inside each file containing data.
+% 'infusion_times' is a vector, with length the same as 'filenames', 
+% containing the times (in datapoints) at which each data file switches
+% from control to Parkinsonian behavior (or the time of carbachol
+% infusion).
+% 'outlier_lim' is the number of standard deviations beyond which a spike
+% in the LFP is considered an outlier.
+% 'sd_lim' is the number of standard deviations defining the cutoff of high
+% beta power.
+% 'win_size' is the minimum duration (in datapoints, so s*sampling_freq) 
+% for which beta must be elevated above the cutoff, to be considered a 
+% high beta segment.
+% 'smooth_size' is the length of time (in datapoints, so s*sampling_freq)
+% over which beta power is smoothed before applying the cutoff.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Creating name to call the analysis by - either name of single file in
+% 'filenames', or 'All'. NB: will be over-written each time you run a
+% multi-file analysis, so should be renamed after running.
+
+if length(filenames) == 1
+    
+    file_label = filenames{1};
+    
+else
+
+    file_label = 'All';
+    
+end
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
-load(subject_mat)
-
-sampling_freq = 1000;
-
 pd_label = {'pre', 'post'};
 
-period_label = {'Pre-Infusion','Post-Infusion'};
+period_label = {'Pre-Infusion', 'Post-Infusion'};
 
 chan_labels = {chan_labels{:}, 'Both', 'Either', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
@@ -18,37 +54,55 @@ ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_
 
 no_channels = length(ch_label);
 
-no_b_blocks = nan(length(folders), no_channels);
+no_b_blocks = nan(length(filenames), no_channels);
 
-no_dps = nan(length(folders), no_channels);
+no_dps = nan(length(filenames), no_channels);
 
-for fo = 1:length(folders)
+% Looping over files.
+
+for fi = 1:length(filenames)
     
-    folder = folders{fo};
+    filename = filenames{fi};
     
-    prefix = prefixes{fo};
+    infusion_index = infusion_times(fi);
     
-    base_index = basetimes(fo)*sampling_freq;
-    
-    subj_name = [folder,'/',prefix];
-    
-    load([subj_name,'_all_channel_data_dec.mat'])
+    % Loading data and results of 'MM_bandpass'.
         
-    load([subj_name,'_all_channel_data_dec_HAP.mat'])
+    data = load(filename);
+    
+    if isstruct(data)
+        
+        field_names = fieldnames(data);
+       
+        if length(field_names) ~= 1
+            
+            display('Input .mat file must contain one variable - data in 2 columns.')
+            
+            return
+            
+        else
+            
+            data = getfield(data, field_names{1});
+            
+        end
+        
+    end
+        
+    load([filename,'_HAP.mat'])
     
     t = (1:size(A,1))/sampling_freq;
     
     beta_amp = A(:,:,3); ba_smooth = nan(size(beta_amp)); beta_high = nan(size(beta_amp)); beta_low = nan(size(beta_amp));
     
-    pd_limits = [1 base_index; (base_index + 1) min(length(t), base_index + 1500*sampling_freq)];
+    pd_limits = [1 infusion_index; (infusion_index + 1) min(length(t), infusion_index + 1500*sampling_freq)];
     
     % beta_cutoff = mean(beta_amp(1:base_index, :)) + sd_lim*std(beta_amp(1:base_index, :));
     
-    norm_data = nan(size(PD_dec));
+    norm_data = nan(size(data));
    
     for ch = 1:2
         
-        norm_data(:,ch) = (PD_dec(:, ch) - mean(PD_dec(:, ch)))/std(PD_dec(:, ch));
+        norm_data(:,ch) = (data(:, ch) - mean(data(:, ch)))/std(data(:, ch));
         
         ba_flipped = [flipud(beta_amp(1:smooth_size, ch)); beta_amp(:,ch); flipud(beta_amp((end-smooth_size+1):end,ch))];
         
@@ -56,9 +110,9 @@ for fo = 1:length(folders)
         
         ba_smooth(:, ch) = ba_conv((smooth_size+1):(end-smooth_size));
         
-        beta_h_cutoff = mean(ba_smooth(1:base_index, ch)) + sd_lim*std(ba_smooth(1:base_index, ch));
+        beta_h_cutoff = mean(ba_smooth(1:infusion_index, ch)) + sd_lim*std(ba_smooth(1:infusion_index, ch));
         
-        beta_l_cutoff = mean(ba_smooth(1:base_index, ch)) - sd_lim*std(ba_smooth(1:base_index, ch));
+        beta_l_cutoff = mean(ba_smooth(1:infusion_index, ch)) - sd_lim*std(ba_smooth(1:infusion_index, ch));
         
         % beta_h_cutoff = quantile(ba_smooth(1:base_index, ch), sd_lim);
         % 
@@ -88,7 +142,7 @@ for fo = 1:length(folders)
         
         for pd = 1:size(pd_limits,1)
             
-            beta_listname = [subj_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_',par_name,'.list'];
+            beta_listname = [filename,'_',ch_label{ch},'_beta_',pd_label{pd},'_',par_name,'.list'];
             
             fid_list = fopen(beta_listname, 'w');
             
@@ -105,7 +159,7 @@ for fo = 1:length(folders)
             % plot(t(pd_limits(pd,1):pd_limits(pd,2)), beta_amp(pd_limits(pd,1):pd_limits(pd,2), ch_index{ch}), 'k',...
             %     t(pd_limits(pd,1):pd_limits(pd,2)), ba_smooth(pd_limits(pd,1):pd_limits(pd,2), ch_index{ch}), 'b')
             
-            title([folder, ' ', chan_labels{ch}, ' Beta Segments ', period_label{pd}])
+            title([filename, ' ', chan_labels{ch}, ' Beta Segments ', period_label{pd}])
             
             axis tight
             
@@ -119,18 +173,40 @@ for fo = 1:length(folders)
             
             bh_pd = beta_high(pd_limits(pd,1):pd_limits(pd,2), ch);
             
-            dbh = diff(bh_pd);%beta_high);
+            if any(bh_pd == 0)
+                
+                dbh = diff(bh_pd);%beta_high);
+                
+                beta_start = find(dbh == 1) + 1 + pd_limits(pd,1) - 1;
+                
+                beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
+                
+            else
+                
+                beta_start = pd_limits(pd, 1);
+                
+                beta_end = pd_limits(pd, 2);
+                
+            end
             
-            beta_start = find(dbh == 1) + 1 + pd_limits(pd,1) - 1;
-            
-            beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
-            
-            if ~isempty(beta_end) && ~isempty(beta_start)
+            if ~isempty(beta_end) || ~isempty(beta_start)
+                
+                if isempty(beta_start)
+                    
+                    beta_start = [pd_limits(pd,1); beta_start];
+                    
+                end
+                
+                if isempty(beta_end)
+                    
+                    beta_end = [beta_end; pd_limits(pd, 2)];
+                    
+                end
                 
                 if beta_end(1) < beta_start(1)
                     
                     beta_start = [pd_limits(pd,1); beta_start];
-                    
+                        
                 end
                 
                 if beta_start(end) > beta_end(end)
@@ -151,10 +227,10 @@ for fo = 1:length(folders)
                 
                 for b = 1:size(beta_blocks,1)
                         
-                    beta_name = [subj_name,'_',par_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_block',num2str(b)];
+                    beta_name = [filename,'_',par_name,'_ch',num2str(ch),'_beta_',pd_label{pd},'_block',num2str(b),'.txt'];
                         
                     plot(t(beta_blocks(b,1):beta_blocks(b,2)), beta_amp(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'g')
-                    
+
                     plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'r')
                     
                     no_epochs = floor(beta_lengths(b)/win_size);
@@ -169,11 +245,11 @@ for fo = 1:length(folders)
                         
                         epoch_start = beta_blocks(b,1) + (e-1)*win_size;
                         
-                        epoch_end = beta_blocks(b,1) + e*win_size;
+                        epoch_end = beta_blocks(b,1) + e*win_size - 1;
                         
                         fid = fopen(epoch_name, 'w');
                         
-                        fprintf(fid, '%f\t%f\n', PD_dec(epoch_start:epoch_end, :)');
+                        fprintf(fid, '%f\t%f\n', data(epoch_start:epoch_end, :)');
                         
                         fclose(fid);
                         
@@ -201,11 +277,11 @@ for fo = 1:length(folders)
                     
                 end
                 
-                no_b_blocks(fo, ch, pd) = size(beta_blocks, 1);
+                no_b_blocks(fi, ch, pd) = size(beta_blocks, 1);
                 
                 beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
-                no_dps(fo, ch, pd) = sum(beta_lengths);
+                no_dps(fi, ch, pd) = sum(beta_lengths);
                 
             end
             
@@ -215,9 +291,9 @@ for fo = 1:length(folders)
     
     subplot(no_channels + 1, 2, 15)
     
-    bar(reshape(no_b_blocks(fo, :, :), no_channels, 2))
+    bar(reshape(no_b_blocks(fi, :, :), no_channels, 2))
     
-    title([folder, ' Number Beta Segments'])
+    title([filename, ' Number Beta Segments'])
     
     set(gca,'XTickLabel',ch_label)
     
@@ -225,15 +301,15 @@ for fo = 1:length(folders)
     
     subplot(no_channels + 1, 2, 16)
     
-    bar(reshape(no_dps(fo, :)/sampling_freq, no_channels, 2))
+    bar(reshape(no_dps(fi, :)/sampling_freq, no_channels, 2))
     
-    title([folder, ' Length Beta Segments (s)'])
+    title([filename, ' Length Beta Segments (s)'])
     
     set(gca,'XTickLabel',ch_label)
     
     legend(period_label)
     
-    save_as_pdf(gcf,[subj_name, '_beta_', par_name])
+    save_as_pdf(gcf,[filename, '_beta_', par_name])
           
 end
 
@@ -241,7 +317,13 @@ figure
 
 subplot(1, 2, 1)
 
-bar(reshape(sum(no_b_blocks), no_channels, 2))
+if size(no_b_blocks, 1) > 1
+    
+    no_b_blocks = sum(no_b_blocks);
+    
+end
+
+bar(reshape(no_b_blocks, no_channels, 2))
     
 title('Total Number Beta Segments')
 
@@ -251,7 +333,13 @@ legend(period_label)
 
 subplot(1, 2, 2)
 
-bar(reshape(sum(no_dps)/sampling_freq, no_channels, 2))
+if size(no_dps, 1) > 1
+    
+    no_dps = sum(no_b_blocks);
+    
+end
+
+bar(reshape(no_dps/sampling_freq, no_channels, 2))
 
 title('Total Length Beta Segments (s)')
 
@@ -259,4 +347,4 @@ set(gca,'XTickLabel',ch_label)
 
 legend(period_label)
 
-save_as_pdf(gcf,[subject_mat(1:(end - length('_subject.mat'))), '_beta_', par_name])
+save_as_pdf(gcf, [file_label, '_beta_', par_name])
