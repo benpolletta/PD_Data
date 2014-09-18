@@ -4,13 +4,13 @@ outlier_lim = 7; sd_lim = 2; win_size = 333; smooth_size = 20000;
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
-f_bins = 9:2:31; no_f_bins = length(f_bins) - 1;
+f_bins = 9.5:1:30.5; no_f_bins = length(f_bins) - 1;
 
 f_pairs = nchoosek(1:no_f_bins, 2); no_f_pairs = size(f_pairs, 1);
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
-f_center_indices = f_centers <= 25;
+f_center_indices = f_centers <= 30;
 
 % c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
 
@@ -22,7 +22,7 @@ win_size = 2000;
 
 f = 1000*(0:win_size)/win_size;
 
-f_indices = f <= 26 & f >= 9;
+f_indices = f <= 30 & f >= 10;
 
 pd_label = {'pre','post'};
 
@@ -122,11 +122,13 @@ for r = 1:2
     
     subplot(2, 2, 2 + r)
 
-    coh_listname = ['All_', record_label{r}, '_ch', num2str(3 - r), '_post_coh_mtm_4tbw_phase.mat'];
+    coh_listname = ['All_', record_label{r}, '_ch', num2str(3 - r), '_post_coh_mtm_', num2str(2*win_size/1000), 'tbw_phase.mat'];
     
     load(coh_listname)
     
-    boundedline(f(f_indices)', rad_deg*record_multiplier*mean_data(f_indices, :), rad_deg*std_data(f_indices, :, :))
+    h = boundedline(f(f_indices)', rad_deg*record_multiplier*mean_data(f_indices, :), rad_deg*std_data(f_indices, :, :));
+    
+    set(h, 'Marker', 's')
     
     hold on
     

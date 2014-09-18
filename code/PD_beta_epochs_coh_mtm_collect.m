@@ -15,10 +15,10 @@ for ch = 1:no_channels
     for pd = 1:2
         
         fid1 = fopen(['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch},...
-            '_', pd_label{pd}, '_coh_mtm_', num2str(tbw), 'tbw_r.txt'], 'w');
+            '_', pd_label{pd}, '_', par_name, '_coh_mtm_', num2str(tbw), 'tbw_r.txt'], 'w');
         
         fid2 = fopen(['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch},...
-            '_', pd_label{pd}, '_coh_mtm_', num2str(tbw), 'tbw_i.txt'], 'w');
+            '_', pd_label{pd}, '_', par_name, '_coh_mtm_', num2str(tbw), 'tbw_i.txt'], 'w');
         
         for fo = 1:length(folders)
             

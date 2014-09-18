@@ -31,7 +31,7 @@ for fo = 1:length(folders)
             
             no_epochs = length(beta_list);
             
-            All_coh = nan(no_epochs, win_size + 1);
+            All_coh = nan(no_epochs, win_size);
             
             parfor e = 1:no_epochs
                 

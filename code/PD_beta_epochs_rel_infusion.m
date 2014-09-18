@@ -119,18 +119,40 @@ for fo = 1:length(folders)
             
             bh_pd = beta_high(pd_limits(pd,1):pd_limits(pd,2), ch);
             
-            dbh = diff(bh_pd);%beta_high);
+            if any(bh_pd == 0)
+                
+                dbh = diff(bh_pd);%beta_high);
+                
+                beta_start = find(dbh == 1) + 1 + pd_limits(pd,1) - 1;
+                
+                beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
+                
+            else
+                
+                beta_start = pd_limits(pd, 1);
+                
+                beta_end = pd_limits(pd, 2);
+                
+            end
             
-            beta_start = find(dbh == 1) + 1 + pd_limits(pd,1) - 1;
-            
-            beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
-            
-            if ~isempty(beta_end) && ~isempty(beta_start)
+            if ~isempty(beta_end) || ~isempty(beta_start)
+                
+                if isempty(beta_start)
+                    
+                    beta_start = [pd_limits(pd,1); beta_start];
+                    
+                end
+                
+                if isempty(beta_end)
+                    
+                    beta_end = [beta_end; pd_limits(pd, 2)];
+                    
+                end
                 
                 if beta_end(1) < beta_start(1)
                     
                     beta_start = [pd_limits(pd,1); beta_start];
-                    
+                        
                 end
                 
                 if beta_start(end) > beta_end(end)

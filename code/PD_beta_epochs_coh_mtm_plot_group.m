@@ -1,6 +1,6 @@
 function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, ~, ~, win_size, ~, tbw)
 
-% par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
+par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 load(subjects_mat)
 
@@ -24,12 +24,12 @@ no_measures = length(measure_label);
 for ch = 1:no_channels
     
     figure
-    
+   
     channel_coh = nan(win_size + 1, 2, 2, 2);
     
     for pd = 1:2
         
-        listname = ['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch}, '_', pd_label{pd}, '_coh_mtm_', num2str(tbw), 'tbw'];
+        listname = ['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch}, '_', pd_label{pd}, '_', par_name, '_coh_mtm_', num2str(tbw), 'tbw'];
         
         All_coh_r = load([listname, '_r.txt']);
         
@@ -49,13 +49,13 @@ for ch = 1:no_channels
             
         end
         
-        channel_coh(:, pd, 1, 1) = abs(nanmean(All_coh))';
+        channel_coh(1:size(All_coh, 2), pd, 1, 1) = abs(nanmean(All_coh))';
         
-        channel_coh(:, pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
+        channel_coh(1:size(All_coh, 2), pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
         
-        channel_coh(:, pd, 1, 2) = angle(nanmean(All_coh))';
+        channel_coh(1:size(All_coh, 2), pd, 1, 2) = angle(nanmean(All_coh))';
         
-        channel_coh(:, pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
+        channel_coh(1:size(All_coh, 2), pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
         
     end
     
