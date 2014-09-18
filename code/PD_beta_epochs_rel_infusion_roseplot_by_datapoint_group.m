@@ -1,4 +1,4 @@
-function MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size)
 
 % Constructs group plots and runs statistics for analysis of phase
 % difference by instantaneous frequecy.

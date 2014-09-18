@@ -1,4 +1,4 @@
-function MM_beta_epochs_coh_mtm_collect(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+function PD_beta_epochs_coh_mtm_collect(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size, tbw)
 
 % Collects complex cross-spectrum for each epoch, so that statistics can
 % be calculated and plotted.

@@ -32,7 +32,7 @@ for ch = 1:no_channels
         
         figure;
         
-        subject_coh = nan(win_size + 1, 2, 2, 2);
+        subject_coh = nan(win_size, 2, 2, 2);
         
         for pd = 1:2
             

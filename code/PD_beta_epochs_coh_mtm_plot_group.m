@@ -1,4 +1,4 @@
-function MM_beta_epochs_coh_mtm_plot_group(filenames, ~, chan_labels, ~, ~, ~, win_size, ~, tbw)
+function PD_beta_epochs_coh_mtm_plot_group(filenames, ~, chan_labels, ~, ~, ~, win_size, ~, tbw)
 
 % Plots magnitude (coherence) and phase (phase of coherence) of the expected complex
 % cross-spectrum between channels. Utilizes jackknife resampling to compute
@@ -97,13 +97,13 @@ for ch = 1:4 %no_channels
                 
             end
             
-            channel_coh(:, pd, 1, 1) = abs(nanmean(All_coh))';
+            channel_coh(1:size(All_coh, 2), pd, 1, 1) = abs(nanmean(All_coh))';
             
-            channel_coh(:, pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
+            channel_coh(1:size(All_coh, 2), pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
             
-            channel_coh(:, pd, 1, 2) = angle(nanmean(All_coh))';
+            channel_coh(1:size(All_coh, 2), pd, 1, 2) = angle(nanmean(All_coh))';
             
-            channel_coh(:, pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
+            channel_coh(1:size(All_coh, 2), pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
             
         end
         

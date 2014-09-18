@@ -1,4 +1,4 @@
-function MM_beta_epochs_rel_infusion_roseplot_by_datapoint(filenames, sampling_freq, chan_labels, injection_times, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_rel_infusion_roseplot_by_datapoint(filenames, sampling_freq, chan_labels, injection_times, outlier_lim, sd_lim, win_size, smooth_size)
 
 % Computes instantaneous frequency and instantaneous phase difference for
 % high beta epochs.

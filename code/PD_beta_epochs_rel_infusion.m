@@ -1,4 +1,4 @@
-function MM_beta_epochs_rel_infusion(filenames, sampling_freq, chan_labels, infusion_times, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_rel_infusion(filenames, sampling_freq, chan_labels, infusion_times, outlier_lim, sd_lim, win_size, smooth_size)
 
 % SAMPLE CALL:
 % MM_beta_epochs_rel_infusion({'file1.txt','file2.txt'},1000,{'Striatum','Motor
