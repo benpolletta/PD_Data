@@ -24,6 +24,22 @@ function MM_beta_epochs_rel_infusion(filenames, sampling_freq, chan_labels, infu
 % 'smooth_size' is the length of time (in datapoints, so s*sampling_freq)
 % over which beta power is smoothed before applying the cutoff.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Creating name to call the analysis by - either name of single file in
+% 'filenames', or 'All'. NB: will be over-written each time you run a
+% multi-file analysis, so should be renamed after running.
+
+if length(filenames) == 1
+    
+    file_label = filenames{1};
+    
+else
+
+    file_label = 'All';
+    
+end
+
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 pd_label = {'pre', 'post'};
@@ -51,8 +67,26 @@ for fi = 1:length(filenames)
     infusion_index = infusion_times(fi);
     
     % Loading data and results of 'MM_bandpass'.
-    
+        
     data = load(filename);
+    
+    if isstruct(data)
+        
+        field_names = fieldnames(data);
+       
+        if length(field_names) ~= 1
+            
+            display('Input .mat file must contain one variable - data in 2 columns.')
+            
+            return
+            
+        else
+            
+            data = getfield(data, field_names{1});
+            
+        end
+        
+    end
         
     load([filename,'_HAP.mat'])
     
@@ -139,18 +173,40 @@ for fi = 1:length(filenames)
             
             bh_pd = beta_high(pd_limits(pd,1):pd_limits(pd,2), ch);
             
-            dbh = diff(bh_pd);%beta_high);
+            if any(bh_pd == 0)
+                
+                dbh = diff(bh_pd);%beta_high);
+                
+                beta_start = find(dbh == 1) + 1 + pd_limits(pd,1) - 1;
+                
+                beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
+                
+            else
+                
+                beta_start = pd_limits(pd, 1);
+                
+                beta_end = pd_limits(pd, 2);
+                
+            end
             
-            beta_start = find(dbh == 1) + 1 + pd_limits(pd,1) - 1;
-            
-            beta_end = find(dbh == -1) + pd_limits(pd,1) - 1;
-            
-            if ~isempty(beta_end) && ~isempty(beta_start)
+            if ~isempty(beta_end) || ~isempty(beta_start)
+                
+                if isempty(beta_start)
+                    
+                    beta_start = [pd_limits(pd,1); beta_start];
+                    
+                end
+                
+                if isempty(beta_end)
+                    
+                    beta_end = [beta_end; pd_limits(pd, 2)];
+                    
+                end
                 
                 if beta_end(1) < beta_start(1)
                     
                     beta_start = [pd_limits(pd,1); beta_start];
-                    
+                        
                 end
                 
                 if beta_start(end) > beta_end(end)
@@ -189,11 +245,11 @@ for fi = 1:length(filenames)
                         
                         epoch_start = beta_blocks(b,1) + (e-1)*win_size;
                         
-                        epoch_end = beta_blocks(b,1) + e*win_size;
+                        epoch_end = beta_blocks(b,1) + e*win_size - 1;
                         
                         fid = fopen(epoch_name, 'w');
                         
-                        fprintf(fid, '%f\t%f\n', PD_dec(epoch_start:epoch_end, :)');
+                        fprintf(fid, '%f\t%f\n', data(epoch_start:epoch_end, :)');
                         
                         fclose(fid);
                         
@@ -261,7 +317,13 @@ figure
 
 subplot(1, 2, 1)
 
-bar(reshape(sum(no_b_blocks), no_channels, 2))
+if size(no_b_blocks, 1) > 1
+    
+    no_b_blocks = sum(no_b_blocks);
+    
+end
+
+bar(reshape(no_b_blocks, no_channels, 2))
     
 title('Total Number Beta Segments')
 
@@ -271,7 +333,13 @@ legend(period_label)
 
 subplot(1, 2, 2)
 
-bar(reshape(sum(no_dps)/sampling_freq, no_channels, 2))
+if size(no_dps, 1) > 1
+    
+    no_dps = sum(no_b_blocks);
+    
+end
+
+bar(reshape(no_dps/sampling_freq, no_channels, 2))
 
 title('Total Length Beta Segments (s)')
 
@@ -279,4 +347,4 @@ set(gca,'XTickLabel',ch_label)
 
 legend(period_label)
 
-save_as_pdf(gcf,[filenames, '_beta_', par_name])
+save_as_pdf(gcf, [file_label, '_beta_', par_name])

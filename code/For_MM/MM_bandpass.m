@@ -1,17 +1,26 @@
-function MM_bandpass(filenames, sampling_freq, conv_length, marker_times)
+function MM_bandpass(filenames, sampling_freq, channel_labels, marker_times, ~, ~, ~, ~)
 
+% Bandpasses two-channel data (each channel is a separate column), using
+% eegfilt.
+%
+% SAMPLE CALL: MM_bandpass({'file1.txt','file2.txt'},1000,{'Striatum','Motor
+% Ctx.'},[3000,5000])
+%
+% INPUTS:
 % 'filenames' is a list of filenames containing data for plotting beta power.
 % 'sampling_freq' is the sampling frequency of the data.
-% 'conv_length' is the timescale of smoothing of power (will be multiplied
-% by sampling freq., so enter in seconds, say, for sampling freq. in Hz).
+% 'channel_labels' is a cell containing the names of the channels in the
+% data (one channel per row).
 % 'marker_times' is a list of times to be marked on the resulting power
 % time series plots, again to be multiplied by sampling freq. Must have the
 % same # of rows as # files; each column contains data for a separate
 % sequence of markers.
 
-bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
+conv_length = .05; %Timescale of smoothing of power (will be multiplied by sampling freq., so enter in seconds, say, for sampling freq. in Hz).
 
-band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
+bands = [10 30; 10 30; 10 30]; %[1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
+
+band_names = {'beta', 'beta', 'beta'}; %{'delta','theta','beta','lgamma','hgamma','HFO'};
 
 no_bands = length(band_names);
 
@@ -125,7 +134,7 @@ for file_no = 1:no_files
         
         axis(ax,'tight')
         
-        legend({'Striatum','Motor Ctx.'})
+        legend(channel_labels)
         
         hold on
         

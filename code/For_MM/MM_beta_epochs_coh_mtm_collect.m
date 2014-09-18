@@ -1,4 +1,4 @@
-function MM_beta_epochs_coh_mtm_collect(filenames, chan_labels, infusion_times, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+function MM_beta_epochs_coh_mtm_collect(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size, tbw)
 
 % Collects complex cross-spectrum for each epoch, so that statistics can
 % be calculated and plotted.
@@ -52,7 +52,7 @@ par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),
 
 pd_label = {'pre', 'post'};
 
-for ch = 1:no_channels
+for ch = 1:4 %no_channels
     
     for pd = 1:2
         

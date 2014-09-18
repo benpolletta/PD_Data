@@ -1,4 +1,4 @@
-function MM_beta_epochs_coh_mtm(filenames, chan_labels, infusion_times, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+function MM_beta_epochs_coh_mtm(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size, tbw)
 
 % Computes complex cross-spectrum between channels for each epoch, so
 % that coherence and phase of coherence can be calculated. Utilizes
@@ -44,7 +44,7 @@ for fi = 1:length(filenames)
     
     filename = filenames{fi};
     
-    for ch = 1:no_channels
+    for ch = 1:4 %no_channels
         
         for pd = 1:2
             
@@ -55,9 +55,9 @@ for fi = 1:length(filenames)
             
             no_epochs = length(beta_list);
             
-            All_coh = nan(no_epochs, win_size + 1);
+            All_coh = nan(no_epochs, win_size);
             
-            parfor e = 1:no_epochs
+            for e = 1:no_epochs
                 
                 data_name = beta_list{e};
                 

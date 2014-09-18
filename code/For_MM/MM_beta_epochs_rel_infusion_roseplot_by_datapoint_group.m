@@ -1,4 +1,4 @@
-function MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, chan_labels, outlier_lim, sd_lim, win_size, smooth_size)
+function MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, ~, chan_labels, ~, outlier_lim, sd_lim, win_size, smooth_size)
 
 % Constructs group plots and runs statistics for analysis of phase
 % difference by instantaneous frequecy.
@@ -27,25 +27,33 @@ function MM_beta_epochs_rel_infusion_roseplot_by_datapoint_group(filenames, chan
 % 'smooth_size' is the length of time (in datapoints, so s*sampling_freq)
 % over which beta power is smoothed before applying the cutoff.
 
+close('all')
+
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
-f_bins = 8:4:32; no_f_bins = length(f_bins) - 1;
+f_bins = 9.5:1:30.5; no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
-% f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
-% f_labels = cellstr(f_labels{1});
-% f_labels = f_labels(1:2:end);
+f_pairs = nchoosek(1:no_f_bins, 2);
+
+no_f_pairs = size(f_pairs, 1);
+
+c_order = [linspace(1,0,no_f_bins); abs(linspace(1,0,no_f_bins)-.5); linspace(0,1,no_f_bins)]';
+
+f_labels = textscan(num2str(f_centers), '%s', 'delimiter', ' ');
+f_labels = cellstr(f_labels{1});
+f_labels = f_labels(1:2:end);
 
 pd_label = {'pre','post'};
 
 period_label = {'Pre-Infusion','Post-Infusion'};
 
-chan_labels = {chan_labels{:}, 'Both', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
+chan_labels = {chan_labels{:}, 'Both', 'Either', [chan_labels{1},' Not ',chan_labels{2}], [chan_labels{2},' Not ',chan_labels{1}], [chan_labels{1},' High ',chan_labels{2},' Low '], [chan_labels{1},' Low ',chan_labels{2},' High']};
 
 % ch_index = {1, 2, 1:2, 1, 2, 1, 2};
 
-ch_label = {'ch1', 'ch2', 'ch1_ch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
+ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_lch2', 'ch2_lch1'};
 
 no_channels = length(ch_label);
 
@@ -77,7 +85,7 @@ end
 
 index = 1;%2;
 
-for ch = 1:no_channels
+for ch = 1:4 %no_channels
             
     all_beta_data = load([all_beta_name{ch},'_pbf_dp.txt']);
     

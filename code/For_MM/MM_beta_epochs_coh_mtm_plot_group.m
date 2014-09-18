@@ -1,4 +1,4 @@
-function MM_beta_epochs_coh_mtm_plot_group(filenames, chan_labels, infusion_times, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+function MM_beta_epochs_coh_mtm_plot_group(filenames, ~, chan_labels, ~, ~, ~, win_size, ~, tbw)
 
 % Plots magnitude (coherence) and phase (phase of coherence) of the expected complex
 % cross-spectrum between channels. Utilizes jackknife resampling to compute
@@ -56,7 +56,7 @@ pd_label = {'pre', 'post'};
 
 % Frequency information.
 
-f = 1000*(0:win_size)/win_size;
+f = 1000*(0:(win_size - 1))/win_size;
 
 f_indices = f <= 32 & f >= 8;
 
@@ -67,11 +67,11 @@ m_label = {'coh','phase'};
 measure_label = {'Coherence','Phase of Coherence'};
 no_measures = length(measure_label);
 
-for ch = 1:no_channels
+for ch = 1:4 %no_channels
     
     figure
     
-    channel_coh = nan(win_size + 1, 2, 2, 2);
+    channel_coh = nan(win_size, 2, 2, 2);
     
     for pd = 1:2
         
@@ -85,23 +85,27 @@ for ch = 1:no_channels
         
         no_epochs = size(All_coh, 1);
         
-        if no_epochs > 2
+        if no_epochs > 0
             
-            All_jack = jackknife(@nanmean, All_coh);
+            if no_epochs > 2
+                
+                All_jack = jackknife(@nanmean, All_coh);
+                
+            else
+                
+                All_jack = jackknife(@nanmean, [All_coh; nan(3 - no_epochs, size(All_coh, 2))]);
+                
+            end
             
-        else
+            channel_coh(:, pd, 1, 1) = abs(nanmean(All_coh))';
             
-            All_jack = jackknife(@nanmean, [All_coh; nan(3 - no_epochs, size(All_coh, 2))]);
+            channel_coh(:, pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
+            
+            channel_coh(:, pd, 1, 2) = angle(nanmean(All_coh))';
+            
+            channel_coh(:, pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
             
         end
-        
-        channel_coh(:, pd, 1, 1) = abs(nanmean(All_coh))';
-        
-        channel_coh(:, pd, 2, 1) = sqrt((no_epochs - 1)*nanstd(abs(All_jack)).^2); %/sqrt(no_epochs)';
-        
-        channel_coh(:, pd, 1, 2) = angle(nanmean(All_coh))';
-        
-        channel_coh(:, pd, 2, 2) = sqrt((no_epochs - 1)*circ_std(angle(All_jack)).^2); %/sqrt(no_epochs)';
         
     end
     

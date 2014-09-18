@@ -1,4 +1,4 @@
-function MM_beta_epochs_rel_infusion_roseplot_by_datapoint(filenames, sampling_freq, chan_labels, outlier_lim, sd_lim, win_size, smooth_size)
+function MM_beta_epochs_rel_infusion_roseplot_by_datapoint(filenames, sampling_freq, chan_labels, injection_times, outlier_lim, sd_lim, win_size, smooth_size)
 
 % Computes instantaneous frequency and instantaneous phase difference for
 % high beta epochs.
@@ -32,7 +32,7 @@ par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),
 
 smooth_winsize = 50;
 
-f_bins = 8:4:32;
+f_bins = 9.5:1:30.5;
 
 % f_labels = textscan(num2str(f_bins), '%s', 'delimiter', ' ');
 % f_labels = cellstr(f_labels{1});
@@ -98,11 +98,11 @@ for fi = 1:length(filenames)
     
     % Loop over channels and other combinations.
     
-    for ch = 1:no_channels
+    for ch = 1:4 %no_channels
         
         beta_name = [filename,'_',ch_label{ch},'_beta'];
         
-        figure;
+        % figure;
         
         % Loop over pre- and post-infusion periods.
         
@@ -132,7 +132,7 @@ for fi = 1:length(filenames)
                     % Calculating smoothed phase difference between
                     % channels.
                     
-                    P_block = unwrap(P(beta_start:beta_end, :, 3)); % Selecting block of phases.
+                    P_block = unwrap(P(block_start:block_end, :, 3)); % Selecting block of phases.
                     
                     P_diff = -diff(P_block,[],2); % Computing phase difference.
                     
@@ -170,7 +170,7 @@ for fi = 1:length(filenames)
                     
                     % Printing frequency by epoch.
                     
-                    block_name = [subj_name,'_',par_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_block',num2str(b)];
+                    block_name = [filename,'_',par_name,'_',ch_label{ch},'_beta_',pd_label{pd},'_block',num2str(b)];
                     
                     no_epochs = max(epochs(blocks == b));
                     
@@ -179,6 +179,8 @@ for fi = 1:length(filenames)
                     block_e_ends = epoch_ends(blocks == b) - min(epoch_starts(blocks == b)) + 1;
                     
                     for e = 1:no_epochs
+                        
+                        % display(sprintf('Block %d Epoch %d', b, e))
                         
                         e_start = block_e_starts(e);
                         
@@ -204,10 +206,9 @@ for fi = 1:length(filenames)
             
             all_beta_data = load(beta_pbf_name);
             
-            format = make_format(size(all_beta_data, 2) + 2, 'f');
+            format = make_format(size(all_beta_data, 2) + 1, 'f');
                 
-            fprintf(fid_mat(ch), format, [pd*ones(size(all_beta_data, 1), 1) all_beta_data...
-                str2double(folder)*ones(size(all_beta_data, 1), 1) ]');
+            fprintf(fid_mat(ch), format, [pd*ones(size(all_beta_data, 1), 1) all_beta_data]');
             
             % if ~isempty(all_beta_data)
             % 
