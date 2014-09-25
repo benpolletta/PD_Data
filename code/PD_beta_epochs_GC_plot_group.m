@@ -42,12 +42,20 @@ for pd = 1:2
         pd_dir_label{2*pd - (2 - dir)} = [direction_labels{dir}, ', ', period_label{pd}];
     end
 end
+        
+All_mean_GC_spec = nan(f_length, 2, no_channels, no_lists);
 
-for ch = 1:no_channels
+All_std_GC_spec = nan(f_length, 2, 2, no_channels, no_lists);
+
+for ch = 1:4%no_channels
     
     for list = 1:no_lists
         
         figure
+        
+        mean_GC_spec = nan(f_length, 2);
+        
+        std_GC_spec = nan(f_length, 1, 2);
         
         for pd = 1:2
             
@@ -106,33 +114,40 @@ for ch = 1:no_channels
                 end
                 
             end
+                
+            All_GC_spec_diff = -diff(All_GC_spec, [], 3);
             
-            if size(All_GC_spec, 1) > 1
+            if size(All_GC_spec_diff, 1) > 1
                 
-                mean_GC_spec = reshape(nanmean(All_GC_spec), f_length, 2);
+                mean_GC_spec(:, pd) = reshape(nanmean(All_GC_spec_diff), f_length, 1);
                 
-                std_GC_spec = reshape(nanstd(All_GC_spec)/sqrt(no_epochs), f_length, 1, 2);
-                std_GC_spec = repmat(std_GC_spec, [1 2 1]);
+                std_GC_spec(:, 1, pd) = reshape(nanstd(All_GC_spec_diff)/sqrt(no_epochs), f_length, 1);
                 
             else
                
-                mean_GC_spec = reshape(All_GC_spec, f_length, 2);
+                mean_GC_spec(:, pd) = reshape(All_GC_spec_diff, f_length, 1);
                 
-                std_GC_spec = nan(size(mean_GC_spec));
+                std_GC_spec(:, 1, pd) = nan(f_length, 1);
                 
             end
             
-            subplot(2, 2, 2 + pd)
-            
-            boundedline(f(f_indices{list}), mean_GC_spec(f_indices{list}, :), std_GC_spec(f_indices{list}, :, :))
-            
-            legend(direction_labels)
-            
-            axis tight
-            
-            title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Spectral ', list_label{list}]})
-            
         end
+        
+        All_mean_GC_spec(:, :, ch, list) = mean_GC_spec;
+        
+        std_GC_spec = repmat(std_GC_spec, [1 2 1]);
+        
+        All_std_GC_spec(:, :, :, ch, list) = std_GC_spec;
+        
+        subplot(2, 1, 2)
+        
+        boundedline(f(f_indices{list}), mean_GC_spec(f_indices{list}, :), std_GC_spec(f_indices{list}, :, :))
+        
+        legend(period_label)
+        
+        axis tight
+        
+        title({[chan_labels{ch}, ' High Beta Blocks'];['Spectral ', list_label{list}, ', (', direction_labels{1}, ') - (', direction_labels{2}, ')']})
         
         save_as_pdf(gcf, listname)
         
@@ -141,3 +156,5 @@ for ch = 1:no_channels
     close('all')
     
 end
+
+save(['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', par_name, '_GC_spec_stats.mat'], 'All_mean_GC_spec', 'All_std_GC_spec')
