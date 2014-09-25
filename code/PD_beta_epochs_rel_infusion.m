@@ -18,9 +18,9 @@ ch_label = {'ch1', 'ch2', 'ch1andch2', 'ch1orch2', 'ch1_nch2', 'ch2_nch1', 'ch1_
 
 no_channels = length(ch_label);
 
-no_b_blocks = nan(length(folders), no_channels);
+no_b_blocks = nan(length(folders), no_channels, 2);
 
-no_dps = nan(length(folders), no_channels);
+no_dps = nan(length(folders), no_channels, 2);
 
 for fo = 1:length(folders)
     
@@ -40,7 +40,7 @@ for fo = 1:length(folders)
     
     beta_amp = A(:,:,3); ba_smooth = nan(size(beta_amp)); beta_high = nan(size(beta_amp)); beta_low = nan(size(beta_amp));
     
-    pd_limits = [1 base_index; (base_index + 1) min(length(t), base_index + 1500*sampling_freq)];
+    pd_limits = [1 min(length(t), base_index); min(length(t), base_index + 1) min(length(t), base_index + 1500*sampling_freq)];
     
     % beta_cutoff = mean(beta_amp(1:base_index, :)) + sd_lim*std(beta_amp(1:base_index, :));
     
@@ -56,9 +56,9 @@ for fo = 1:length(folders)
         
         ba_smooth(:, ch) = ba_conv((smooth_size+1):(end-smooth_size));
         
-        beta_h_cutoff = mean(ba_smooth(1:base_index, ch)) + sd_lim*std(ba_smooth(1:base_index, ch));
+        beta_h_cutoff = mean(ba_smooth(1:pd_limits(1, 2), ch)) + sd_lim*std(ba_smooth(1:pd_limits(1, 2), ch));
         
-        beta_l_cutoff = mean(ba_smooth(1:base_index, ch)) - sd_lim*std(ba_smooth(1:base_index, ch));
+        beta_l_cutoff = mean(ba_smooth(1:pd_limits(1, 2), ch)) - sd_lim*std(ba_smooth(1:pd_limits(1, 2), ch));
         
         % beta_h_cutoff = quantile(ba_smooth(1:base_index, ch), sd_lim);
         % 
