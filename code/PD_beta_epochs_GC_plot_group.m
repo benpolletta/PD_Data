@@ -19,8 +19,8 @@ no_lists = length(list_suffix);
 
 f = 1000*(0:win_size)/win_size;
 
-f_indices{1} = f <= 100;%f <= 35 & f >= 5;
-f_indices{2} = f <= 100;%40;
+f_indices{1} = f <= 31 & f >= 9; %f <= 100
+f_indices{2} = f <= 100; %40;
 
 f_length = win_size + 2;
 
