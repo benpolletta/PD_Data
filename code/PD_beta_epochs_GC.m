@@ -18,7 +18,7 @@ list_suffix = {'', '_A'};
 
 no_lists = length(list_suffix);
 
-f_length = win_size + 2;
+f_length = win_size + 1;
 
 index = 1; % For when it gets stopped in the middle.
 
@@ -34,7 +34,7 @@ for fo = 1:length(folders)
         
         for pd = 1:2
             
-            if index == 2
+            if index > 0
             
             for list = 1:1%no_lists
                 

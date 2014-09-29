@@ -1,4 +1,4 @@
-function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, ~, ~, win_size, ~, tbw)
+function PD_beta_epochs_coh_mtm_plot_group(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
