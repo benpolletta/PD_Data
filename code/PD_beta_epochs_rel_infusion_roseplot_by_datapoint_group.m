@@ -175,16 +175,8 @@ for ch = 1:no_channels
                 
                 % if conc_pval(f) > 0.01/(length(f_bins) - 1)
                 
-                if size(phi_pre, 1) > 0 && size(phi_post, 1) > 0
+                angle_pval(f) = circ_wwtest(phi_pre, phi_post);
                 
-                    angle_pval(f) = circ_wwtest(phi_pre, phi_post);
-                
-                else
-                    
-                    angle_pval(f) = 1;
-                    
-                end
-                    
                 % else
                 % 
                 %     angle_pval(f) = circ_cmtest(phi_pre, phi_post); 
