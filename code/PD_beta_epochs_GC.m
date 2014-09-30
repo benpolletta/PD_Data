@@ -1,4 +1,4 @@
-function PD_beta_epochs_GC(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_GC(subjects_mat, outlier_lim, sd_lim, win_size, smooth_size, start_index)
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -34,7 +34,7 @@ for fo = 1:length(folders)
         
         for pd = 1:2
             
-            if index > 0
+            if index > start_index
             
             for list = 1:1%no_lists
                 
