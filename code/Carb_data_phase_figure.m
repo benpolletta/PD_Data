@@ -1,6 +1,6 @@
 function Carb_data_phase_figure
 
-outlier_lim = 7; sd_lim = 2; rp_win_size = 333; smooth_size = 20000;
+outlier_lim = 7; sd_lim = 2; rp_win_size = 333; smooth_size = 5000;
 
 rp_par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(rp_win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -58,7 +58,7 @@ for r = 1:2
         
         MR_mat_temp = MR_mat; conf_mat_temp = conf_mat;
         
-        load([record_label{r}, '_6OHDA_', rp_par_name, record_chan_labels{r}, 'beta_ri_rose_dp_group.mat'])
+        load([record_label{r}, '_6OHDA_', sixOHDA_rp_par_name, record_chan_labels{r}, 'beta_ri_rose_dp_group.mat'])
         
         MR_mat_temp(:, 3) = MR_mat(:, 1); conf_mat_temp(:, 3) = conf_mat(:, 1);
         
@@ -114,7 +114,7 @@ for r = 1:2
         
         mean_data_temp = mean_data; std_data_temp = std_data;
         
-        load(['All_', record_label{r}, '_6OHDA', '_ch', num2str(3 - r), '_post_', coh_par_name, '_coh_mtm_', num2str(2*coh_win_size/1000), 'tbw_phase.mat'])
+        load(['All_', record_label{r}, '_6OHDA', '_ch', num2str(3 - r), '_post_', sixOHDA_coh_par_name, '_coh_mtm_', num2str(2*coh_win_size/1000), 'tbw_phase.mat'])
         
         mean_data_temp(:, 3) = mean_data(:, 1); std_data_temp(:, :, 3) = std_data(:, :, 1);
         
@@ -154,23 +154,23 @@ for r = 1:2
     
     plot_std_GC = All_std_GC_spec(:, :, :, 3 - r, 1);
     
-    % if r == 1
-    % 
-    %     plot_mean_GC_temp = plot_mean_GC; plot_std_GC_temp = plot_std_GC;
-    % 
-    %     load(['All_', record_label{r}, '_60HDA_', rp_par_name, '_GC_spec_stats.mat'])
-    % 
-    %     plot_mean_GC_temp(:, 3) = All_mean_GC_spec(:, 1, 3 - r, 1); std_GC_temp(:, :, 3) = All_std_GC_spec(:, :, 1, 3 - r, 1);
-    % 
-    %     clear plot_mean_GC plot_std_GC
-    % 
-    %     plot_mean_GC = plot_mean_GC_temp; plot_std_GC = plot_std_GC_temp;
-    % 
-    % end
+    if r == 1
+    
+        plot_mean_GC_temp = plot_mean_GC; plot_std_GC_temp = plot_std_GC;
+    
+        load(['All_', record_label{r}, '_6OHDA_', sixOHDA_rp_par_name, '_GC_spec_stats.mat'])
+    
+        plot_mean_GC_temp(:, 3) = All_mean_GC_spec(:, 1, 3 - r, 1); plot_std_GC_temp(:, :, 3) = All_std_GC_spec(:, :, 1, 3 - r, 1);
+    
+        clear plot_mean_GC plot_std_GC
+    
+        plot_mean_GC = plot_mean_GC_temp; plot_std_GC = plot_std_GC_temp;
+    
+    end
     
     h = boundedline(f_GC(f_indices_GC)', record_multiplier*plot_mean_GC(f_indices_GC, :), plot_std_GC(f_indices_GC, :, :));
     
-    set(h, 'Marker', 's')
+    %set(h, 'Marker', 's')
     
     hold on
     

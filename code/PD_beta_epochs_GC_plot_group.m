@@ -49,7 +49,7 @@ All_std_GC_spec = nan(f_length, 2, 2, no_channels, no_lists);
 
 for ch = 1:4%no_channels
     
-    for list = 1:no_lists
+    for list = 1:1%no_lists
         
         figure
         
@@ -59,7 +59,7 @@ for ch = 1:4%no_channels
         
         for pd = 1:2
             
-            listname = ['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch}, '_', pd_label{pd}, list_suffix{list}, '_GC'];
+            listname = ['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch}, '_', pd_label{pd}, '_', par_name, list_suffix{list}, '_GC'];
             
             All_GC = load([listname, '.txt']);
             
@@ -77,7 +77,7 @@ for ch = 1:4%no_channels
                 
                 if ~isempty(dir_GC_spec)
                     
-                    All_GC_spec(:, :, dir) = dir_GC_spec;
+                    All_GC_spec(:, 1:size(dir_GC_spec, 2), dir) = dir_GC_spec;
                     
                 end
                 

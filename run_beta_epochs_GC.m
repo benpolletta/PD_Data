@@ -1,10 +1,10 @@
-%run /project/crc-nak/brpp/startup
+%run /projectnb/crc-nak/brpp/startup
 
-%cd /project/crc-nak/brpp/PD_Data/
+%cd /projectnb/crc-nak/brpp/PD_Data/
 
-%matlabpool open 8
+matlabpool open 8
 
-PD_beta_epochs_GC('st_m1_6OHDA_subjects.mat',7,2,333,5000,2*8*2 + 2)
+PD_beta_epochs_GC('st_m1_6OHDA_subjects.mat',7,2,333,5000,8*2 + 3*2)
 
 PD_beta_epochs_GC('st_m1_6OHDA_subjects.mat',7,2,333,20000,0)
 

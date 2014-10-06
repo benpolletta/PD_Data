@@ -1,7 +1,21 @@
 function PD_beta_epochs_rel_infusion(subject_mat, outlier_lim, sd_lim, win_size, smooth_size)
 
-par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
+if isscalar(win_size)
 
+    par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
+
+elseif length(win_size) == 2
+   
+    par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size(1)), 'to', num2str(win_size(2)),'win_',num2str(smooth_size),'smooth'];
+    
+else
+    
+    display('win_size must be a scalar (lower limit of beta epoch length) or an interval (lower and upper limits).')
+    
+    return
+    
+end
+    
 load(subject_mat)
 
 sampling_freq = 1000;
@@ -167,8 +181,16 @@ for fo = 1:length(folders)
                 
                 beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
-                beta_blocks(beta_lengths < win_size, :) = [];
+                if isscalar(win_size)
                 
+                    beta_blocks(beta_lengths < win_size, :) = [];
+                
+                elseif length(win_size) == 2
+                    
+                    beta_blocks(beta_lengths < win_size(1) & beta_lengths > win_size(2)) = [];
+                    
+                end
+                    
                 beta_lengths = diff(beta_blocks, [], 2) + 1;
                 
                 for b = 1:size(beta_blocks,1)
@@ -179,19 +201,61 @@ for fo = 1:length(folders)
                     
                     plot(t(beta_blocks(b,1):beta_blocks(b,2)), ba_smooth(beta_blocks(b,1):beta_blocks(b,2), ch_index{ch}), 'r')
                     
-                    no_epochs = floor(beta_lengths(b)/win_size);
+                    if isscalar(win_size)
+                        
+                        no_epochs = floor(beta_lengths(b)/win_size);
+                        
+                        for e = 1:no_epochs
+                            
+                            epoch_name = [beta_name,'_epoch',num2str(e),'.txt'];
+                            
+                            A_name = [beta_name,'_epoch',num2str(e),'_A.txt'];
+                            
+                            P_name = [beta_name,'_epoch',num2str(e),'_P.txt'];
+                            
+                            epoch_start = beta_blocks(b,1) + (e-1)*win_size;
+                            
+                            epoch_end = beta_blocks(b,1) + e*win_size - 1;
+                            
+                            fid = fopen(epoch_name, 'w');
+                            
+                            fprintf(fid, '%f\t%f\n', PD_dec(epoch_start:epoch_end, :)');
+                            
+                            fclose(fid);
+                            
+                            fid = fopen(A_name, 'w');
+                            
+                            fprintf(fid, '%f\t%f\n', A(epoch_start:epoch_end, :, 3)');
+                            
+                            fclose(fid);
+                            
+                            fid = fopen(P_name, 'w');
+                            
+                            fprintf(fid, '%f\t%f\n', P(epoch_start:epoch_end, :, 3)');
+                            
+                            fclose(fid);
+                            
+                            fprintf(fid_list, '%s\n', epoch_name);
+                            
+                            fprintf(fid_A_list, '%s\n', A_name);
+                            
+                            fprintf(fid_P_list, '%s\n', P_name);
+                            
+                            fprintf(fid_win_list, '%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,1), beta_blocks(b,2), e, epoch_start, epoch_end, median(beta_amp(epoch_start:epoch_end,:)));
+                            
+                        end
                     
-                    for e = 1:no_epochs
+                    elseif length(win_size) == 2
                         
-                        epoch_name = [beta_name,'_epoch',num2str(e),'.txt'];
+                        epoch_name = [beta_name,'.txt'];
                         
-                        A_name = [beta_name,'_epoch',num2str(e),'_A.txt'];
+                        A_name = [beta_name, '_A.txt'];
                         
-                        P_name = [beta_name,'_epoch',num2str(e),'_P.txt'];
+                        P_name = [beta_name, '_P.txt'];
                         
-                        epoch_start = beta_blocks(b,1) + (e-1)*win_size;
+                        epoch_start = beta_blocks(b,1);
                         
-                        epoch_end = beta_blocks(b,1) + e*win_size - 1;
+                        epoch_end = beta_blocks(b,2);
                         
                         fid = fopen(epoch_name, 'w');
                         
@@ -217,7 +281,7 @@ for fo = 1:length(folders)
                         
                         fprintf(fid_P_list, '%s\n', P_name);
                         
-                        fprintf(fid_win_list, '%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,1), beta_blocks(b,2), e, epoch_start, epoch_end, median(beta_amp(epoch_start:epoch_end,:)));
+                        fprintf(fid_win_list, '%d\t%d\t%d\t%f\t%f\n', b, beta_blocks(b,1), beta_blocks(b,2), median(beta_amp(epoch_start:epoch_end,:)));
                         
                     end
                     
@@ -280,5 +344,7 @@ title(['Total Length Beta Segments (s)'])
 set(gca,'XTickLabel',ch_label)
 
 legend(period_label)
+
+save([subject_mat(1:(end - length('_subject.mat'))), '_beta_', par_name, '.mat'], 'no_b_blocks', 'no_dps')
 
 save_as_pdf(gcf,[subject_mat(1:(end - length('_subject.mat'))), '_beta_', par_name])

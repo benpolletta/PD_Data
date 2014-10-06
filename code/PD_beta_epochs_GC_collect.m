@@ -19,17 +19,17 @@ no_directions = length(dir_labels);
 
 for ch = 1:no_channels
     
-    for list = 1:no_lists
+    for list = 1:1%no_lists
         
         for pd = 1:2
             
             fid = fopen(['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_', ch_label{ch},...
-                '_', pd_label{pd}, list_suffix{list}, '_GC.txt'], 'w');
+                '_', pd_label{pd}, '_', par_name, list_suffix{list}, '_GC.txt'], 'w');
             
             for dir = 1:no_directions
                 
                 fid_spec(dir) = fopen(['All_', subjects_mat(1:(end-length('_subjects.mat'))), '_',...
-                    ch_label{ch}, '_', pd_label{pd}, list_suffix{list}, '_GCspec_', dir_labels{dir}, '.txt'], 'w');
+                    ch_label{ch}, '_', pd_label{pd}, '_', par_name, list_suffix{list}, '_GCspec_', dir_labels{dir}, '.txt'], 'w');
                 
             end
             
