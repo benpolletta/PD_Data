@@ -1,29 +1,33 @@
+function run_beta_epochs_coh_mtm(group_names, win_lengths, smooth_lengths)
+
 run /projectnb/crc-nak/brpp/startup
 
 cd /projectnb/crc-nak/brpp/PD_Data/
 
-%matlabpool close force local
+s = matlabpool('size');
 
-%matlabpool open local
+if s == 0
+    
+    matlabpool open 8
+    
+end
 
-%PD_beta_epochs_rel_infusion('st_m1_subjects.mat',7,2,1000,5000)
+for g = 1:group_names
+    
+    for w = 1:win_lengths
+        
+        for s = 1:smooth_lengths
+            
+            run_PD_coherence(group_names{g}, 7, 2, win_lengths(w), smooth_lengths(s), 2*win_lengths(w)/1000)
 
-%PD_beta_epochs_rel_infusion('st_stn_subjects.mat',7,2,1000,5000)
+        end
+        
+    end
+    
+end
 
-%PD_beta_epochs_coh_mtm('st_m1_subjects.mat',7,2,1000,5000,2*1)
-
-%PD_beta_epochs_coh_mtm('st_stn_subjects.mat',7,2,1000,5000,2*1)
-
-run_PD_coherence('st_m1_6OHDA_subjects.mat',7,2,1000,5000,2*1)
-
-run_PD_coherence('st_m1_6OHDA_subjects.mat',7,2,2000,5000,2*2)
-
-run_PD_coherence('st_m1_subjects.mat',7,2,1000,5000,2*1)
-
-run_PD_coherence('st_m1_subjects.mat',7,2,2000,5000,2*2)
-
-run_PD_coherence('st_stn_subjects.mat',7,2,1000,5000,2*1)
-
-run_PD_coherence('st_stn_subjects.mat',7,2,2000,5000,2*2)
-
-matlabpool close
+if  s == 0
+    
+    matlabpool close
+    
+end

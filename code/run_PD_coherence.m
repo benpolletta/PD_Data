@@ -16,6 +16,6 @@ PD_beta_epochs_coh_mtm_plot_group(subject_mat, outlier_lim, sd_lim, win_size, sm
 
 close('all')
 
-% PD_beta_epochs_coh_mtm_plot_individual(subject_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
-% 
-% close('all')
+PD_beta_epochs_coh_mtm_plot_individual(subject_mat, outlier_lim, sd_lim, win_size, smooth_size, tbw)
+
+close('all')
