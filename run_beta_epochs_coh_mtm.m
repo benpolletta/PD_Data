@@ -4,19 +4,19 @@ run /projectnb/crc-nak/brpp/startup
 
 cd /projectnb/crc-nak/brpp/PD_Data/
 
-s = matlabpool('size');
+% s = matlabpool('size');
+% 
+% if s == 0
+%     
+%     matlabpool open 8
+%     
+% end
 
-if s == 0
+for g = 1:length(group_names)
     
-    matlabpool open 8
-    
-end
-
-for g = 1:group_names
-    
-    for w = 1:win_lengths
+    for w = 1:length(win_lengths)
         
-        for s = 1:smooth_lengths
+        for s = 1:length(smooth_lengths)
             
             run_PD_coherence(group_names{g}, 7, 2, win_lengths(w), smooth_lengths(s), 2*win_lengths(w)/1000)
 
@@ -26,8 +26,8 @@ for g = 1:group_names
     
 end
 
-if  s == 0
-    
-    matlabpool close
-    
-end
+% if  s == 0
+%     
+%     matlabpool close
+%     
+% end

@@ -26,11 +26,11 @@ end
 
 index = 1;
 
-for g = 1:group_names
+for g = 1:length(group_names)
     
-    for w = 1:win_lengths
+    for w = 1:length(win_lengths)
         
-        for s = 1:smooth_lengths
+        for s = 1:length(smooth_lengths)
 
             PD_beta_epochs_GC(group_names{g}, 7, 2, win_lengths(w), smooth_lengths(s), start_indices(index))
             
