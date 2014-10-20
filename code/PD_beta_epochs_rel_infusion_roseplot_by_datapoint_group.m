@@ -1,10 +1,10 @@
-function PD_beta_epochs_rel_infusion_roseplot_by_datapoint_group(subject_mat, outlier_lim, sd_lim, win_size, smooth_size)
+function PD_beta_epochs_rel_infusion_roseplot_by_datapoint_group(subject_mat, outlier_lim, sd_lim, win_size, smooth_size, f_bins)
 
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 load(subject_mat)
 
-f_bins = 9.5:1:30.5; no_f_bins = length(f_bins) - 1;
+if isempty(f_bins), f_bins = 9.5:1:30.5; end, no_f_bins = length(f_bins) - 1;
 
 f_centers = (f_bins(1:(end-1)) + f_bins(2:end))/2;
 
@@ -264,7 +264,7 @@ for ch = 1:no_channels
         
         %% Saving plot data.
         
-        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_group.mat'],...
+        save([subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_', num2str(no_f_bins), 'bins_group.mat'],...
             'MR_mat', 'conf_mat', 'rao_test', 'rayleigh_test', 'conc_pval', 'angle_pval', 'f_conc_pval', 'f_angle_pval', 'zero_test')
         
         %% Plotting number of datapoints pre vs. post by freq.
@@ -471,7 +471,7 @@ for ch = 1:no_channels
         
         %%
         
-        save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp'])
+        save_as_pdf(index, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_',ch_label{ch},'_by_ch',num2str(ch1),'_beta_ri_rose_dp_', num2str(no_f_bins), 'bins'])
         
         index = index + 1;
         
@@ -479,7 +479,7 @@ for ch = 1:no_channels
     
 end
 
-save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp'])
+save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp_', num2str(no_f_bins), 'bins'])
 
 end
 

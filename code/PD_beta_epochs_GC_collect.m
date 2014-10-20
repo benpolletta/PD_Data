@@ -50,6 +50,10 @@ for ch = 1:no_channels
                 
                 fprintf(fid, format, All_GC');
                 
+                All_GC_spec = reshape(All_GC_spec, [size(All_GC_spec, 1) size(All_GC_spec, 3) size(All_GC_spec, 2)]);
+                
+                All_GC_spec = permute(All_GC_spec, [1 3 2]);
+                
                 spec_format = make_format(size(All_GC_spec, 2), 'f');
                 
                 for dir = 1:no_directions
