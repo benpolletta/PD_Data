@@ -1,5 +1,7 @@
 function PD_beta_epochs_rel_infusion_roseplot_by_datapoint_group(subject_mat, outlier_lim, sd_lim, win_size, smooth_size, f_bins)
 
+close('all')
+
 par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
 
 load(subject_mat)
@@ -38,9 +40,7 @@ for ch = 1:no_channels
     
 end
 
-% figure(1)
-
-index = 1;%2;
+index = 2;
 
 for ch = 1:no_channels
             
@@ -108,6 +108,20 @@ for ch = 1:no_channels
         
         for pd = 1:length(pd_label)
             
+            if ch <= 4
+                
+                figure(1)
+                
+                plot_index = (ch - 1)*(2*length(pd_label)) + (ch1 - 1)*2 + pd;
+                
+                subplot(4, 4, plot_index)
+                
+                rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
+                
+                title({[chan_labels{ch}, ' High Beta Blocks, ']; period_label{pd}; ['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
+                
+            end
+            
             figure(index)
             
             subplot(4, 2, 2 + pd)
@@ -115,14 +129,6 @@ for ch = 1:no_channels
             [MR_mat(:, pd), ~, ~, conf_mat(:, pd)] = rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
             
             title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
-            
-            % figure(1)
-            % 
-            % subplot(3, 4, (ch-1)*(2 + length(pd_label)) + (pd-1)*2 + ch1)
-            % 
-            % rose_plot(all_Pds(all_pd_index == pd), all_Fs(all_pd_index == pd, ch1), 20, f_bins);
-            % 
-            % title({[chan_labels{ch}, ' High Beta Blocks, ', period_label{pd}];['Phase Lag by ', chan_labels{ch1}, ' Freq.']})
                 
         end
         
@@ -479,7 +485,7 @@ for ch = 1:no_channels
     
 end
 
-save_as_pdf(gcf,[subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp_', num2str(no_f_bins), 'bins'])
+save_as_pdf(1, [subject_mat(1:(end-length('_subjects.mat'))),'_',par_name,'_beta_ri_rose_dp_', num2str(no_f_bins), 'bins'])
 
 end
 

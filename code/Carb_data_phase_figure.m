@@ -28,7 +28,7 @@ f_GC = sampling_freq*(0:GC_win_size)/GC_win_size;
 
 f_indices_GC = f_GC <= 30 & f_GC >= 10;
 
-period_label = {'Pre-Infusion', '6OHDA'};
+period_label = {'Pre-Infusion', 'Post-Infusion'};
 
 record_label = {'st_m1', 'st_stn'}; record_chan_labels = {'_ch2_by_ch1_', '_ch1_by_ch2_'};
     
@@ -41,10 +41,10 @@ figure;
 for r = 1:2
     
     record_multiplier = (-1)^(r + 1);
-
-    %% Plotting phase angle by frequency, pre and post.
     
     load([record_label{r}, '_subjects.mat'])
+
+    %% Plotting phase angle by frequency, pre and post.
     
     load([record_label{r}, '_', rp_par_name, record_chan_labels{r}, 'beta_ri_rose_dp_group.mat'])
     

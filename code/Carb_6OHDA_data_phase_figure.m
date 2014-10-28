@@ -1,6 +1,6 @@
 function Carb_6OHDA_data_phase_figure
 
-outlier_lim = 7; sd_lim = 2; rp_win_size = 333; smooth_size = 5000;
+outlier_lim = 7; sd_lim = 2; rp_win_size = 333; smooth_size = 20000;
 
 rp_par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(rp_win_size),'win_',num2str(smooth_size),'smooth'];
 
@@ -30,7 +30,7 @@ f_coh = 1000*(0:coh_win_size)/coh_win_size;
 
 f_indices_coh = f_coh <= 30 & f_coh >= 10;
 
-f_GC = 100*(0:rp_win_size)/rp_win_size;
+f_GC = 1000*(0:rp_win_size)/rp_win_size;
 
 f_indices_GC = f_GC <= 30 & f_GC >= 10;
 
