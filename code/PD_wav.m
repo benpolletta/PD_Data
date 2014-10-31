@@ -7,6 +7,8 @@ sampling_freq = 1000;
 freqs = 1:200;
 no_freqs = length(freqs);
 
+bands = [1 4; 4 8; 8 30; 30 100; 100 120; 0 200]; no_bands = size(bands, 1);
+
 no_cycles = linspace(3, 21, no_freqs);
 
 wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
@@ -33,9 +35,11 @@ for fo = 1:length(folders)
         
         t = (1:no_secs*sampling_freq)/sampling_freq;
         
-        clear Spec Spec_pct
+        clear Spec Spec_pct BP BP_norm BP_pct
         
         [Spec, Spec_pct] = deal(nan(no_secs*sampling_freq, no_freqs, 2));
+        
+        [BP, BP_norm, BP_pct] = deal(nan(no_secs*sampling_freq, no_bands, 2));
         
         for ch = 1:2
             
@@ -51,52 +55,70 @@ for fo = 1:length(folders)
                 
             end
             
+            %% Band power.
+            
+            for b = 1:no_bands
+                
+                band_indices = freqs >= bands(b, 1) & freqs <= bands(b, 2);
+                
+                BP(:, b, ch) = sqrt(sum(abs(Spec(:, band_indices, ch)).^2, 2));
+                
+            end
+            
+            %% Normalize by total power.
+            
+            BP_norm(:, :, ch) = BP(:, :, ch)./repmat(BP(:, end, ch), 1, no_bands);
+            
+            Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(BP(:, end, ch), 1, no_freqs);
+            
             %% Baseline normalize.
             
-            baseline_mean = mean(abs(Spec(t <= basetime, :, ch)));
+            baseline_mean = mean(abs(Spec_norm(t <= basetime, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
             
-            %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+            Spec_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
             
-            Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
+            baseline_BP = mean(BP_norm(t <= basetime, :, ch));
             
-            figure(1)
+            BP_pct(:, :, ch) = 100*BP_norm(:, :, ch)./ones(size(BP_norm(:, :, ch)))*diag(baseline_BP) - 100;
             
-            subplot(2, 1, ch)
-            
-            imagesc(t - basetime, freqs, zscore(abs(Spec(:, :, ch)))')
-            
-            cl = caxis; caxis([cl(1) .25*cl(2)])
-            
-            axis xy
-            
-            xlabel('Time (sec)'); ylabel('Hz');
-            
-            title(['Gabor Spectrogram of ', folder, ', ', chan_labels{ch}])
-            
-            grid on
-            
-            figure(2)
-            
-            subplot(2, 1, ch)
-            
-            imagesc(t - basetime, freqs, Spec_pct(:, :, ch)')
-            
-            cl = caxis; caxis([cl(1) .25*cl(2)])
-            
-            axis xy
-            
-            xlabel('Time (sec)'); ylabel('Hz');
-            
-            title(['Baseline Normalized Gabor Spectrogram of ', folder, ', ', chan_labels{ch}])
-            
-            grid on
+            % figure(1)
+            % 
+            % subplot(2, 1, ch)
+            % 
+            % imagesc(t - basetime, freqs, zscore(abs(Spec(:, :, ch)))')
+            % 
+            % cl = caxis; caxis([cl(1) .25*cl(2)])
+            % 
+            % axis xy
+            % 
+            % xlabel('Time (sec)'); ylabel('Hz');
+            % 
+            % title(['Gabor Spectrogram of ', folder, ', ', chan_labels{ch}])
+            % 
+            % grid on
+            % 
+            % figure(2)
+            % 
+            % subplot(2, 1, ch)
+            % 
+            % imagesc(t - basetime, freqs, Spec_pct(:, :, ch)')
+            % 
+            % cl = caxis; caxis([cl(1) .25*cl(2)])
+            % 
+            % axis xy
+            % 
+            % xlabel('Time (sec)'); ylabel('Hz');
+            % 
+            % title(['Baseline Normalized Gabor Spectrogram of ', folder, ', ', chan_labels{ch}])
+            % 
+            % grid on
             
         end
         
-        save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_pct', 't', 'basetime', 'freqs')
+        save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_pct', 't', 'basetime', 'freqs', 'BP', 'BP_norm', 'BP_pct')
         
-        suffix = {'', '_pct'};
-        
+        % suffix = {'', '_pct'};
+        %
         % for s = 1:length(suffix)
         % 
         %     try
