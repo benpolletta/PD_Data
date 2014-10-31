@@ -1,10 +1,8 @@
 function PD_bandpass_channels(subject_mat)
 
-present_dir = pwd;
-
 load(subject_mat)
 
-bands = [1 4; 4 12; 10 30; 30 60; 60 90; 90 110; 120 180];
+bands = [1 4; 4 10; 10 30; 32 60; 60 90; 90 110; 120 180];
 band_names = {'delta','theta','beta','lgamma','hgamma','HFO'};
 no_bands = length(band_names);
 
@@ -16,7 +14,7 @@ for fo = 1:length(folders)
     
     basetime = basetimes(fo);
     
-    infusetime = infusetimes(fo);
+    %infusetime = infusetimes(fo);
 
     load([folder,'/',prefix,'_all_channel_data_dec.mat'])
     
@@ -26,9 +24,7 @@ for fo = 1:length(folders)
     A = nan(size(PD_dec,1),2,no_bands);
     P = nan(size(PD_dec,1),2,no_bands);
     
-    if isempty(dir([folder,'/',prefix,'_all_channel_data_dec_HAP.mat']))
-        
-        BP = nan(length(PD_dec),2);
+    %if isempty(dir([folder,'/',prefix,'_all_channel_data_dec_HAP.mat']))
             
         for b = 1:no_bands
             
@@ -42,11 +38,11 @@ for fo = 1:length(folders)
         
         save([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'],'H','A','P','bands','band_names')
         
-    else
-        
-        load([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'])
-        
-    end
+    % else
+    % 
+    %     load([folder,'/',prefix,'_all_channel_data_dec_HAP.mat'])
+    % 
+    % end
     
     figure;
     
@@ -64,11 +60,11 @@ for fo = 1:length(folders)
             
             A_conv = conv(A_flipped,ones(20*sampling_freq,1)/(20*sampling_freq),'same');
         
-            A_smooth(:,ch) = A_conv((10*sampling_freq+1):(end-10*sampling_freq));
+            A_smooth(:, ch) = A_conv((10*sampling_freq+1):(end-10*sampling_freq));
              
         end
             
-        A_pct_baseline = 100*A_smooth*diag(1./mean(A_smooth(t<basetime,:))) - 100;
+        % A_pct_baseline = 100*A_smooth*diag(1./mean(A_smooth(t<basetime,:))) - 100;
         
         A_plot = A_smooth;%A_pct_baseline;
         
@@ -83,7 +79,7 @@ for fo = 1:length(folders)
         box off
         
         plot([basetime basetime]',[min(min(A_plot)) max(max(A_plot))]','r')
-        plot([basetime+infusetime basetime+infusetime]',[min(min(A_plot)) max(max(A_plot))]','r')
+        %plot([basetime+infusetime basetime+infusetime]',[min(min(A_plot)) max(max(A_plot))]','r')
 
         ylabel(sprintf('%s (%g - %g Hz) power',band_names{b},bands(b,1),bands(b,2)))
 %         ylabel({[band_names{b},' power'];'percent change'})

@@ -44,6 +44,8 @@ for fo = 1:length(folders)
     load([subj_name,'_all_channel_data_dec.mat'])
     
     load([subj_name,'_all_channel_data_dec_HAP.mat'])
+                    
+    A_pct = A(:, :, 3)./sum(A, 3);
     
     periods = [1 base_index; (base_index + 1) size(A,1)];
     
@@ -93,6 +95,8 @@ for fo = 1:length(folders)
                     H_block = H(plot_start:plot_end, :, 3);
                     
                     P_block = P(plot_start:plot_end, :, 3);
+                    
+                    A_pct_block = A_pct(plot_start:plot_end, :);
                     
                     %% Calculating wavelet spectrogram.
                     
@@ -162,7 +166,7 @@ for fo = 1:length(folders)
                     
                     subplot(4, 1, 3)%(6, 1, 5)
                     
-                    plot(t, LFP_block)
+                    [ax, h1, h2] = plotyy(t, LFP_block, t, A_pct_block);
                     
                     hold on, plot(repmat([beta_start, beta_end]/sampling_freq, 2, 1), diag([max(max(LFP_block)) min(min(LFP_block))])*ones(2), 'k')
                     
@@ -170,15 +174,23 @@ for fo = 1:length(folders)
                     
                     box off
                     
-                    axis tight
+                    axis(ax(1),'tight'), axis(ax(2),'tight'), xlim(ax(2),xlim(ax(1))) %axis tight
                     
-                    legend(chan_labels, 'Location', 'NorthWest')
+                    set(ax,{'ycolor'},{'black';'black'})
+                    
+                    set(get(ax(1),'YLabel'),'String','LFP')
+                    
+                    set(get(ax(2),'YLabel'),'String','Amplitude (% \beta)')
+                    
+                    legend(h1, chan_labels, 'Location', 'NorthWest')
+                    
+                    legend(h2, chan_labels, 'Location', 'SouthWest')
                     
                     %% Plot Bandpassed Oscillation and Phase Diff.
                     
                     subplot(4, 1, 4)%(6, 1, 6)
                     
-                    [ax, ~, h2] = plotyy(t, real(H_block), t, Pd_smooth);
+                    [ax, ~, ~] = plotyy(t, real(H_block), t, Pd_smooth);
                     
                     hold on, plot(t, zeros(length(t), 1), ':k'), plot(repmat([beta_start, beta_end]/sampling_freq, 2, 1), diag([max(max(real(H_block))) min(min(real(H_block)))])*ones(2), 'k')
                     

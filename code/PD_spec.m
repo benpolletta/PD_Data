@@ -9,7 +9,7 @@ load('PD_dec.mat')
 
 no_secs=floor(length(PD_dec)/sampling_freq);
 
-t=[1:no_secs*sampling_freq]/sampling_freq;
+t=(1:no_secs*sampling_freq)/sampling_freq;
 
 % [first_pmtm,f]=pmtm(PD_dec(1:sampling_freq),[],[],sampling_freq);
 % 
