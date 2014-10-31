@@ -16,6 +16,10 @@ nobs = size(X,2);
 % Find optimal model order.
 [AIC,BIC,moAIC,moBIC] = tsdata_to_infocrit(X,momax,'LWR',false);
 
+% figure(1); clf;
+% plot_tsdata([AIC BIC]',{'AIC','BIC'},1/1000);
+% title('Model order estimation');
+
 morder = moAIC;
 
 % Fit vector autoregressive model.
