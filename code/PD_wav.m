@@ -35,9 +35,9 @@ for fo = 1:length(folders)
         
         t = (1:no_secs*sampling_freq)/sampling_freq;
         
-        clear Spec Spec_pct BP BP_norm BP_pct
+        clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
         
-        [Spec, Spec_pct] = deal(nan(no_secs*sampling_freq, no_freqs, 2));
+        [Spec, Spec_norm, Spec_pct] = deal(nan(no_secs*sampling_freq, no_freqs, 2));
         
         [BP, BP_norm, BP_pct] = deal(nan(no_secs*sampling_freq, no_bands, 2));
         
@@ -115,7 +115,7 @@ for fo = 1:length(folders)
             
         end
         
-        save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_pct', 't', 'basetime', 'freqs', 'BP', 'BP_norm', 'BP_pct')
+        save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_norm', 'Spec_pct', 't', 'basetime', 'freqs', 'BP', 'BP_norm', 'BP_pct')
         
         % suffix = {'', '_pct'};
         %
