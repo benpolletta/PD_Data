@@ -4,8 +4,7 @@ load(subjects_mat)
 
 sampling_freq = 1000;
 
-freqs = 1:200;
-no_freqs = length(freqs);
+freqs = 1:200; no_freqs = length(freqs);
 
 bands = [1 4; 4 8; 8 30; 30 100; 100 120; 0 200]; no_bands = size(bands, 1);
 
