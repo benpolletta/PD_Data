@@ -6,9 +6,9 @@ sampling_freq = 1000;
 
 freqs = 1:200; no_freqs = length(freqs);
 
-bands = [1 4; 4 8; 8 30; 30 100; 100 120; 0 200]; no_bands = size(bands, 1);
+bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
 
-norms = {'', '_norm', '_pct'}; no_norms = length(norms);
+norms = {'', '_norm', '_pct', '_norm_pct'}; no_norms = length(norms);
 
 for fo = 1:length(folders)
     
@@ -29,20 +29,6 @@ for fo = 1:length(folders)
     no_epochs = no_pre_epochs + no_post_epochs;
     
     subj_name = [folder,'/',prefix];
-    
-    % load([subj_name, '_wt.mat'])
-    % 
-    % All_spec = nan([size(Spec) 3]);
-    % 
-    % All_spec(:, :, :, 1) = Spec; All_spec(:, :, :, 2) = Spec_norm; All_spec(:, :, :, 3) = Spec_pct;
-    % 
-    % clear Spec Spec_norm Spec_pct
-    % 
-    % All_BP = nan([size(BP) 3]);
-    % 
-    % All_BP(:, :, :, 1) = BP; All_BP(:, :, :, 2) = BP_norm; All_BP(:, :, :, 3);
-    % 
-    % clear BP BP_norm BP_pct
         
     t_dec = nan(no_epochs, 1);
     
