@@ -12,6 +12,10 @@ for fo = 1:length(folders)
     
     prefix = prefixes{fo};
     
+    subj_name = [folder,'/',prefix];
+    
+    load([subj_name,'_all_channel_data_dec.mat'])
+    
     basetime = basetimes(fo);
     
     base_index = basetime*sampling_freq;
@@ -20,13 +24,9 @@ for fo = 1:length(folders)
     
     start_index = base_index - no_pre_epochs*epoch_length;
     
-    no_post_epochs = floor(1500*sampling_freq/epoch_length);
+    no_post_epochs = floor(min(1500, size(PD_dec, 1)/sampling_freq - basetime)*sampling_freq/epoch_length);
     
     no_epochs = no_pre_epochs + no_post_epochs;
-    
-    subj_name = [folder,'/',prefix];
-    
-    load([subj_name,'_all_channel_data_dec.mat'])
     
     test_data = PD_dec(1:epoch_length, 1);
     
@@ -36,7 +36,7 @@ for fo = 1:length(folders)
     
     clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
     
-    epoch_no = nan(no_epochs, 1);
+    [epoch_no, t] = deal(nan(no_epochs, 1));
     
     [Spec, Spec_norm, Spec_pct] = deal(nan(no_epochs, no_freqs, 2));
         
@@ -49,6 +49,8 @@ for fo = 1:length(folders)
         epoch_start = start_index + (e - 1)*epoch_length + 1;
         
         epoch_end = start_index + e*epoch_length;
+        
+        t(e) = mean([epoch_start epoch_end])/sampling_freq - basetime;
         
         epoch_data = PD_dec(epoch_start:epoch_end, :);
         
@@ -66,7 +68,7 @@ for fo = 1:length(folders)
                 
                 band_indices = freqs >= bands(b, 1) & freqs <= bands(b, 2);
                 
-                BP(e, b, ch) = sum(abs(data_hat(band_indices)), 2);
+                BP(e, b, ch) = sum(abs(data_hat(band_indices)));
                 
             end
             
@@ -84,11 +86,11 @@ for fo = 1:length(folders)
         
         %% Baseline normalize.
         
-        baseline_mean = mean(abs(Spec_norm(t <= basetime, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+        baseline_mean = mean(abs(Spec_norm(t < 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
         
         Spec_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
         
-        baseline_BP = mean(BP_norm(t <= basetime, :, ch));
+        baseline_BP = mean(BP_norm(t < 0, :, ch));
         
         BP_pct(:, :, ch) = 100*BP_norm(:, :, ch)./ones(size(BP_norm(:, :, ch)))*diag(baseline_BP) - 100;
         
