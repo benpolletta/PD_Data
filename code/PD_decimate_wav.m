@@ -54,8 +54,12 @@ for fo = 1:length(folders)
         
         All_spec = load([subj_name, '_wt.mat'], ['Spec', norms{n}]);
         
+        All_spec = getfield(All_spec, ['Spec', norms{n}]);
+        
         All_BP = load([subj_name, '_wt.mat'], ['BP', norms{n}]);
         
+        All_BP = getfield(All_BP, ['BP', norms{n}]);
+
         no_secs = min(basetime + 1500, size(All_spec, 1)/sampling_freq);
         
         t = (1:(no_secs*sampling_freq))/sampling_freq - base_index;
@@ -64,11 +68,9 @@ for fo = 1:length(folders)
             
             for e = 1:no_epochs
                 
-                epoch_start = start_index + (e - 1)*epoch_length + 1
+                epoch_start = start_index + (e - 1)*epoch_length + 1;
                 
-                epoch_end = start_index + e*epoch_length
-
-		length(t)
+                epoch_end = start_index + e*epoch_length;
                 
                 t_dec(e) = median(t(epoch_start:epoch_end));
                 
