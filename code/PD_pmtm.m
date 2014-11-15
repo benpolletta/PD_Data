@@ -4,7 +4,7 @@ load(subjects_mat)
 
 sampling_freq = 1000;
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 500]; no_bands = size(bands, 1);
 
 for fo = 1:length(folders)
     
@@ -84,25 +84,39 @@ for fo = 1:length(folders)
         
         Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
         
-        baseline_BP = mean(BP(t < 0, :, ch));
-        
-        BP_pct(:, :, ch) = 100*BP(:, :, ch)./(ones(size(BP(:, :, ch)))*diag(baseline_BP)) - 100;
+        % baseline_BP = mean(BP(t < 0, :, ch));
+        % 
+        % BP_pct(:, :, ch) = 100*BP(:, :, ch)./(ones(size(BP(:, :, ch)))*diag(baseline_BP)) - 100;
         
         %% Normalize by total power.
         
-        BP_norm(:, :, ch) = BP(:, :, ch)./repmat(BP(:, end, ch), 1, no_bands);
-        
         Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(BP(:, end, ch), 1, no_freqs);
+        
+        % BP_norm(:, :, ch) = BP(:, :, ch)./repmat(BP(:, end, ch), 1, no_bands);
         
         %% Baseline normalize percent of total power.
         
         baseline_mean = mean(abs(Spec_norm(t < 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
         
         Spec_norm_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
+         
+        % baseline_BP = mean(BP_norm(t < 0, :, ch));
+        % 
+        % BP_norm_pct(:, :, ch) = 100*BP_norm(:, :, ch)./(ones(size(BP_norm(:, :, ch)))*diag(baseline_BP)) - 100;
         
-        baseline_BP = mean(BP_norm(t < 0, :, ch));
+        %% Band power.
         
-        BP_norm_pct(:, :, ch) = 100*BP_norm(:, :, ch)./(ones(size(BP_norm(:, :, ch)))*diag(baseline_BP)) - 100;
+        for b = 1:no_bands
+            
+            band_indices = freqs >= bands(b, 1) & freqs <= bands(b, 2);
+            
+            BP_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
+            
+            BP_norm(:, b, ch) = sum(Spec_norm(:, band_indices, ch), 2);
+            
+            BP_norm_pct(:, b, ch) = sum(Spec_norm_pct(:, band_indices, ch), 2);
+            
+        end
         
     end
         

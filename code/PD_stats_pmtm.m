@@ -29,6 +29,11 @@ for fo = 1:length(folders)
     for n = 1:no_norms
         
         BP_data = getfield(All_data, ['BP', norms{n}]);
+        
+        %% Eliminating segments with high total power.
+        
+                    
+        %% Comparing Band Power against Baseline, for Each Window.
 
         for b = 1:no_bands
             
@@ -40,11 +45,9 @@ for fo = 1:length(folders)
                 
                 for ch = 1:2
                     
-                    %% Comparing Band Power against Baseline.
+                    p_less(w, ch, b, n) = ranksum(BP_data(t < 0, b, ch), BP_data(win_indices, b, ch), 'tail', 'right');
                     
-                    p_less(w, ch, n) = ranksum(BP_data(t < 0, b, ch), BP_data(win_indices, b, ch), 'tail', 'right');
-                    
-                    p_greater(w, ch, n) = ranksum(BP_data(t < 0, b, ch), BP_data(win_indices, b, ch), 'tail', 'left');
+                    p_greater(w, ch, b, n) = ranksum(BP_data(t < 0, b, ch), BP_data(win_indices, b, ch), 'tail', 'left');
                     
                 end
                 
@@ -54,6 +57,6 @@ for fo = 1:length(folders)
         
     end
     
-    save([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats'], 't_win', 'bands', 'norms', 'p_less', 'p_greater')
+    save([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat'], 't_win', 'bands', 'norms', 'p_less', 'p_greater')
     
 end

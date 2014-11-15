@@ -1,5 +1,7 @@
 function PD_plot_pmtm(subjects_mat, epoch_secs, window_secs)
 
+close('all')
+
 load(subjects_mat)
 
 bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
@@ -20,11 +22,15 @@ for fo = 1:length(folders)
    
     All_data = load([subj_name, '_', num2str(epoch_secs), 's_epoch_pmtm.mat']);
     
-    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats']);
+    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat']);
     
-    lower_test = p_lower <= .01/2*sum_all_dimensions(~isnan(p_lower));
+    lower_test = p_less <= .01/(2*sum_all_dimensions(~isnan(p_less))); lower_test = +lower_test;
     
-    upper_test = p_upper <= .05/2*sum_all_dimensions(~isnan(p_upper));
+    lower_test(lower_test == 0) = nan;
+    
+    upper_test = p_greater <= .05/(2*sum_all_dimensions(~isnan(p_greater))); upper_test = +upper_test;
+    
+    upper_test(upper_test == 0) = nan;
     
     t = All_data.t;
     
@@ -68,7 +74,7 @@ for fo = 1:length(folders)
             
         end
         
-        try, save_as_pdf(gcf, [subj_name, '_', num2str(epoch_secs), 's_pmtm', norms{n}]), end
+        try, save_as_pdf(gcf, [subj_name, '_', num2str(epoch_secs), 's_epochs_pmtm', norms{n}]), end
         
         %% Plotting Band Power.
         
@@ -78,23 +84,27 @@ for fo = 1:length(folders)
         
         for b = 1:no_bands
             
-            subplot(r, c, b)
+            handle = subplot(r, c, b);
             
             plot(t, zscore(reshape(BP_data(:, b, :), size(BP_data, 1), 2)))
             
-            add_stars(t_win, [lower_test(:, :, b, n) upper_test(:, :, b, n)], [0 0 1 1])
+            add_stars(handle, t_win, [lower_test(:, :, b, n) upper_test(:, :, b, n)], [0 0 1 1], [0 0 1; 0 .5 0; 0 0 1; 0 .5 0])
             
             xlabel('Time (s)')
             
             ylabel(['Power', norm_labels{n}])
             
-            title(['Power, ', num2str(bands(b, 1)), ' - ', num2str(bands(b, 2)), ' Hz'])
+            title([folder, ', ', num2str(bands(b, 1)), ' - ', num2str(bands(b, 2)), ' Hz'])
             
-            legend(chan_labels)
+            if b == 1
+            
+                legend(chan_labels, 'Location', 'NorthWest')
+            
+            end
             
         end
         
-        try, save_as_pdf(gcf, [subj_name, '_', num2str(epoch_secs), 's_pmtm_BP', norms{n}]), end
+        try, save_as_pdf(gcf, [subj_name, '_', num2str(epoch_secs), 's_epochs_' , num2str(window_secs), 's_stats_pmtm_BP', norms{n}]), end
         
     end
     

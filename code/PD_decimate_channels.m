@@ -41,7 +41,7 @@ for ch = 1:2
     
     PD_dec_temp = PD_dec_temp - PD_trend;
     
-    PD_dec(:,ch) =  PD_dec_temp;
+    PD_dec(:,ch) = PD_dec_temp;
     
 end
 
