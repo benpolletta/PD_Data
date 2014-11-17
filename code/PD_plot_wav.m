@@ -1,8 +1,10 @@
-function PD_plot_wav(subjects_mat, epoch_length)
+function PD_plot_wav(subjects_mat, epoch_secs)
 
 load(subjects_mat)
 
 sampling_freq = 1000;
+
+epoch_length = epoch_secs*sampling_freq;
 
 freqs = 1:200;
 
@@ -24,7 +26,7 @@ for fo = 1:length(folders)
     
     subj_name = [folder,'/',prefix];
    
-    load([subj_name, '_', num2str(epoch_length/sampling_freq), 's_dec_wav.mat'])
+    load([subj_name, '_', num2str(epoch_secs), 's_dec_wav.mat'])
     
     for n = 1:no_norms
         
@@ -38,7 +40,7 @@ for fo = 1:length(folders)
                 
                 subplot(2, 1, ch)
                 
-                imagesc(t_dec, freqs, Spec_dec(:, :, ch, n, s)')
+                imagesc(t_dec, freqs, abs(Spec_dec(:, :, ch, n, s))')
                 
                 cl = caxis; caxis([cl(1) .25*cl(2)])
                 
@@ -52,7 +54,7 @@ for fo = 1:length(folders)
                 
             end
         
-            try save_as_pdf(gcf, [subj_name, '_', num2str(epoch_length/sampling_freq), 's_wav', norms{n}, '_', stat_labels{s}]), end
+            try save_as_pdf(gcf, [subj_name, '_', num2str(epoch_secs), 's_wav', norms{n}, '_', stat_labels{s}]), end
             
             %% Plotting Band Power.
             
@@ -76,7 +78,7 @@ for fo = 1:length(folders)
                 
             end
             
-            try save_as_pdf(gcf, [subj_name, '_', num2str(epoch_length/sampling_freq), 's_wav_BP', norms{n}, '_', stat_labels{s}]), end
+            try save_as_pdf(gcf, [subj_name, '_', num2str(epoch_secs), 's_wav_BP', norms{n}, '_', stat_labels{s}]), end
             
         end
         

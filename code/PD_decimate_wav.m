@@ -1,8 +1,10 @@
-function PD_decimate_wav(subjects_mat, epoch_length)
+function PD_decimate_wav(subjects_mat, epoch_secs)
 
 load(subjects_mat)
 
 sampling_freq = 1000;
+
+epoch_length = epoch_secs*sampling_freq;
 
 freqs = 1:200; no_freqs = length(freqs);
 
@@ -10,11 +12,15 @@ bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
 
 norms = {'', '_norm', '_pct', '_norm_pct'}; no_norms = length(norms);
 
-for fo = 1:length(folders)
+for fo = 2:length(folders)
     
     folder = folders{fo};
     
     prefix = prefixes{fo};
+    
+    subj_name = [folder,'/',prefix];
+    
+    load([subj_name,'_all_channel_data_dec.mat'])
     
     basetime = basetimes(fo);
     
@@ -24,11 +30,9 @@ for fo = 1:length(folders)
     
     start_index = base_index - no_pre_epochs*epoch_length;
     
-    no_post_epochs = floor(1500*sampling_freq/epoch_length);
+    no_post_epochs = floor(min(1500, size(PD_dec, 1)/sampling_freq - basetime)*sampling_freq/epoch_length);
     
     no_epochs = no_pre_epochs + no_post_epochs;
-    
-    subj_name = [folder,'/',prefix];
         
     t_dec = nan(no_epochs, 1);
     
@@ -60,7 +64,7 @@ for fo = 1:length(folders)
                 
                 t_dec(e) = median(t(epoch_start:epoch_end));
                 
-                epoch_spec = All_spec(epoch_start:epoch_end, :, ch);
+                epoch_spec = abs(All_spec(epoch_start:epoch_end, :, ch));
                 
                 Spec_dec(e, :, ch, n, 1) = median(epoch_spec);
                 
@@ -78,6 +82,6 @@ for fo = 1:length(folders)
         
     end
    
-    save([subj_name, '_', num2str(epoch_length/sampling_freq), 's_dec_wav.mat'], '-v7.3', 't_dec', 'Spec_dec', 'BP_dec')
+    save([subj_name, '_', num2str(epoch_secs), 's_dec_wav.mat'], '-v7.3', 't_dec', 'Spec_dec', 'BP_dec')
     
 end

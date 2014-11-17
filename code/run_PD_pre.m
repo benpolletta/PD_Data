@@ -8,7 +8,7 @@ present_dir = pwd;
 
 load('st_stn_subjects.mat')
 
-for fo = 1:length(folders)
+parfor fo = 1:length(folders)
     
     folder = folders{fo};
     

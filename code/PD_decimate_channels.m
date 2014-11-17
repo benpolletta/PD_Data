@@ -8,11 +8,11 @@ for ch = 1:2
     
     PD_dec_temp = decimate(PD_data(:,ch), 10);
     
-    PD_dec_temp = decimate(PD_dec_temp, 2);
+    PD_dec_temp = decimate(PD_dec_temp, 4);
     
     PD_dec_temp = detrend(PD_dec_temp, 'linear');
     
-    sampling_freq = sampling_rate/20;
+    sampling_freq = sampling_rate/40;
     
     hanning_window = hanning(20*sampling_freq);
     hanning_window = hanning_window/sum(hanning_window);
