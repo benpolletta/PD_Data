@@ -1,12 +1,8 @@
-function run_PD_pre(outlier_check)
+function run_PD_pre(subject_mat, outlier_check)
 
 present_dir = pwd;
 
-% load('initial_subjects.mat')
-
-% load('st_m1_subjects.mat')
-
-load('st_stn_subjects.mat')
+load(subject_mat)
 
 parfor fo = 1:length(folders)
     
