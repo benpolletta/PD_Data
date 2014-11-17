@@ -1,4 +1,5 @@
-function [mean_E,std_E,normalizer] = PD_powerfreq(subject_mat)
+function [mean_E, std_E, normalizer] = PD_powerfreq(subject_mat)
+
 sampling_freq=1000;
 a=3;
 b=72;
@@ -6,12 +7,12 @@ b=72;
 load(subject_mat);
 pd_label = {'pre','post'};
 
-normalizer(70,length(folders),length(chan_labels))=0;
+normalizer(70,length(folders),length(chan_labels))=0; % Same as setting normalizer = zeros(70, length(folders, length(chan_labels));
 
 for pd=1:length(pd_label)
     
     avg_E=[];
-    pre_E=[];
+    % pre_E=[];
 
     for fo = 1:length(folders)-1
         
@@ -24,6 +25,7 @@ for pd=1:length(pd_label)
         
         for ch=1:length(chan_labels)
             % pre_E(:,fo,ch)=mean(zscore(log(energy(a:b, :, ch)), 0, 1), 2);
+            
             if pd==1
                 normalizer(:, fo, ch) = mean(energy(a:b, 1:60*5*fo, ch), 2);
             end

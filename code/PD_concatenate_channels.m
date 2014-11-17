@@ -2,7 +2,7 @@ function PD_concatenate_channels(prefix,plot_opt)
 
 datalist = [prefix,'_datafiles.list'];
     
-if isempty(dir(datalist))
+% if isempty(dir(datalist))
     
     file_fid = fopen(datalist,'w');
     
@@ -20,7 +20,7 @@ if isempty(dir(datalist))
     
     fclose(file_fid);
     
-end
+% end
 
 file_fid = fopen(datalist,'r');
 
