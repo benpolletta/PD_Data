@@ -16,7 +16,7 @@ parfor fo = 1:length(folders)
 %     
 %     PD_decimate(prefix,1)
     
-%     PD_concatenate_channels(prefix,1)
+    PD_concatenate_channels(prefix,1)
     
     PD_decimate_channels(prefix,1)
     

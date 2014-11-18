@@ -46,7 +46,7 @@ for fo = 2:length(folders)
         
         All_spec = getfield(All_spec, ['Spec', norms{n}]);
         
-        All_BP = load([subj_name, '_wt.mat'], ['BP', norms{n}]);
+        All_BP = load([subj_name, '_wt_BP.mat'], ['BP', norms{n}]);
         
         All_BP = getfield(All_BP, ['BP', norms{n}]);
 
