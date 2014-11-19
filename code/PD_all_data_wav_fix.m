@@ -12,8 +12,6 @@ no_cycles = linspace(3, 21, no_freqs);
 
 wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
 
-segment_length = size(wavelets, 2);
-
 for fo = 1:length(folders)
     
     folder = folders{fo};
@@ -52,7 +50,7 @@ for fo = 1:length(folders)
         
         %% Normalize by total power.
         
-        Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(sqrt(sum(Spec.^2, 2)), 1, no_freqs);
+        Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(sqrt(sum(Spec(:, :, ch).^2, 2)), 1, no_freqs);
         
         %% Baseline normalize percent of total power.
         
@@ -68,11 +66,11 @@ for fo = 1:length(folders)
             
             BP(:, b, ch) = sqrt(sum(abs(Spec(:, band_indices, ch)).^2, 2));
             
-            BP_pct(:, :, ch) = sqrt(sum(abs(Spec_pct(:, band_indices, ch)).^2, 2));
+            BP_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
             
-            BP_norm(:, b, ch) = sqrt(sum(abs(Spec_norm(:, band_indices, ch)).^2, 2));
+            BP_norm(:, b, ch) = sum(Spec_norm(:, band_indices, ch), 2);
             
-            BP_norm_pct(:, b, ch) = sqrt(sum(abs(Spec_pct(:, band_indices, ch)).^2, 2));
+            BP_norm_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
             
         end
         
