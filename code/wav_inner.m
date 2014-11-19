@@ -42,7 +42,7 @@ for ch = 1:2
     
     %% Normalize by total power.
     
-    Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(BP(:, end, ch), 1, no_freqs);
+    Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(sqrt(sum(Spec.^2, 2)), 1, no_freqs);
     
     %% Baseline normalize percent of total power.
     

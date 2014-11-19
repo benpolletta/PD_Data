@@ -2,7 +2,7 @@ function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size)
 
 load(subject_mat)
 
-sampling_freq = 1000;
+%sampling_freq = 1000;
 
 freqs = 1:200; % no_freqs = length(freqs);
 
@@ -102,7 +102,7 @@ for fo = 1:length(folders)
             
             subplot(6, 1, (ch - 1)*3 + 1)
             
-            imagesc(t, freqs, WT_chunk(:, 1:100, ch)')
+            imagesc(t, freqs(1:100), WT_chunk(:, 1:100, ch)')
             
             if ch == 1
                

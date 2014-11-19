@@ -32,6 +32,15 @@ for fo = 1:length(folders)
         
         %% Eliminating segments with high total power.
         
+        BP_tot_zs = zscore(BP_data(:, end));
+        
+        BP_out = find(BP_tot_zs > 5);
+        
+        for o = 1:length(BP_out)
+           
+            
+            
+        end
                     
         %% Comparing Band Power against Baseline, for Each Window.
 
