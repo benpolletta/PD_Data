@@ -1,12 +1,12 @@
-function PD_rel_infusion_plot_spectrogram(subject_mat, chunk_size)
+function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size)
 
 load(subject_mat)
 
 sampling_freq = 1000;
 
-freqs = 1:200; no_freqs = length(freqs);
+freqs = 1:200; % no_freqs = length(freqs);
 
-no_cycles = linspace(3, 21, no_freqs);
+% no_cycles = linspace(3, 21, no_freqs);
 
 bands = [1 8; 8 30; 30 100; 100 200; 0 200]; no_bands = size(bands, 1);
 
@@ -20,9 +20,7 @@ for b = 1:no_bands
 
 end
     
-no_channels = length(chan_labels);
-
-BP_chunk = nan(chunk_size*sampling_freq, no_bands); %[total_chunk, beta_chunk] = deal(nan(chunk_size*sampling_freq, 2));
+% BP_chunk = nan(chunk_size*sampling_freq, no_bands); %[total_chunk, beta_chunk] = deal(nan(chunk_size*sampling_freq, 2));
 
 for fo = 1:length(folders)
     
@@ -44,13 +42,23 @@ for fo = 1:length(folders)
     
     no_chunks = no_mins*60/chunk_size;
     
-    load([subj_name,'_wt.mat'], 'Spec', 'BP')
+    load([subj_name, '_wt.mat'], 'Spec')
     
-    BP_zs = nan(size(BP));
+    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm')
+    
+    load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
+    
+    load([subj_name, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high_cum')
+    
+    BP_high(BP_high == 0) = nan; BP_high_cum(BP_high_cum == 0) = nan;
+    
+    % [BP_zs, BP_norm_zs] = deal(nan(size(BP)));
     
     for ch = 1:2
     
-        BP_zs(:, :, ch) = zscore(BP(:, :, ch));
+        BP(:, :, ch) = zscore(BP(:, :, ch));
+        
+        BP_norm(:, :, ch) = zscore(BP_norm(:, :, ch));
     
     end
         
@@ -64,7 +72,15 @@ for fo = 1:length(folders)
         
         LFP_chunk = PD_zs(chunk_start:chunk_end, :);
         
-        WT_chunk = abs(Spec(chunk_start:chunk_end, :, :)); % WT_chunk = abs(wavelet_spectrogram(LFP_chunk, sampling_freq, freqs, no_cycles));
+        WT_chunk = Spec(chunk_start:chunk_end, :, :); % WT_chunk = abs(wavelet_spectrogram(LFP_chunk, sampling_freq, freqs, no_cycles));
+        
+        BP_chunk = BP(chunk_start:chunk_end, :, :);
+        
+        BP_norm_chunk = BP_norm(chunk_start:chunk_end, :, :);
+        
+        BP_high_chunk = BP_high(chunk_start:chunk_end, :, :);
+        
+        BP_high_cum_chunk = BP_high_cum(chunk_start:chunk_end, :, :);
         
         t = ((chunk_start:chunk_end)/sampling_freq - basetime);
         
@@ -72,7 +88,7 @@ for fo = 1:length(folders)
         
         figure
         
-        for ch = 1:no_channels
+        for ch = 1:2
             
             % %% Compute Band Power.
             % 
@@ -114,7 +130,27 @@ for fo = 1:length(folders)
             
             subplot(6, 1, (ch - 1)*3 + 3)
             
-            plot(t, [LFP_chunk(:, ch) BP_zs(chunk_start:chunk_end, :, ch)])%BP_chunk]))
+            [ax, ~, h2] = plotyy(t, LFP_chunk(:, ch), t, BP_chunk(:, :, ch));
+            
+            box off
+            
+            hold(ax(1), 'on'), hold(ax(2), 'on')
+            
+            plot(ax(2), t, BP_high_cum_chunk(:, :, ch).*BP_chunk(:, :, ch), 'LineWidth', 2)
+            
+            plot(ax(2), t, BP_norm_chunk(:, :, ch), '--')
+            
+            plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_norm_chunk(:, :, ch), '--', 'LineWidth', 2)
+            
+            axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
+            
+            set(ax,{'ycolor'},{'black';'black'})
+            
+            set(get(ax(1),'YLabel'), 'String', 'LFP')
+            
+            set(get(ax(2),'YLabel'), 'String', 'Band Power')
+            
+            legend(h2, band_labels, 'Location', 'SouthWest')
 
             axis tight
             
@@ -122,13 +158,25 @@ for fo = 1:length(folders)
             
             set(gca, 'YTick', ceil(yl(1)):floor(yl(2)), 'YTickLabel', ceil(yl(1)):2:floor(yl(2)), 'YGrid', 'on')
             
-            ylabel(['LFP & Band Power'])
-            
-            if ch == 1
-            
-                legend({'LFP', band_labels{:}})
-            
-            end
+            % %% Plot LFP & Band Power.
+            % 
+            % subplot(6, 1, (ch - 1)*3 + 3)
+            % 
+            % plot(t, [LFP_chunk(:, ch) BP_zs(chunk_start:chunk_end, :, ch)])%BP_chunk]))
+            % 
+            % axis tight
+            % 
+            % yl = ylim;
+            % 
+            % set(gca, 'YTick', ceil(yl(1)):floor(yl(2)), 'YTickLabel', ceil(yl(1)):2:floor(yl(2)), 'YGrid', 'on')
+            % 
+            % ylabel(['LFP & Band Power'])
+            % 
+            % if ch == 1
+            % 
+            %     legend({'LFP', band_labels{:}})
+            % 
+            % end
             
         end
         
