@@ -84,4 +84,6 @@ for fo = 1:length(folders)
         
     end
     
+    close('all')
+    
 end

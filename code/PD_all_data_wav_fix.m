@@ -2,15 +2,15 @@ function PD_all_data_wav_fix(subjects_mat)
 
 load(subjects_mat)
 
-sampling_freq = 1000;
+% sampling_freq = 1000;
 
-freqs = 1:200; no_freqs = length(freqs);
+freqs = 1:200; % no_freqs = length(freqs);
 
 bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
 
-no_cycles = linspace(3, 21, no_freqs);
-
-wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
+% no_cycles = linspace(3, 21, no_freqs);
+% 
+% wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
 
 for fo = 1:length(folders)
     
@@ -76,8 +76,8 @@ for fo = 1:length(folders)
         
     end
     
-    save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', 't', 'basetime', 'freqs')
+    save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', 't', 'basetime', 'freqs', 'sampling_freq')
     
-    save([subj_name, '_wt_BP.mat'], '-v7.3', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', 't', 'basetime', 'bands')
+    save([subj_name, '_wt_BP.mat'], '-v7.3', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', 't', 'basetime', 'bands', 'sampling_freq')
     
 end

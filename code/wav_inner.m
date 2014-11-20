@@ -52,7 +52,7 @@ for ch = 1:2
     
 end
 
-save([subj_name, '_wt.mat'], 't', 'basetime', 'freqs', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', '-v7.3')
+save([subj_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', '-v7.3')
     
 %% Band power.
 
@@ -74,4 +74,4 @@ for ch = 1:2
     
 end
 
-save([subj_name, '_wt_BP.mat'], 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', '-v7.3')
+save([subj_name, '_wt_BP.mat'], 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', '-v7.3')

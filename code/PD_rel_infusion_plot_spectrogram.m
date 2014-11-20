@@ -8,13 +8,13 @@ freqs = 1:200; % no_freqs = length(freqs);
 
 % no_cycles = linspace(3, 21, no_freqs);
 
-bands = [1 8; 8 30; 30 100; 100 200; 0 200]; no_bands = size(bands, 1);
+bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
 
 [band_indices, band_labels] = deal(cell(no_bands, 1));
 
 for b = 1:no_bands
 
-    band_indices{b} = freqs >= bands(b, 1) & freqs <= bands(b, 2);
+    % band_indices{b} = freqs >= bands(b, 1) & freqs <= bands(b, 2);
     
     band_labels{b} = [num2str(bands(b, 1)), '-', num2str(bands(b, 2)),'Hz'];
 
@@ -62,7 +62,7 @@ for fo = 1:length(folders)
     
     end
         
-    for c = (19*3):no_chunks
+    for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
         chunk_name = [subj_name, '_chunk', num2str(c), '_wt'];
     
@@ -116,19 +116,21 @@ for fo = 1:length(folders)
             
             hold on, plot(t', ones(length(t), 2)*diag([10 30]), ':w'),
             
-            subplot(6, 1, (ch - 1)*3 + 2)
-            
-            imagesc(t, freqs, zscore(WT_chunk(:, 1:100, ch))')
-            
-            ylabel('Freq. Normalized')
-            
-            axis xy
-            
-            hold on, plot(t', ones(length(t), 2)*diag([10 30]), '--w'),
+            % subplot(6, 1, (ch - 1)*3 + 2)
+            % 
+            % imagesc(t, freqs(1:100), zscore(WT_chunk(:, 1:100, ch))')
+            % 
+            % ylabel('Freq. Normalized')
+            % 
+            % axis xy
+            % 
+            % hold on, plot(t', ones(length(t), 2)*diag([10 30]), '--w'),
+            % 
+            % % hold on, plot(t, 100*(LFP_chunk(:, ch) - min(LFP_chunk(:, ch)))/range(LFP_chunk(:, ch)), '--r')
             
             %% Plot LFP & Band Power.
             
-            subplot(6, 1, (ch - 1)*3 + 3)
+            subplot(6, 1, (ch - 1)*3 + 2)
             
             [ax, ~, h2] = plotyy(t, LFP_chunk(:, ch), t, BP_chunk(:, :, ch));
             
@@ -138,9 +140,9 @@ for fo = 1:length(folders)
             
             plot(ax(2), t, BP_high_cum_chunk(:, :, ch).*BP_chunk(:, :, ch), 'LineWidth', 2)
             
-            plot(ax(2), t, BP_norm_chunk(:, :, ch), '--')
-            
-            plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_norm_chunk(:, :, ch), '--', 'LineWidth', 2)
+%             plot(ax(2), t, BP_norm_chunk(:, :, ch), '--')
+%             
+%             plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_norm_chunk(:, :, ch), '--', 'LineWidth', 2)
             
             axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
             
@@ -150,8 +152,12 @@ for fo = 1:length(folders)
             
             set(get(ax(2),'YLabel'), 'String', 'Band Power')
             
-            legend(h2, band_labels, 'Location', 'SouthWest')
+            if ch == 1
+            
+                legend(h2, band_labels, 'Location', 'SouthWest')
 
+            end
+                
             axis tight
             
             yl = ylim;
@@ -177,6 +183,32 @@ for fo = 1:length(folders)
             %     legend({'LFP', band_labels{:}})
             % 
             % end
+            
+            %% Plot LFP & Band Power (Norm.
+            
+            subplot(6, 1, (ch - 1)*3 + 3)
+            
+            [ax, ~, h2] = plotyy(t, nan(size(LFP_chunk(:, ch))), t, BP_norm_chunk(:, :, ch));
+            
+            box off
+            
+            hold(ax(1), 'on'), hold(ax(2), 'on')
+            
+            plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_norm_chunk(:, :, ch), 'LineWidth', 2)
+            
+            axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
+            
+            set(ax,{'ycolor'},{'black';'black'})
+            
+            set(get(ax(1),'YLabel'), 'String', 'LFP')
+            
+            set(get(ax(2),'YLabel'), 'String', '% Band Power')
+                
+            axis tight
+            
+            yl = ylim;
+            
+            set(gca, 'YTick', ceil(yl(1)):floor(yl(2)), 'YTickLabel', ceil(yl(1)):2:floor(yl(2)), 'YGrid', 'on')
             
         end
         
