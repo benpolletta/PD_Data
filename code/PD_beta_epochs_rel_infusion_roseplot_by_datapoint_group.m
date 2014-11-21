@@ -314,7 +314,9 @@ for ch = 1:4 %no_channels
         
         % legend(period_label, 'Location', 'NorthEast')
         
-        set(gca, 'XTickLabel', f_centers)
+        set(gca, 'XTick', f_centers - 1, 'XTickLabel', f_centers)
+        
+        xlim([8 30])
         
         freezeColors
         
@@ -346,7 +348,9 @@ for ch = 1:4 %no_channels
         
         % legend(period_label, 'Location', 'NorthWest')
         
-        set(gca, 'XTickLabel', f_centers)
+        set(gca, 'XTick', f_centers - 1, 'XTickLabel', f_centers)
+        
+        xlim([8 30])
         
         freezeColors
         
@@ -378,7 +382,9 @@ for ch = 1:4 %no_channels
         
         % legend(period_label, 'Location', 'SouthEast')
         
-        set(gca, 'XTickLabel', f_centers)
+        set(gca, 'XTick', f_centers - 1, 'XTickLabel', f_centers)
+        
+        xlim([8 30])
         
         freezeColors
         
