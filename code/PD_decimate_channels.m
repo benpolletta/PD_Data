@@ -1,4 +1,4 @@
-function PD_decimate_channels(prefix,plot_opt)
+function PD_decimate_channels(prefix, detrend_window, plot_opt)
 
 load([prefix,'_all_channel_data.mat'])
 
@@ -14,7 +14,7 @@ for ch = 1:2
     
     sampling_freq = sampling_rate/40;
     
-    hanning_window = hanning(20*sampling_freq);
+    hanning_window = hanning(detrend_window*sampling_freq);
     hanning_window = hanning_window/sum(hanning_window);
     
     PD_dec_temp_reflected = [flipud(PD_dec_temp(1:5*sampling_rate)); PD_dec_temp; fliplr(PD_dec_temp(1:5*sampling_rate))];

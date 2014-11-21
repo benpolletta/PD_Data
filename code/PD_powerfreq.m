@@ -1,13 +1,12 @@
 function [mean_E, std_E, normalizer] = PD_powerfreq(subject_mat)
 
-sampling_freq=1000;
-a=3;
-b=72;
+low_freq_lim = 3;
+high_freq_lim = 72;
 
 load(subject_mat);
 pd_label = {'pre','post'};
 
-normalizer(70,length(folders),length(chan_labels))=0; % Same as setting normalizer = zeros(70, length(folders, length(chan_labels));
+normalizer(70, length(folders), length(chan_labels))=0; % Same as setting normalizer = zeros(70, length(folders, length(chan_labels));
 
 for pd=1:length(pd_label)
     
@@ -19,15 +18,17 @@ for pd=1:length(pd_label)
         folder = folders{fo};
         prefix = prefixes {fo};
         
-        outputname=[pwd, '/', subject_mat(1:end-12), prefix, '_', pd_label{pd}, '_all_channel_spec_HT', '.mat'];
+        outputname=[subject_mat(1:end-12), prefix, '_', pd_label{pd}, '_all_channel_spec_HT', '.mat'];
         
         load(outputname)
         
-        for ch=1:length(chan_labels)
+        for ch = 1:length(chan_labels)
             % pre_E(:,fo,ch)=mean(zscore(log(energy(a:b, :, ch)), 0, 1), 2);
             
-            if pd==1
+            if pd == 1
+                
                 normalizer(:, fo, ch) = mean(energy(a:b, 1:60*5*fo, ch), 2);
+            
             end
             
             pre_E = zeros(70, length(energy), length(chan_labels));
