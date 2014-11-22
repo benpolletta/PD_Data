@@ -47,8 +47,8 @@ for lowfreq = low_freq_lim:high_freq_lim
         
         filt_det = detrend(tempsignal); % Detrends (brings to zero mean) the filtered signal by subtracting a linear best fit (not just average!).
         
-        phase(lowfreq + 2, (j-1)*SegPoints + 1:length(tempsignal)) = angle(hilbert(filt_det));  % If we didn't downsample then we just spit it out.
-        energy(lowfreq + 2, (j-1)*SegPoints + 1:length(tempsignal)) = abs(hilbert(filt_det));
+        phase(lowfreq + 2, (j-1)*SegPoints + (1:length(tempsignal))) = angle(hilbert(filt_det));  % If we didn't downsample then we just spit it out.
+        energy(lowfreq + 2, (j-1)*SegPoints + (1:length(tempsignal))) = abs(hilbert(filt_det));
         
         clear tempsignal;
         clear filt_det;

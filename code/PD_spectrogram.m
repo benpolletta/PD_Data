@@ -1,7 +1,7 @@
 function PD_spectrogram(subject_mat)
 
 low_freq_lim = 1;
-high_freq_lim = 100;
+high_freq_lim = 200;
 
 load(subject_mat);
 
@@ -16,13 +16,16 @@ for fo = 1:length(folders)
     folder = folders{fo};
     prefix = prefixes {fo};
     
-    base_index = basetimes(fo)*sampling_freq;
-    beta_index = (betatimes(fo))*sampling_freq+base_index;
     subj_name = [folder,'/',prefix];
     
     load([pwd,'/',subj_name,'_all_channel_data_dec.mat'])
     
-    for pd = 1:length(pd_label)
+    base_index = basetimes(fo)*sampling_freq;
+    %beta_index = (betatimes(fo))*sampling_freq+base_index;
+    
+    pd_limits = [1 base_index length(PD_dec)];
+    
+    for pd = 1:length(pd_labels)
         
         for ch = 1:length(chan_labels)
             
@@ -30,17 +33,22 @@ for fo = 1:length(folders)
             
             dummydata=sampling_freq*5; %5sec of dummy data
             
-            if pd == 1
-                
-                % tempdata = [PD_dec(dummydata:-1:1, ch); PD_dec(1:base_index, ch); PD_dec(base_index:-1:(base_index - dummydata + 1), ch)]';
-                tempdata = [PD_dec(dummydata:-1:1, ch); PD_dec(:, ch); PD_dec(end:-1:end-dummydata+1, ch)]';
-                
-            elseif pd == 2
-                
-                tempdata = [PD_dec((dummydata + base_index - 1):-1:base_index, ch); PD_dec(base_index+1:beta_index, ch);...
-                    PD_dec(beta_index:-1:(beta_index - dummydata + 1), ch)]';
-                
-            end
+            clear tempdata
+            
+            tempdata = [PD_dec((pd_limits(pd) + dummydata):-1:1, ch); PD_dec(pd_limits(pd):pd_limits(pd + 1), ch); ...
+                PD_dec(pd_limits(pd + 1):-1:(pd_limits(pd + 1) - dummydata + 1), ch)]';
+            
+            % if pd == 1
+            % 
+            %     % tempdata = [PD_dec(dummydata:-1:1, ch); PD_dec(1:base_index, ch); PD_dec(base_index:-1:(base_index - dummydata + 1), ch)]';
+            %     tempdata = [PD_dec(dummydata:-1:1, ch); PD_dec(:, ch); PD_dec(end:-1:end-dummydata+1, ch)]';
+            % 
+            % elseif pd == 2
+            % 
+            %     tempdata = [PD_dec((dummydata + base_index - 1):-1:base_index, ch); PD_dec(base_index+1:beta_index, ch);...
+            %         PD_dec(beta_index:-1:(beta_index - dummydata + 1), ch)]';
+            % 
+            % end
             
             SegPoints = 5000;
             
@@ -63,7 +71,7 @@ for fo = 1:length(folders)
         
         end
         
-        outputname = [subject_mat(1:end-12), prefix, '_', pd_label{pd}, '_all_channel_spec_HT', '.mat'];
+        outputname = [subject_mat(1:end-12), prefix, '_', pd_labels{pd}, '_all_channel_spec_HT', '.mat'];
         save (outputname, '-struct', 'PD_spec', '-v7')
         clear PD_spec
         

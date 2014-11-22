@@ -27,15 +27,15 @@ for pd=1:length(pd_label)
             
             if pd == 1
                 
-                normalizer(:, fo, ch) = mean(energy(a:b, 1:60*5*fo, ch), 2);
+                normalizer(:, fo, ch) = mean(energy(low_freq_lim:high_freq_lim, 1:60*5*fo, ch), 2);
             
             end
             
             pre_E = zeros(70, length(energy), length(chan_labels));
             
             % pre_E(:,:,ch)=energy(a:b,:,ch) ./ repmat(normalizer(:,fo,ch),[1 length(energy) 1]);
-            pre_E(:, :, ch) = (energy(a:b, :, ch) - repmat(normalizer(:, fo, ch), [1 length(energy) 1])) ...
-                ./ (energy(a:b, :, ch) + repmat(normalizer(:, fo, ch), [1 length(energy) 1]));
+            pre_E(:, :, ch) = (energy(low_freq_lim:high_freq_lim, :, ch) - repmat(normalizer(:, fo, ch), [1 length(energy) 1])) ...
+                ./ (energy(low_freq_lim:high_freq_lim, :, ch) + repmat(normalizer(:, fo, ch), [1 length(energy) 1]));
             % avg_E(:,ch)=reshape(pre_E(:,fo,ch),b-a+1,1);
             
             avg_E(:, fo, ch) = mean(pre_E(:,:,ch), 2);

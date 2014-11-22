@@ -24,23 +24,11 @@ for fo = 1:length(folders)
         
     t_win = nan(no_windows, 1);
     
-    [p_less, p_greater] = deal(nan(no_windows, 2, no_bands, no_norms));
+    [median_pow, mean_pow, p_less, p_greater] = deal(nan(no_windows, 2, no_bands, no_norms));
     
     for n = 1:no_norms
         
         BP_data = getfield(All_data, ['BP', norms{n}]);
-        
-        %% Eliminating segments with high total power.
-        
-        BP_tot_zs = zscore(BP_data(:, end));
-        
-        BP_out = find(BP_tot_zs > 5);
-        
-        for o = 1:length(BP_out)
-           
-            
-            
-        end
                     
         %% Comparing Band Power against Baseline, for Each Window.
 
@@ -54,6 +42,10 @@ for fo = 1:length(folders)
                 
                 for ch = 1:2
                     
+                    median_pow(w, ch, b, n) = median(BP_data(win_indices, b, ch));
+                    
+                    mean_pow(w, ch, b, n) = mean(BP_data(win_indices, b, ch));
+                    
                     p_less(w, ch, b, n) = ranksum(BP_data(t < 0, b, ch), BP_data(win_indices, b, ch), 'tail', 'right');
                     
                     p_greater(w, ch, b, n) = ranksum(BP_data(t < 0, b, ch), BP_data(win_indices, b, ch), 'tail', 'left');
@@ -66,6 +58,6 @@ for fo = 1:length(folders)
         
     end
     
-    save([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat'], 't_win', 'bands', 'norms', 'p_less', 'p_greater')
+    save([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat'], 't_win', 'bands', 'norms', 'median_pow', 'mean_pow', 'p_less', 'p_greater')
     
 end

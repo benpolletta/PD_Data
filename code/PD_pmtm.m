@@ -58,7 +58,7 @@ for fo = 1:length(folders)
             
             data = epoch_data(:, ch);
             
-            data_hat = pmtm(data, 1*epoch_length/sampling_freq);
+            data_hat = pmtm(detrend(data), 1*epoch_length/sampling_freq);
             
             Spec(e, :, ch) = data_hat;
             
