@@ -15,10 +15,14 @@ for fo = 1:length(folders)
     prefix = prefixes{fo};
     
     subj_name = [folder,'/',prefix];
+        
+    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_artifacts.mat'])
    
     All_data = load([subj_name, '_', num2str(epoch_secs), 's_epoch_pmtm.mat']);
     
     t = All_data.t;
+    
+    t(artifact_indicator) = [];
     
     no_windows = floor((t(end) - window_secs)/epoch_secs);
         
@@ -29,6 +33,8 @@ for fo = 1:length(folders)
     for n = 1:no_norms
         
         BP_data = getfield(All_data, ['BP', norms{n}]);
+        
+        BP_data(artifact_indicator, :, :) = [];
                     
         %% Comparing Band Power against Baseline, for Each Window.
 

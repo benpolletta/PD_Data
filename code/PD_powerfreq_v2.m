@@ -2,6 +2,7 @@ function [mean_E, std_E, normalizer] = PD_powerfreq_v2(subject_mat)
 
 low_freq_lim = 3;
 high_freq_lim = 72;
+no_freqs = high_freq_lim - low_freq_lim + 1;
 
 load(subject_mat)
 no_folders = length(folders);
@@ -19,8 +20,10 @@ for pd=1:length(pd_label)
     
     for fo = 1:no_folders % - 1
         
-        % folder = folders{fo};
+        folder = folders{fo};
         prefix = prefixes {fo};
+        
+        load([folder, '/', prefix, '_all_channel_data_dec.mat'], 'sampling_freq')
         
         outputname=[subject_mat(1:end-12), prefix, '_', pd_label{pd}, '_all_channel_spec_HT', '.mat'];
         

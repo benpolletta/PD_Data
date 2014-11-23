@@ -1,4 +1,4 @@
-function PD_plot_pmtm(subjects_mat, epoch_secs, window_secs)
+function PD_color_band_plot_pmtm(subjects_mat, epoch_secs, window_secs)
 
 close('all')
 
@@ -22,7 +22,9 @@ for fo = 1:length(folders)
    
     All_data = load([subj_name, '_', num2str(epoch_secs), 's_epoch_pmtm.mat']);
     
-    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat']);
+    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat'])
+        
+    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_artifacts.mat'])
     
     lower_test = p_less <= .01/(2*sum_all_dimensions(~isnan(p_less))); lower_test = +lower_test;
     
@@ -44,6 +46,8 @@ for fo = 1:length(folders)
         
         Spec_data = getfield(All_data, ['Spec', norms{n}]);
         
+        Spec_data(artifact_indicator, :, :) = nan;
+        
         for ch = 1:2
             
             figure((fo - 1)*no_norms*2 + n)
@@ -52,7 +56,7 @@ for fo = 1:length(folders)
             
             if n < 3
                 
-                Spec_plot = zscore(Spec_data(:, plot_freq_indices, ch))';
+                Spec_plot = nanzscore(Spec_data(:, plot_freq_indices, ch))';
                 
             else
                 
@@ -62,7 +66,7 @@ for fo = 1:length(folders)
             
             imagesc(t, freqs(plot_freq_indices), Spec_plot)
             
-            cl = caxis; caxis([cl(1) .25*cl(2)])
+            cl = caxis; caxis([cl(1) median(max(Spec_plot, [], 2))])
             
             axis xy
             
@@ -80,13 +84,15 @@ for fo = 1:length(folders)
         
         BP_data = getfield(All_data, ['BP', norms{n}]);
         
+        BP_data(artifact_indicator, :, :) = nan;
+        
         figure((fo - 1)*no_norms*2 + no_norms + n)
         
         for b = 1:no_bands
             
             handle = subplot(r, c, b);
             
-            plot(t, zscore(reshape(BP_data(:, b, :), size(BP_data, 1), 2)))
+            plot(t, nanzscore(reshape(BP_data(:, b, :), size(BP_data, 1), 2)))
             
             add_stars(handle, t_win, [lower_test(:, :, b, n) upper_test(:, :, b, n)], [0 0 1 1], [0 0 1; 0 .5 0; 0 0 1; 0 .5 0])
             

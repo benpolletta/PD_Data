@@ -70,7 +70,7 @@ for fo = 1:length(folders)
             
             BP_norm(:, b, ch) = sum(Spec_norm(:, band_indices, ch), 2);
             
-            BP_norm_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
+            BP_norm_pct(:, b, ch) = sum(Spec_norm_pct(:, band_indices, ch), 2);
             
         end
         
