@@ -204,11 +204,11 @@ for fo = 1:length(folders)
     
     subj_name = [folder,'/',prefix];
    
-    open([subj_name, '_', num2str(epoch_secs), 's_pmtm_outliers'])
+    open([subj_name, '_', num2str(epoch_secs), 's_pmtm_artifacts.fig'])
     
-    for f_no = 1:no_figures(fo)
+    for f_no = 2:no_figures(fo)
         
-        open([subj_name, '_', num2str(epoch_secs), 's_pmtm_artifacts_', num2str(f_no)])
+        open([subj_name, '_', num2str(epoch_secs), 's_pmtm_artifacts_', num2str(f_no), '.fig'])
         
     end
     

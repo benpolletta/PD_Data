@@ -30,7 +30,7 @@ for fo = 2:length(folders)
     
     start_index = base_index - no_pre_epochs*epoch_length;
     
-    no_post_epochs = floor(min(1500, size(PD_dec, 1)/sampling_freq - basetime)*sampling_freq/epoch_length);
+    no_post_epochs = floor((size(PD_dec, 1) - basetime*sampling_freq)/epoch_length);
     
     no_epochs = no_pre_epochs + no_post_epochs;
         

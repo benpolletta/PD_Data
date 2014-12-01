@@ -10,19 +10,17 @@ wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
 
 segment_length = sampling_freq;
 
-no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
-
-t = (1:no_secs*sampling_freq)/sampling_freq - basetime;
+t = (1:length(PD_dec))/sampling_freq - basetime;
 
 clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
 
-[Spec, Spec_norm, Spec_pct, Spec_norm_pct] = deal(nan(no_secs*sampling_freq, no_freqs, 2));
+[Spec, Spec_norm, Spec_pct, Spec_norm_pct] = deal(nan(length(PD_dec), no_freqs, 2));
 
-[BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(no_secs*sampling_freq, no_bands, 2));
+[BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(length(PD_dec), no_bands, 2));
 
 for ch = 1:2
     
-    data = PD_dec(1:(no_secs*sampling_freq), ch);
+    data = PD_dec(:, ch);
     
     data_reflected = [flipud(data(1:segment_length)); data; flipud(data((end - segment_length + 1):end))];
     

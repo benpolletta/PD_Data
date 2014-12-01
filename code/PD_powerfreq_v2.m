@@ -111,9 +111,9 @@ for pd=1:length(pd_label)
         
     end
     
-    mean_E(:, :, pd) = mean(avg_E, 2); % Mean over animals.
+    mean_E(:, pd, :) = mean(avg_E, 2); % Mean over animals.
     
-    std_E(:, :, pd) = std(avg_E, 1, 2)/sqrt(size(avg_E, 2)); % Standard error over animals.
+    std_E(:, pd, :) = std(avg_E, 1, 2)/sqrt(size(avg_E, 2)); % Standard error over animals.
     
 end
 

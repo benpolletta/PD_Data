@@ -38,7 +38,7 @@ for fo = 1:length(folders)
     
     data_length = length(PD_dec);
     
-    no_mins = min(floor(data_length/(sampling_freq*60)), (basetime + 1500)/60);
+    no_mins = floor(data_length/(sampling_freq*60)); % min(floor(data_length/(sampling_freq*60)), (basetime + 1500)/60);
     
     no_chunks = no_mins*60/chunk_size;
     

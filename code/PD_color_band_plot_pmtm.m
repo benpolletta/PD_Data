@@ -22,7 +22,11 @@ for fo = 1:length(folders)
    
     All_data = load([subj_name, '_', num2str(epoch_secs), 's_epoch_pmtm.mat']);
     
-    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat'])
+    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_BP_windowed.mat'])
+    
+    t_win_BP = t_win;
+    
+    load([subj_name, '_', num2str(epoch_secs), 's_pmtm_', num2str(window_secs), 's_stats.mat'], 't_win', 'p_less', 'p_greater')
         
     load([subj_name, '_', num2str(epoch_secs), 's_pmtm_artifacts.mat'])
     
@@ -92,9 +96,19 @@ for fo = 1:length(folders)
             
             handle = subplot(r, c, b);
             
-            plot(t, nanzscore(reshape(BP_data(:, b, :), size(BP_data, 1), 2)))
+            [ax, ~, ~] = plotyy(t, reshape(BP_data(:, b, :), size(BP_data, 1), 2), t_win_BP, mean_pow(:, :, b, n));
             
-            add_stars(handle, t_win, [lower_test(:, :, b, n) upper_test(:, :, b, n)], [0 0 1 1], [0 0 1; 0 .5 0; 0 0 1; 0 .5 0])
+            hold(ax(1), 'on'), hold(ax(2), 'on')
+            
+            axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
+            
+            set(ax,{'ycolor'},{'black';'black'})
+            
+            set(get(ax(1),'YLabel'), 'String', ['Power', norm_labels{n}])
+            
+            set(get(ax(2),'YLabel'), 'String', 'Mean Power')
+            
+            add_stars(ax(1), t_win, [lower_test(:, :, b, n) upper_test(:, :, b, n)], [0 0 1 1], [0 0 1; 0 .5 0; 0 0 1; 0 .5 0])
             
             xlabel('Time (s)')
             
@@ -104,7 +118,7 @@ for fo = 1:length(folders)
             
             if b == 1
             
-                legend(chan_labels, 'Location', 'NorthWest')
+                legend(ax(1), chan_labels, 'Location', 'NorthWest')
             
             end
             
