@@ -295,7 +295,7 @@ for e = 1:no_epochs
        
         minute = ceil(e/3);
         
-        save_as_pdf(gcf, [fig_name, '_', num2str(minute), 'min'])
+        save_as_pdf(gcf, [fig_name, '_', num2str(minute, '%03d'), 'min'])
         
     end
     

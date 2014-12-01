@@ -64,7 +64,7 @@ for fo = 1:length(folders)
         
     for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
-        chunk_name = [subj_name, '_chunk', num2str(c), '_wt'];
+        chunk_name = [subj_name, '_chunk', num2str(c, '%03d'), '_wt'];
     
         chunk_start = (c - 1)*chunk_size*sampling_freq + 1;
         
