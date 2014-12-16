@@ -18,7 +18,7 @@ end
 
 load([folders{1}, '/', prefixes{1}, '_all_channel_data_dec.mat'], 'sampling_freq')
 
-for fo = 2:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
