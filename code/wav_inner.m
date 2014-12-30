@@ -12,11 +12,11 @@ segment_length = sampling_freq;
 
 t = (1:length(PD_dec))/sampling_freq - basetime;
 
-clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
+clear Spec Spec_norm Spec_pct Spec_norm_pct BP BP_norm BP_pct BP_norm_pct
+
+%% Wavelet spectrogram.
 
 [Spec, Spec_norm, Spec_pct, Spec_norm_pct] = deal(nan(length(PD_dec), no_freqs, 2));
-
-[BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(length(PD_dec), no_bands, 2));
 
 for ch = 1:2
     
@@ -50,9 +50,16 @@ for ch = 1:2
     
 end
 
-save([subj_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', '-v7.3')
+% save([subj_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', '-v7.3')
+
+save([subj_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', '-v7.3')
+save([subj_name, '_wt_norm.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm', '-v7.3')
+save([subj_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
+save([subj_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
     
 %% Band power.
+
+[BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(length(PD_dec), no_bands, 2));
 
 for ch = 1:2
 

@@ -18,7 +18,7 @@ end
 
 load([folders{1}, '/', prefixes{1}, '_all_channel_data_dec.mat'], 'sampling_freq')
 
-for fo = 1:length(folders)
+for fo = 1:1%length(folders)
     
     folder = folders{fo};
     
@@ -59,7 +59,7 @@ for fo = 1:length(folders)
     
     for ch = 1:2
         
-        [peaks, locs] = findpeaks(((-1)^(ch + 1))*Spike_data(:, ch), 'MinPeakDistance', min_samples_apart);
+        [peaks, locs] = findpeaks(Spike_data(:, ch), 'MinPeakDistance', min_samples_apart); %((-1)^(ch + 1))*
         
         [peak_widths, peak_prominences] = peak_details(Spike_data(:, ch), locs, min_samples_apart);
         
@@ -257,7 +257,7 @@ for e = 1:no_epochs
         
         epoch_prom_std{ch} = Peak_data{ch}(epoch_loc_indices, end - 1);
         
-        plot_peaks(epoch_locs, ch) = ((-1)^(ch + 1))*epoch_peaks{ch};
+        plot_peaks(epoch_locs, ch) = epoch_peaks{ch}; %((-1)^(ch + 1))*epoch_peaks{ch};
         
     end
     
@@ -277,11 +277,11 @@ for e = 1:no_epochs
     
     for ch = 1:2
         
-        text(epoch_loc_t{ch}, ((-1)^(ch + 1))*epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prominences{ch})/10)),...
-            'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold')
+        text(epoch_loc_t{ch}, epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prominences{ch})/10)),...
+            'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold') %((-1)^(ch + 1))*
         
-        text(epoch_loc_t{ch}, ((-1)^(ch + 1))*epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prom_std{ch})/10)),...
-            'VerticalAlignment', 'top', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold')
+        text(epoch_loc_t{ch}, epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prom_std{ch})/10)),...
+            'VerticalAlignment', 'top', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold') %((-1)^(ch + 1))*
     
     end
 
