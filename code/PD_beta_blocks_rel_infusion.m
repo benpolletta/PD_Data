@@ -1,44 +1,38 @@
 function PD_beta_blocks_rel_infusion(subject_mat, sd_lim)
-
-% if isscalar(win_size)
-% 
-%     par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size),'win_',num2str(smooth_size),'smooth'];
-% 
-% elseif length(win_size) == 2
-%    
-%     par_name = [num2str(outlier_lim),'out_',num2str(sd_lim),'sd_',num2str(win_size(1)), 'to', num2str(win_size(2)),'win_',num2str(smooth_size),'smooth'];
-%     
-% else
-%     
-%     display('win_size must be a scalar (lower limit of beta epoch length) or an interval (lower and upper limits).')
-%     
-%     return
-%     
-% end
     
 load(subject_mat)
 
-sampling_freq = 1000;
+freqs = 1:200;
+
+bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
 
 norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
 
 [BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), 6, no_norms, 2, 2));
 
-for fo = 1:length(folders)
+for fo = 2:2 %length(folders)
     
     folder = folders{fo};
     
     prefix = prefixes{fo};
     
+    subj_name = [folder,'/',prefix];
+
+    load([subj_name, '_wt_BP.mat'], 'sampling_freq')
+    
     base_index = basetimes(fo)*sampling_freq;
     
-    subj_name = [folder,'/',prefix];
+    load([subj_name, '_peaks.mat'])
+    
+    [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
     
     for n = 1:no_norms
         
         BP_data = load([subj_name,'_wt_BP.mat'], ['BP', norms{n}]);
         
         BP_data = getfield(BP_data, ['BP', norms{n}]);
+        
+        BP_data(logical(BP_nans)) = nan;
         
         t = (1:size(BP_data, 1))/sampling_freq;
         
@@ -52,7 +46,7 @@ for fo = 1:length(folders)
             
             for b = 1:size(BP_high, 2)
                 
-                high_cutoff = mean(BP_data(1:pd_limits(1, 2), b, ch)) + sd_lim*std(BP_data(1:pd_limits(1, 2), b, ch));
+                high_cutoff = nanmean(BP_data(1:pd_limits(1, 2), b, ch)) + sd_lim*nanstd(BP_data(1:pd_limits(1, 2), b, ch));
                 
                 BP_high(:, b, ch) = BP_data(:, b, ch) >= high_cutoff;
                 
@@ -83,3 +77,35 @@ for fo = 1:length(folders)
 end
 
 save([subject_mat(1:(end - length('_subjects.mat'))), '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
+
+end
+
+function [wav_nans, BP_nans] = indicator_to_nans(indicator, sampling_freq, freqs, no_cycles, bands)
+
+[no_dps, no_channels] = size(indicator);
+
+wav_nans = nan(no_dps, length(freqs), no_channels);
+
+BP_nans = nan(no_dps, size(bands, 1), no_channels);
+
+for ch = 1:no_channels
+    
+    wav_nans_temp = abs(wavelet_spectrogram(indicator(:, ch), sampling_freq, freqs, no_cycles, 0, ''));
+    
+    wav_nans_temp = wav_nans_temp*diag(1./max(wav_nans_temp));
+    
+    wav_nans(:, :, ch) = wav_nans_temp > .01;
+    
+    for b = 1:size(bands, 1)
+       
+        band_freqs = freqs >= bands(b, 1) & freqs <= bands(b, 2);
+        
+        BP_nans(:, b, ch) = sum(wav_nans(:, band_freqs, ch), 2);
+        
+    end
+    
+    BP_nans(BP_nans > 0) = 1;
+
+end
+    
+end

@@ -1,4 +1,4 @@
-function PD_spikes_individual_plot(folder, prefix, spike_boundaries, min_secs_apart, min_prominences, min_prominences_flag, plot_opt)
+function PD_spikes_individual_plot(folder, prefix, basetime, spike_boundaries, min_secs_apart, min_prominences, min_prominences_flag, plot_opt)
 
 % Script to find spikes in time series from carbachol data.
 
@@ -6,13 +6,11 @@ subj_name = [folder, '/', prefix];
 
 load([subj_name, '_all_channel_data_dec.mat'])
 
-basetime = basetimes(fo);
-
 t = (1:length(PD_dec))/sampling_freq - basetime;
 
-min_prominence = min_prominences(fo);
+min_prominence = min_prominences;
 
-min_samples_apart = min_secs_apart(fo)*sampling_freq;
+min_samples_apart = min_secs_apart*sampling_freq;
 
 if isempty(spike_boundaries)
     
@@ -20,9 +18,9 @@ if isempty(spike_boundaries)
     
 else
     
-    spike_start = spike_boundaries(fo, 1);
+    spike_start = spike_boundaries(1);
     
-    spike_end = spike_boundaries(fo, 2);
+    spike_end = spike_boundaries(2);
     
 end
 
