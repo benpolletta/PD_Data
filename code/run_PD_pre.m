@@ -12,9 +12,9 @@ parfor fo = 1:length(folders)
    
     cd (folder)
     
-%     PD_concatenate(prefix,1)
-%     
-%     PD_decimate(prefix,1)
+    % PD_concatenate(prefix,1)
+    % 
+    % PD_decimate(prefix,1)
     
     PD_concatenate_channels(prefix,1)
     

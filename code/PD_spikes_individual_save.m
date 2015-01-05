@@ -55,7 +55,7 @@ for ch = 1:2
         
     end
     
-    Spike_indicator(locs, ch) = 1;
+    Spike_indicator(Peak_data{ch}(:, 2), ch) = 1;
     
 end
 

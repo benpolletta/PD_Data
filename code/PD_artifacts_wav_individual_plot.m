@@ -1,4 +1,4 @@
-function PD_artifacts_wav_individual_plot(folder, prefix, sd_lim)
+function PD_artifacts_wav_individual_plot(folder, prefix, basetime, sd_lim)
 
 clear BP_art_t
 
@@ -12,7 +12,7 @@ All_data = load([subj_name, '_wt_BP.mat']);
 
 BP_t = All_data.t;
 
-t = (1:length(PD_dec))/sampling_freq;
+t = (1:length(PD_dec))/sampling_freq - basetime;
 
 BP_data = All_data.BP;
 
