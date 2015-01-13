@@ -26,13 +26,13 @@ artifact_plot = nan(size(PD_dec));
 
 artifact_indicator = zeros(length(BP_t), 2);
 
-BP_out = nan(size(BP_data));
+[BP_zs, BP_out] = deal(nan(size(BP_data)));
 
 for ch = 1:2
     
-    BP_zs = zscore(BP_data(:, :, ch));
+    BP_zs(:, :, ch) = zscore(BP_data(:, :, ch));
     
-    BP_out(:, ch) = any(BP_zs > sd_lim, 2);
+    BP_out(:, ch) = any(BP_zs(:, :, ch) > sd_lim, 2);
     
 end
 
@@ -103,13 +103,17 @@ for a = 1:no_arts
     
     subplot(rows, rows, mod(a, rows^2) + (mod(a, rows^2) == 0)*(rows^2))
     
-    plot(t(segment_start:segment_end), PD_dec(segment_start:segment_end, :))
+    [ax, ~, ~] = plotyy(t(segment_start:segment_end), PD_dec(segment_start:segment_end, 1), t(segment_start:segment_end), BP_zs(segment_start:segment_end, :, 1));
     
-    axis tight
+    hold(ax(1), 'on'), hold(ax(2), 'on')
     
-    hold on
+    plot(ax(1), t(segment_start:segment_end), PD_dec(segment_start:segment_end, 2), '-.')
     
-    plot(t(artifact_start:artifact_end), PD_dec(artifact_start:artifact_end, :), 'r')
+    plot(ax(2), t(segment_start:segment_end), BP_zs(segment_start:segment_end, :, 2), '-.')
+    
+    plot(ax(1), t(artifact_start:artifact_end), PD_dec(artifact_start:artifact_end, :), 'r', 'LineWidth', 2)
+    
+    axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
     
     title([folder, ', Artifact ', num2str(a)])
     

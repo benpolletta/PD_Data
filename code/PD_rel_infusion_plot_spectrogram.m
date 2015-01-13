@@ -1,4 +1,4 @@
-function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size)
+function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size, outlier_lims)
 
 load(subject_mat)
 
@@ -22,7 +22,7 @@ end
     
 % BP_chunk = nan(chunk_size*sampling_freq, no_bands); %[total_chunk, beta_chunk] = deal(nan(chunk_size*sampling_freq, 2));
 
-for fo = 1:2 %length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -46,9 +46,9 @@ for fo = 1:2 %length(folders)
     
     load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm')
     
-    % load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
+    load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
     
-    load([subj_name, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high', 'BP_high_cum')
+    load([subj_name, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high_cum')
     
     BP_high(BP_high == 0) = nan; BP_high_cum(BP_high_cum == 0) = nan;
     
@@ -62,23 +62,33 @@ for fo = 1:2 %length(folders)
     
     end
     
+    load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+    
     load([subj_name, '_peaks.mat'])
+    
+    [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
     
     [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
     
-    BP_no_spikes = BP; % BP_norm_no_spikes = BP_norm;
+    BP_no_spikes = BP;
+    
+    BP_no_spikes(logical(outlier_nans)) = nan;
     
     BP_no_spikes(logical(BP_nans)) = nan;
     
-    % BP_norm_no_spikes(logical(BP_nans)) = nan;
+    BP_norm_no_spikes = BP_norm;
+    
+    BP_norm_no_spikes(logical(outlier_nans)) = nan;
+    
+    BP_norm_no_spikes(logical(BP_nans)) = nan;
         
     for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
         chunk_name = [subj_name, '_chunk', num2str(c, '%03d'), '_wt'];
     
-        chunk_start = (c - 1)*chunk_size*sampling_freq + 1;
+        chunk_start = max(1, (c - 1)*chunk_size*sampling_freq + 1);
         
-        chunk_end = c*chunk_size*sampling_freq;
+        chunk_end = min(c*chunk_size*sampling_freq, data_length);
         
         LFP_chunk = PD_zs(chunk_start:chunk_end, :);
         
@@ -86,11 +96,13 @@ for fo = 1:2 %length(folders)
         
         BP_chunk = BP(chunk_start:chunk_end, :, :);
         
+        BP_norm_chunk = BP_norm(chunk_start:chunk_end, :, :);
+        
         Spikes_chunk = Spike_indicator(chunk_start:chunk_end, :);
         
         BP_no_spikes_chunk = BP_no_spikes(chunk_start:chunk_end, :, :);
         
-        % BP_norm_chunk = BP_norm(chunk_start:chunk_end, :, :);
+        BP_norm_no_spikes_chunk = BP_norm_no_spikes(chunk_start:chunk_end, :, :);
         
         BP_high_chunk = BP_high(chunk_start:chunk_end, :, :);
         
@@ -150,10 +162,6 @@ for fo = 1:2 %length(folders)
             
             plot(ax(2), t, BP_high_cum_chunk(:, :, ch).*BP_chunk(:, :, ch), 'LineWidth', 2)
             
-            % plot(ax(2), t, BP_norm_chunk(:, :, ch), '--')
-            % 
-            % plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_norm_chunk(:, :, ch), '--', 'LineWidth', 2)
-            
             axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
             
             set(ax,{'ycolor'},{'black';'black'})
@@ -198,15 +206,19 @@ for fo = 1:2 %length(folders)
             
             subplot(6, 1, (ch - 1)*3 + 3)
             
-            [ax, ~, h2] = plotyy(t, nan(size(LFP_chunk(:, ch))), t, BP_no_spikes_chunk(:, :, ch));
+            [ax, ~, ~] = plotyy(t, nan(size(LFP_chunk(:, ch))), t, BP_norm_no_spikes_chunk(:, :, ch));
             
             box off
             
             hold(ax(1), 'on'), hold(ax(2), 'on')
             
-            plot(ax(2), t, BP_chunk(:, :, ch), ':')
+            plot(ax(2), t, BP_norm_chunk(:, :, ch), ':')
             
-            plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_chunk(:, :, ch), 'LineWidth', 2)
+            plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_norm_chunk(:, :, ch), 'LineWidth', 2)
+            
+            % plot(ax(2), t, BP_chunk(:, :, ch), ':')
+            % 
+            % plot(ax(2), t, BP_high_chunk(:, :, ch).*BP_chunk(:, :, ch), 'LineWidth', 2)
             
             axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
             

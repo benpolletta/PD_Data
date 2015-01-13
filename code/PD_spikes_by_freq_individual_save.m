@@ -33,7 +33,7 @@ Spike_data_wav = wavelet_spectrogram(Spike_data, sampling_freq, band(1):band(2),
 
 Spike_data_BP = permute(sum(abs(Spike_data_wav), 2), [1 3 2]);
 
-Spike_indicator = zeros(size(Spike_data));
+Spike_indicator = zeros(size(PD_dec));
 
 Peak_data = cell(1, 2);
 

@@ -8,9 +8,9 @@ bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
 
 norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
 
-[BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), 6, no_norms, 2, 2));
+[BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), 6, 2, 2, no_norms));
 
-for fo = 2:length(folders)
+for fo = 1:1%length(folders)
     
     folder = folders{fo};
     
@@ -70,9 +70,9 @@ for fo = 2:length(folders)
             
             for ch = 1:2
                 
-                BP_high_dps(fo, :, ch, pd, n) = sum(BP_high(pd_limits(pd,1):pd_limits(pd,2), :, ch))/pd_lengths(pd);
+                BP_high_dps(fo, :, ch, pd, n) = nansum(BP_high(pd_limits(pd,1):pd_limits(pd,2), :, ch))/pd_lengths(pd);
                     
-                BP_high_cum_dps(fo, :, ch, pd, n) = sum(BP_high_cum(pd_limits(pd,1):pd_limits(pd,2), :, ch))/pd_lengths(pd);
+                BP_high_cum_dps(fo, :, ch, pd, n) = nansum(BP_high_cum(pd_limits(pd,1):pd_limits(pd,2), :, ch))/pd_lengths(pd);
                 
             end
             

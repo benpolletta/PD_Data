@@ -114,7 +114,7 @@ for ch = 1:no_channels
     
     xlabel('Epoch Length')
     
-    ylabel('Proportion Observed')%Times Observed')
+    ylabel('Proportion Observed') %Times Observed')
     
     title({[chan_labels{ch}, ' Beta > ', num2str(sd_lim), ' S.D.'];'Hist. of \beta Epoch Length'})
           

@@ -1,4 +1,4 @@
-function PD_spikes_by_freq_individual_plot(folder, prefix, basetime, spike_boundaries, band, band_label, no_cycles, min_secs_apart, min_prominences, min_prominences_flag, plot_opt)
+function PD_spikes_by_freq_individual_plot(folder, prefix, basetime, channel_multipliers, spike_boundaries, band, band_label, no_cycles, min_secs_apart, min_prominences, min_prominences_flag, plot_opt)
 
 % Script to find spikes in time series from carbachol data.
 
@@ -11,6 +11,12 @@ t = (1:length(PD_dec))/sampling_freq - basetime;
 min_prominence = min_prominences;
 
 min_samples_apart = min_secs_apart*sampling_freq;
+
+if isempty(channel_multipliers)
+   
+    channel_multipliers = [1 1];
+    
+end
 
 if isempty(spike_boundaries)
     
@@ -41,9 +47,9 @@ for ch = 1:2
     
     [~, BP_locs] = findpeaks(Spike_data_BP(:, ch), 'MinPeakDistance', min_samples_apart); %((-1)^(ch + 1))*
     
-    [peaks, locs] = BP_to_LFP(Spike_data(:, ch), BP_locs, 100);
+    [peaks, locs] = BP_to_LFP(channel_multipliers(ch)*Spike_data(:, ch), BP_locs, 100);
     
-    [peak_widths, peak_prominences] = peak_details(Spike_data(:, ch), locs, min_samples_apart);
+    [peak_widths, peak_prominences] = peak_details(channel_multipliers(ch)*Spike_data(:, ch), locs, min_samples_apart);
     
     locs = locs + spike_start - 1;
     
@@ -67,11 +73,11 @@ end
 
 if plot_opt == 1
     
-    plot_peaks_1(t, PD_dec, Peak_data, min_samples_apart)
+    plot_peaks_1(t, PD_dec, channel_multipliers, Peak_data, min_samples_apart)
     
 elseif plot_opt == 2
     
-    plot_peaks_2(fig_name, t, sampling_freq, PD_dec, Peak_data, [spike_start spike_end] + [-min_samples_apart min_samples_apart])
+    plot_peaks_2(fig_name, t, sampling_freq, PD_dec, channel_multipliers, Peak_data, [spike_start spike_end] + [-min_samples_apart min_samples_apart])
     
 end
 
@@ -173,7 +179,7 @@ for ch = 1:2
             
             hold on
             
-            plot(t(locs(p)), ((-1)^(ch + 1))*peaks(p), [colors{ch}, symbols{ch}])
+            plot(t(locs(p)), channel_multipliers(ch)*peaks(p), [colors{ch}, symbols{ch}])
             
             title(num2str(peak_prominences(p)))
             
@@ -205,7 +211,7 @@ for ch = 1:2
         
         hold on
         
-        plot(t(locs(no_figs*(no_rows^2) + l)), ((-1)^(ch + 1))*peaks(no_figs*(no_rows^2) + l), [colors{ch}, symbols{ch}])
+        plot(t(locs(no_figs*(no_rows^2) + l)), channel_multipliers(ch)*peaks(no_figs*(no_rows^2) + l), [colors{ch}, symbols{ch}])
         
         title(num2str(peak_prominences(no_figs*(no_rows^2) + l)))
         
@@ -257,7 +263,7 @@ for e = 1:no_epochs
         
         epoch_prom_std{ch} = Peak_data{ch}(epoch_loc_indices, end - 1);
         
-        plot_peaks(epoch_locs, ch) = epoch_peaks{ch}; %((-1)^(ch + 1))*epoch_peaks{ch};
+        plot_peaks(epoch_locs, ch) = channel_multipliers(ch)*epoch_peaks{ch};
         
     end
     
@@ -277,11 +283,11 @@ for e = 1:no_epochs
     
     for ch = 1:2
         
-        text(epoch_loc_t{ch}, epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prominences{ch})/10)),...
-            'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold') %((-1)^(ch + 1))*
+        text(epoch_loc_t{ch}, channel_multipliers(ch)*epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prominences{ch})/10)),...
+            'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold') 
         
-        text(epoch_loc_t{ch}, epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prom_std{ch})/10)),...
-            'VerticalAlignment', 'top', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold') %((-1)^(ch + 1))*
+        text(epoch_loc_t{ch}, channel_multipliers(ch)*epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prom_std{ch})/10)),...
+            'VerticalAlignment', 'top', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold')
     
     end
 
