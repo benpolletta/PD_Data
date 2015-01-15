@@ -40,13 +40,15 @@ for fo = 1:length(folders)
         
         laser_transitions(trial_laser_off) = 1;
         
-        laser_periods(trial_laser_on:trial_laser_off, 1) = 1;
+        laser_periods(trial_laser_on:trial_laser_off, 2) = 1;
         
-        laser_periods(trial_laser_off + (1:(5*sampling_freq)), 2) = 1;
+        laser_periods(trial_laser_off + (1:(5*sampling_freq)), 3) = 1;
         
-        laser_periods(trial_off - (1:(5*sampling_freq)), 3) = 1;
+        laser_periods(trial_off - (1:(5*sampling_freq)), 1) = 1;
         
     end
+    
+    laser_periods((data_length + 1):end, :) = [];
     
     save([subj_name, '_wav_laser_artifacts.mat'], 'laser_transitions', 'laser_periods')
     

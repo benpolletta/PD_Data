@@ -6,11 +6,11 @@ freqs = 1:200;
 
 bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
 
-norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
+no_norms = length(norms);
 
 [BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), 6, 2, 2, no_norms));
 
-for fo = 1:1%length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -22,13 +22,41 @@ for fo = 1:1%length(folders)
     
     base_index = basetimes(fo)*sampling_freq;
     
-    load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
-    load([subj_name, '_peaks.mat'])
+        load([subj_name, '_wav_laser_artifacts.mat'])
+        
+        [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
     
-    [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+    else
+        
+        laser_nans = [];
+        
+    end
     
-    [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
+    
+        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+        
+        [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+    else
+        
+        outlier_nans = [];
+        
+    end
+    
+    if ~isempty(dir([subj_name, '_peaks.mat']))
+        
+        load([subj_name, '_peaks.mat'])
+        
+        [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+    else
+        
+        BP_nans = [];
+        
+    end
     
     for n = 1:no_norms
         
@@ -36,15 +64,29 @@ for fo = 1:1%length(folders)
         
         BP_data = getfield(BP_data, ['BP', norms{n}]);
         
-        BP_data(logical(outlier_nans)) = nan;
+        if ~isempty(laser_nans)
+            
+            BP_data(logical(laser_nans)) = nan;
+            
+        end
         
-        BP_data(logical(BP_nans)) = nan;
+        if ~isempty(outlier_nans)
+            
+            BP_data(logical(outlier_nans)) = nan;
+            
+        end
         
-        t = (1:size(BP_data, 1))/sampling_freq;
+        if ~isempty(BP_nans)
+            
+            BP_data(logical(BP_nans)) = nan;
+            
+        end
+        
+        t = (1:size(BP_data, 1) - base_index)/sampling_freq;
         
         BP_high = nan(size(BP_data));
         
-        pd_limits = [1 min(length(t), base_index); min(length(t), base_index + 1) length(t)];
+        pd_limits = [1 min(length(t), floor(base_index)); min(length(t), floor(base_index) + 1) length(t)];
         
         pd_lengths = diff(pd_limits, [], 2) + 1;
         

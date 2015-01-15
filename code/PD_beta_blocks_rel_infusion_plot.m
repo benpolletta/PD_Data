@@ -15,9 +15,8 @@ for b = 1:length(bands)
     band_labels{b} = sprintf('%d - %d Hz', bands(b, 1), bands(b, 2));
      
 end
-norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
 
-long_norms = {'', ', Increase Over Baseline Power', ', % Total Power', ', Increase in % Total Power Over Baseline'};
+no_norms = length(norms);
 
 high_type = {'', '_cum'}; no_types = length(high_type);
     

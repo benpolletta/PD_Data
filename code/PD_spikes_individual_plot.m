@@ -113,7 +113,11 @@ for p = 1:no_peaks
     
     right_endpoint = find(sign(d_dropoff(window_indices(1:(end - 1)) > loc)) > 0, 1);
     
-    peak_widths(p) = right_endpoint - left_endpoint + 1;
+    if ~isempty(left_endpoint) && ~isempty(right_endpoint)
+        
+        peak_widths(p) = right_endpoint - left_endpoint + 1;
+        
+    end
     
 end
 

@@ -62,25 +62,49 @@ for fo = 1:length(folders)
     
     end
     
-    load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
-    
-    load([subj_name, '_peaks.mat'])
-    
-    [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
-    
-    [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
-    
     BP_no_spikes = BP;
-    
-    BP_no_spikes(logical(outlier_nans)) = nan;
-    
-    BP_no_spikes(logical(BP_nans)) = nan;
     
     BP_norm_no_spikes = BP_norm;
     
-    BP_norm_no_spikes(logical(outlier_nans)) = nan;
+    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
-    BP_norm_no_spikes(logical(BP_nans)) = nan;
+        load([subj_name, '_wav_laser_times.mat'])
+        
+        [laser_wav_nans, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+        BP_no_spikes(logical(laser_nans)) = nan;
+        
+        BP_norm_no_spikes(logical(laser_nans)) = nan;
+        
+        Spec(logical(laser_wav_nans)) = nan;
+        
+    end
+    
+    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
+    
+        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+        
+        [outlier_wav_nans, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+        BP_no_spikes(logical(outlier_nans)) = nan;
+        
+        BP_norm_no_spikes(logical(outlier_nans)) = nan;
+        
+        Spec(logical(outlier_wav_nans)) = nan;
+        
+    end
+    
+    if ~isempty(dir([subj_name, '_peaks.mat']))
+        
+        load([subj_name, '_peaks.mat'])
+        
+        [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+        BP_no_spikes(logical(BP_nans)) = nan;
+        
+        BP_norm_no_spikes(logical(BP_nans)) = nan;
+        
+    end
         
     for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
