@@ -20,7 +20,11 @@ for b = 1:no_bands
     
 end
 
-pd_colors = {'g', 'r'};
+no_chans = length(chan_labels);
+
+no_pds = length(pd_labels);
+
+%pd_colors = {'g', 'r'};
 
 % norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
 % 
@@ -31,6 +35,8 @@ pd_colors = {'g', 'r'};
 % if isempty(dir([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat']))
 
 pct_bp_high = nan(epoch_secs, no_folders, 2, no_bands, 2);
+
+[All_bp_max_start, All_bp_max_end] = deal(nan(no_folders, no_chans, no_bands, no_pds));
 
 for fo = 1:no_folders
     
@@ -44,15 +50,23 @@ for fo = 1:no_folders
     
     t = (1:size(BP_high_cum, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
-    pd_indices = nan(length(t), 2);
-    
-    pd_indices(:, 1) = t > (min(t) + epoch_secs/2 - 1) & t < (-epoch_secs/2 + 1); 
-    
-    pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (1800 - epoch_secs/2 + 1);
+    if no_pds == 2
+        
+        pd_indices = nan(length(t), 2);
+        
+        pd_indices(:, 1) = t > (min(t) + epoch_secs/2 - 1) & t < (-epoch_secs/2 + 1);
+        
+        pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (1800 - epoch_secs/2 + 1);
+        
+    elseif no_pds == 1
+        
+        pd_indices = ones(length(t), 1);
+        
+    end
     
     beta_blocks_find = nan(size(BP_high_cum));
     
-    for ch = 1:2
+    for ch = 1:no_chans
         
         for b = 1:no_bands
             
@@ -70,9 +84,9 @@ for fo = 1:no_folders
             
             hold on
             
-            handle = nan(2, 1);
+            handle = nan(no_pds, 1);
             
-            for pd = 1:2
+            for pd = 1:no_pds
                 
                 % first_possible_index = find(pd_indices(:, pd), 1, 'first') + epoch_secs*sampling_freq/2 - 1;
                 % 
@@ -95,6 +109,10 @@ for fo = 1:no_folders
                     pct_bp_high(sec, fo, pd, b, ch) = sum(BP_high_cum(sec_start:sec_end, b, ch))/sampling_freq;
                     
                 end
+                
+                All_bp_max_start(fo, ch, b, pd) = bp_max_start;
+                
+                All_bp_max_end(fo, ch, b, pd) = bp_max_end;
                 
             end
             
@@ -134,7 +152,7 @@ for b = 1:no_bands
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat'], 'pct_bp_high')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat'], 'pct_bp_high', 'All_bp_max_start', 'All_bp_max_end')
 
 % else
 %     
@@ -142,108 +160,14 @@ save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(e
 %     
 % end
 
-p_val = nan(no_bands, 2);
-
-for b = 1:no_bands
-    
-    figure
-    
-    for ch = 1:2
-        
-        pct_bp_high_for_test = nan(no_folders*epoch_secs, 2);
-        
-        for pd = 1:2
-            
-            pct_bp_high_for_test(:, pd) = reshape(pct_bp_high(:, :, pd, b, ch), no_folders*epoch_secs, 1);
-            
-        end
-        
-        p_val(b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
-        
-        subplot(1, 2, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
-        
-        boxplot(pct_bp_high_for_test, 'labels', {'Pre-Infusion', 'Post-Infusion'})
-        
-        ylabel('High Beta Density')
-        
-        % if b == 1
-            
-            title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-                [band_labels{b}, ', p-value = ', num2str(p_val(b, ch)), ' (ranksum test)']})
-        
-        % else
-        % 
-        %     title([band_labels{b}, ', p-value = ', num2str(p_val(b, ch))])
-        % 
-        % end
-        
-    end
-
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_boxplot'])
-    
-end
-
-p_val = nan(no_bands, 2);
-
-for b = 1:no_bands
-    
-    figure
-    
-    for ch = 1:2
-        
-        pct_bp_high_for_test = nan(no_folders*epoch_secs, 2);
-        
-        for pd = 1:2
-            
-            pct_bp_high_for_test(:, pd) = reshape(pct_bp_high(:, :, pd, b, ch), no_folders*epoch_secs, 1);
-            
-        end
-        
-        p_val(b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
-        
-        subplot(1, 2, ch) % subplot(no_bands, 2, (b - 1)*2 + ch)
-        
-        range = [all_dimensions(@min, pct_bp_high_for_test) all_dimensions(@max, pct_bp_high_for_test)];
-        
-        range = max(eps, range);
-        
-        [bin_edges, bin_centers] = make_bins(range(1), range(2), 100, 'log'); % 25, ''); % 
-        
-        for pd = 1:2
-            
-            [h, ~] = histc(pct_bp_high_for_test(:, pd), bin_edges);
-            
-            % h = max(eps, h);
-            
-            loglog(bin_centers, h(1:(end - 1))/sum(h(1:(end - 1))), pd_colors{pd})
-            
-            hold on
-            
-        end
-        
-        legend({'Pre-Infusion', 'Post-Infusion'})
-        
-        xlabel('High Beta Density')
-        
-        ylabel('Proportion Observed')
-            
-        title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-            [band_labels{b}, ', p-value = ', num2str(p_val(b, ch)), ' (ranksum test)']})
-        
-        % if b == 1
-        % 
-        %     title([chan_labels{ch}, ', ', band_labels{b}, ', p-value = ', num2str(p_val(b, ch))])
-        % 
-        % else
-        % 
-        %     title([band_labels{b}, ', p-value = ', num2str(p_val(b, ch))])
-        % 
-        % end
-        
-    end
-
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_hist'])
-    
-end
-
-end
+% if no_pds > 1
+%     
+%     no_comparisons = nchoosek(no_pds, 2);
+%     
+%     comparisons = nchoosek(1:no_pds, 2);
+%     
+% else
+%     
+%     no_comparisons = 0;
+%     
+% end

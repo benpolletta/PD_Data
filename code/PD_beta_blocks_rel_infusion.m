@@ -4,11 +4,15 @@ load(subject_mat)
 
 freqs = 1:200;
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
 
 no_norms = length(norms);
 
-[BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), 6, 2, 2, no_norms));
+no_pds = length(pd_labels);
+
+no_chans = length(chan_labels);
+
+[BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), no_bands, no_chans, no_pds, no_norms));
 
 for fo = 1:length(folders)
     
@@ -18,21 +22,53 @@ for fo = 1:length(folders)
     
     subj_name = [folder,'/',prefix];
 
-    load([subj_name, '_wt_BP.mat'], 'sampling_freq')
+    load([subj_name, '_wt_BP.mat'])
     
     base_index = basetimes(fo)*sampling_freq;
+        
+    t = ((1:size(BP, 1)) - base_index)/sampling_freq;
     
     if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
         load([subj_name, '_wav_laser_artifacts.mat'])
         
         [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+        pd_indices = laser_periods;
+        
+        base_index = logical(ones(size(BP, 1), 1)); % pd_indices(:, 1); %
     
     else
         
         laser_nans = [];
         
+        if no_pds == 2
+        
+            pd_indices(:, 1) = t < 0; pd_indices(:, 2) = t > 0;
+            
+            base_index = pd_indices(:, 1);
+            
+        elseif no_pds == 1
+           
+            pd_indices = ones(size(t));
+            
+            base_index = logical(ones(size(BP, 1), 1));
+            
+        end
+        
     end
+    
+    pd_indices = logical(pd_indices); base_index = logical(base_index);
+    
+    % if no_pds == 2
+    % 
+    %     base_index = pd_indices(:, 1);
+    % 
+    % elseif no_pds
+    % 
+    %     base_index = logical(ones(size(BP, 1), 1));
+    % 
+    % end
     
     if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
     
@@ -82,19 +118,15 @@ for fo = 1:length(folders)
             
         end
         
-        t = (1:size(BP_data, 1) - base_index)/sampling_freq;
-        
         BP_high = nan(size(BP_data));
         
-        pd_limits = [1 min(length(t), floor(base_index)); min(length(t), floor(base_index) + 1) length(t)];
+        % base_limits = [1 min(length(t), floor(base_index))]; % ; min(length(t) - 1, floor(base_index) + 1) length(t)];
         
-        pd_lengths = diff(pd_limits, [], 2) + 1;
-        
-        for ch = 1:2
+        for ch = 1:no_chans
             
             for b = 1:size(BP_high, 2)
                 
-                high_cutoff = nanmean(BP_data(1:pd_limits(1, 2), b, ch)) + sd_lim*nanstd(BP_data(1:pd_limits(1, 2), b, ch));
+                high_cutoff = nanmean(BP_data(base_index, b, ch)) + sd_lim*nanstd(BP_data(base_index, b, ch));
                 
                 BP_high(:, b, ch) = BP_data(:, b, ch) >= high_cutoff;
                 
@@ -108,17 +140,17 @@ for fo = 1:length(folders)
         
         save([subj_name, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
         
-        for pd = 1:size(pd_limits,1)
-            
-            for ch = 1:2
-                
-                BP_high_dps(fo, :, ch, pd, n) = nansum(BP_high(pd_limits(pd,1):pd_limits(pd,2), :, ch))/pd_lengths(pd);
-                    
-                BP_high_cum_dps(fo, :, ch, pd, n) = nansum(BP_high_cum(pd_limits(pd,1):pd_limits(pd,2), :, ch))/pd_lengths(pd);
-                
-            end
-            
-        end
+        % for pd = 1:no_pds
+        % 
+        %     for ch = 1:no_chans
+        % 
+        %         BP_high_dps(fo, :, ch, pd, n) = nansum(BP_high(pd_indices(:, pd), :, ch))/sum(pd_indices(:, pd));
+        % 
+        %         BP_high_cum_dps(fo, :, ch, pd, n) = nansum(BP_high_cum(pd_indices(:, pd), :, ch))/sum(pd_indices(:, pd));
+        % 
+        %     end
+        % 
+        % end
         
     end
           
