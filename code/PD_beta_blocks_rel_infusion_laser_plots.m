@@ -98,12 +98,16 @@ for b = 1:no_bands
             
             ylabel([chan_labels{ch}, 'Beta Power'])
             
+            title([chan_labels{ch}, ', Boxplot of High ', band_labels{b}, ' Power (Per Trial)'])
+            
         else
             
             h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
                 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
             
             ylabel([chan_labels{ch}, 'Beta Density'])
+            
+            title([chan_labels{ch}, ', Boxplot of High ', band_labels{b}, ' Density (Per Trial)'])
             
         end
         
@@ -129,15 +133,11 @@ for b = 1:no_bands
             
         end
         
-        xlim([0 4])
+        xlim([0 (no_pds + 1)])
         
-        set(gca, 'XTickLabel', pd_labels)
-        
-        ylabel('High Beta Density')
+        set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
         
         % if b == 1
-            
-        title([chan_labels{ch}, ', Boxplot of High ', band_labels{b}, ' Density (Per Trial)'])
         
         % else
         % 

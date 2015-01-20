@@ -139,9 +139,9 @@ for b = 1:no_bands
                 
             end
             
-            xlim([0 4])
+            xlim([0 no_pds])
             
-            set(gca, 'XTickLabel', pd_labels)
+            set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
             
             title([folders{fo}, ', ', band_labels{b}])
             

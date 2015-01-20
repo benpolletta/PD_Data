@@ -120,6 +120,30 @@ for fo = 1:no_folders
                 
                 hold on
                 
+                if fo == 1
+                    
+                    title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
+                    
+                elseif fo == no_folders
+                    
+                    xlabel('Time Rel. Infusion (Min.)')
+                    
+                end
+                
+                if ch == 1
+                    
+                    ylabel({folder; 'High Power Density per Min.'})
+                    
+                    if fo == 1
+                        
+                        legend(handle, {['Peak ', num2str(epoch_secs/60), ' Min., Pre-Infusion'], ['Peak ', num2str(epoch_secs/60), ' Min., Post-Infusion']})
+                        
+                    end
+                    
+                end
+                
+                plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
+                
                 handle(pd) = plot(t(bp_max_start:bp_max_end)/60, BP_plot(bp_max_start:bp_max_end), pd_colors{pd}, 'LineWidth', 2);
                 
                 for sec = 1:epoch_secs
@@ -133,30 +157,6 @@ for fo = 1:no_folders
                 end
                 
             end
-            
-            if fo == 1
-                
-                title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
-               
-            elseif fo == no_folders
-                
-                xlabel('Time Rel. Infusion (Min.)')
-                
-            end
-                    
-            if ch == 1
-            
-                ylabel({folder; 'High Power Density per Min.'})
-                
-                if fo == 1
-                
-                    legend(handle, {['Peak ', num2str(epoch_secs/60), ' Min., Pre-Infusion'], ['Peak ', num2str(epoch_secs/60), ' Min., Post-Infusion']})
-                
-                end
-                    
-            end
-            
-            plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
             
         end
         
