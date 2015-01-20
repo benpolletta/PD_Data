@@ -78,8 +78,6 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
-        pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
-        
         if exist('BP_sec')
             
             mn = nanmean(pct_bp_high_for_test);
@@ -97,6 +95,8 @@ for b = 1:no_bands
             ylabel('Beta Power')
             
         else
+        
+            pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
             
             mn = nanmean(log(pct_bp_high_for_test));
             

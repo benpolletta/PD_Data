@@ -139,7 +139,7 @@ for b = 1:no_bands
                 
             end
             
-            xlim([0 no_pds])
+            xlim([0 (no_pds + 1)])
             
             set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
             
