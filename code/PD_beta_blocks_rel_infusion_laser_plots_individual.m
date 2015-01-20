@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat)
+function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure)
     
 close('all')
 
@@ -56,7 +56,7 @@ max_no_trials = all_dimensions(@max, no_trials);
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
 
@@ -96,10 +96,26 @@ for b = 1:no_bands
             
             if strcmp(measure, '_power')
                 
-                h = 
+                h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
+                
+                if fo == 1
+                    
+                    ylabel([chan_labels{ch}, 'Beta Power'])
+                    
+                end
+                
+            else
             
-            h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
-                0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+                h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
+                    0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+                
+                if fo == 1
+                    
+                    ylabel([chan_labels{ch}, 'Beta Density'])
+                    
+                end
+                
+            end
             
             box off
             
@@ -127,13 +143,11 @@ for b = 1:no_bands
             
             set(gca, 'XTickLabel', pd_labels)
             
-            ylabel({chan_labels{ch}; 'High Beta Density'})
-            
-            title([folder, ', ', band_labels{b}])
+            title([folders{fo}, ', ', band_labels{b}])
             
         end
         
-        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_bar_individual'])
+        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, measure, '_bar_individual'])
         
     end
     

@@ -16,6 +16,8 @@ no_chans = length(chan_labels);
 
 for fo = 1:length(folders)
     
+    clear pd_indices base_index
+    
     folder = folders{fo};
     
     prefix = prefixes{fo};

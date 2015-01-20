@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_plots(subject_mat)
+function PD_beta_blocks_rel_infusion_laser_plots(subject_mat, measure)
     
 close('all')
 
@@ -56,7 +56,7 @@ max_no_trials = all_dimensions(@max, no_trials);
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
 
@@ -92,8 +92,20 @@ for b = 1:no_bands
         
         pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
         
-        h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
-            0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+        if strcmp(measure, '_power')
+            
+            h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
+            
+            ylabel([chan_labels{ch}, 'Beta Power'])
+            
+        else
+            
+            h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
+                0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+            
+            ylabel([chan_labels{ch}, 'Beta Density'])
+            
+        end
         
         box off
         
