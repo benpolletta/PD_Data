@@ -90,7 +90,17 @@ for b = 1:no_bands
             
             if exist('BP_sec')
                 
-                h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
+                mn = nanmean(pct_bp_high_for_test);
+                
+                sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
+                
+                if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+                    
+                    mn = [mn mn - 5]; sd = [sd nan];
+                    
+                end
+                
+                h = barwitherr(sd, mn, 0.6);
                 
                 if fo == 1
                     
@@ -99,9 +109,18 @@ for b = 1:no_bands
                 end
                 
             else
+                
+                mn = nanmean(log(pct_bp_high_for_test));
+                
+                sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
+                
+                if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+                    
+                    mn = [mn mn - 5]; sd = [sd nan];
+                    
+                end
             
-                h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
-                    0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+                h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
                 
                 if fo == 1
                     
@@ -124,7 +143,7 @@ for b = 1:no_bands
             if fo == 1
             
                 title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-                    [folder, ', ', band_labels{b}];['p-value = ', num2str(p_val(b, ch)), ' (t-test)']})
+                    [folder, ', ', band_labels{b}];['p-value = ', num2str(p_val(b, ch)), ' (', test_handle, ')']})
                 
             else
                 
@@ -132,9 +151,9 @@ for b = 1:no_bands
             
             end
             
-            xlim([0 3])
+            xlim([0 (no_pds + 1)])
             
-            set(gca, 'XTickLabel', pd_labels)
+            set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
             
         end
     

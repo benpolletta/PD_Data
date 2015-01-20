@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_stats(subject_mat)
+function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure)
     
 close('all')
 
@@ -58,8 +58,6 @@ no_secs = max_no_trials*5;
 
 % high_type = {'', '_cum'}; no_types = length(high_type);
 
-if isempty(dir([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials.mat']))
-
 pct_bp_high = nan(no_secs, no_folders, no_pds, no_bands, no_chans);
 
 for fo = 1:no_folders
@@ -70,8 +68,16 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    load([subj_name, '_2sd_BP_high.mat'], 'BP_high_cum')
-    
+    if strcmp(measure, '_power')
+        
+        BP_high_cum = get_BP(subj_name, outlier_lims(fo));
+        
+    else
+        
+        load([subj_name, '_2sd_BP_high.mat'], 'BP_high_cum')
+   
+    end
+        
     t = (1:size(BP_high_cum, 1))/sampling_freq;
     
     for ch = 1:no_chans
@@ -80,7 +86,7 @@ for fo = 1:no_folders
             
             figure(b)
             
-            beta_blocks_plot = conv(BP_high_cum(:, b, ch), ones(sampling_freq, 1)/sampling_freq, 'same');
+            beta_blocks_plot = nanconv(BP_high_cum(:, b, ch), ones(sampling_freq, 1)/sampling_freq, 'same');
             
             subplot(no_folders, 2, (fo - 1)*2 + ch)
             
@@ -140,131 +146,47 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, measure])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials.mat'], 'pct_bp_high')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials', measure, '.mat'], 'pct_bp_high')
 
-else
+end
+
+function BP = get_BP(subj_name, outlier_lim)
+
+load([subj_name, '_wt.mat'], 'sampling_freq', 'freqs')
+
+load([subj_name, '_wt_BP.mat'], 'BP', 'bands')
+
+if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials.mat'])
+    load([subj_name, '_wav_laser_artifacts.mat'])
+    
+    [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
+    
+    BP(logical(laser_nans)) = nan;
     
 end
 
-no_comparisons = nchoosek(no_pds, 2);
-
-comparisons = nchoosek(1:no_pds, 2);
-
-[p_greater, p_less] = deal(nan(no_bands, no_comparisons, no_chans));
-
-for b = 1:no_bands
+if ~isempty(outlier_lim) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lim), 'sd_outliers.mat']))
     
-    figure
+    load([subj_name, '_wav_BP_', num2str(outlier_lim), 'sd_outliers.mat'])
     
-    for ch = 1:no_chans
-        
-        pct_bp_high_for_test = nan(no_folders*no_secs, no_pds);
-        
-        for pd = 1:no_pds
-            
-            pct_bp_high_for_test(1:no_folders*no_secs, pd) = reshape(pct_bp_high(:, :, pd, b, ch), no_folders*no_secs, 1);
-            
-        end
-        
-        for comp = 1:no_comparisons
-        
-            p_greater(b, comp, ch) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
-        
-            p_less(b, comp, ch) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
-            
-        end
-        
-        subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
-        
-        boxplot(pct_bp_high_for_test, 'labels', pd_labels)
-        
-        ylabel('High Beta Density')
-        
-        % if b == 1
-            
-        title([chan_labels{ch}, ', Boxplot of High ', band_labels{b}, ' Density (Per Trial)'])
-        
-        % else
-        % 
-        %     title([band_labels{b}, ', p-value = ', num2str(p_val(b, ch))])
-        % 
-        % end
-        
-    end
-
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_boxplot'])
+    [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+    
+    BP(logical(outlier_nans)) = nan;
     
 end
 
-for b = 1:no_bands
+if ~isempty(dir([subj_name, '_peaks.mat']))
     
-    figure
+    load([subj_name, '_peaks.mat'])
     
-    for ch = 1:no_chans
-        
-        pct_bp_high_for_test = nan(no_folders*no_secs, no_pds);
-        
-        for pd = 1:no_pds
-            
-            pct_bp_high_for_test(1:no_folders*no_secs, pd) = reshape(pct_bp_high(:, :, pd, b, ch), no_folders*no_secs, 1);
-            
-        end
-        
-        for comp = 1:no_comparisons
-        
-            p_greater(b, comp, ch) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
-        
-            p_less(b, comp, ch) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
-            
-        end
-        
-        subplot(1, no_chans, ch) % subplot(no_bands, 2, (b - 1)*2 + ch)
-        
-        range = [all_dimensions(@min, pct_bp_high_for_test) all_dimensions(@max, pct_bp_high_for_test)];
-        
-        range = max(eps, range);
-        
-        [bin_edges, bin_centers] = make_bins(range(1), range(2), 50, 'log'); % 10, ''); %
-        
-        for pd = 1:no_pds
-            
-            [h, ~] = histc(pct_bp_high_for_test(:, pd), bin_edges);
-            
-            % h = max(eps, h);
-            
-            loglog(bin_centers, h(1:(end - 1))/sum(h(1:(end - 1))), pd_colors{pd})
-            
-            hold on
-            
-        end
-        
-        legend(pd_labels)
-        
-        xlabel('High Beta Density')
-        
-        ylabel('Proportion Observed')
-            
-        title([chan_labels{ch}, ', Histogram of High ', band_labels{b}, ' Density (Per Trial)'])
-        
-        % if b == 1
-        % 
-        %     title([chan_labels{ch}, ', ', band_labels{b}, ', p-value = ', num2str(p_val(b, ch))])
-        % 
-        % else
-        % 
-        %     title([band_labels{b}, ', p-value = ', num2str(p_val(b, ch))])
-        % 
-        % end
-        
-    end
-
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_hist'])
+    [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+    
+    BP(logical(spike_nans)) = nan;
     
 end
 

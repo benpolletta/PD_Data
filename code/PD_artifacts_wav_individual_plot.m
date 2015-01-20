@@ -10,13 +10,27 @@ load([subj_name, '_all_channel_data_dec.mat'])
 
 All_data = load([subj_name, '_wt_BP.mat']);
 
+load([subj_name, '_wt.mat'], 'freqs')
+
+bands = All_data.bands;
+
 BP_t = All_data.t;
 
 t = (1:length(PD_dec))/sampling_freq - basetime;
 
 BP_data = All_data.BP;
 
-bands = All_data.bands;
+if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
+    
+    load([subj_name, '_wav_laser_artifacts.mat'])
+    
+    [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
+    
+    laser_nans = repmat(laser_nans, [1 1 2]);
+    
+    BP_data(logical(laser_nans)) = nan;
+    
+end
 
 for b = 1:length(bands), band_labels{b} = sprintf('%.0f - %.0f Hz', bands(b, :)); end
 
@@ -30,7 +44,7 @@ artifact_indicator = zeros(length(BP_t), 2);
 
 for ch = 1:2
     
-    BP_zs(:, :, ch) = zscore(BP_data(:, :, ch));
+    BP_zs(:, :, ch) = nanzscore(BP_data(:, :, ch));
     
     BP_out(:, ch) = any(BP_zs(:, :, ch) > sd_lim, 2);
     

@@ -82,14 +82,33 @@ for b = 1:no_bands
         
         if exist('BP_sec')
             
-            h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
+            mn = nanmean(pct_bp_high_for_test);
+            
+            sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
+            
+            if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+                
+                mn = [mn mn - 5]; sd = [sd nan];
+                
+            end
+            
+            h = barwitherr(sd, mn, 0.6);
             
             ylabel('Beta Power')
             
         else
             
-            h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
-                0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+            mn = nanmean(log(pct_bp_high_for_test));
+            
+            sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
+            
+            if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+                
+                mn = [mn mn - 5]; sd = [sd nan];
+                
+            end
+           
+            h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
         
             ylabel('Beta Density')
             
@@ -108,13 +127,14 @@ for b = 1:no_bands
         title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
             [band_labels{b}, ', p-value = ', num2str(p_val(b, ch)), ' (ranksum test)']})
         
-        xlim([0 3])
+        xlim([0 (no_pds + 1)])
         
-        set(gca, 'XTickLabel', pd_labels)
+        set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
         
     end
 
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot', pd_handle])
+    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', ...
+        num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot', pd_handle])
     
 end
 

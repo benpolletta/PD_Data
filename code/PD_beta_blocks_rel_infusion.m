@@ -34,6 +34,8 @@ for fo = 1:length(folders)
         
         [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
         
+        laser_nans = repmat(laser_nans, [1 1 2]);
+        
         pd_indices = laser_periods;
         
         base_index = logical(ones(size(BP, 1), 1)); % pd_indices(:, 1); %
@@ -76,6 +78,8 @@ for fo = 1:length(folders)
         
         [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
         
+        outlier_nans = repmat(outlier_nans, [1 1 2]);
+        
     else
         
         outlier_nans = [];
@@ -86,11 +90,11 @@ for fo = 1:length(folders)
         
         load([subj_name, '_peaks.mat'])
         
-        [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
         
     else
         
-        BP_nans = [];
+        spike_nans = [];
         
     end
     
@@ -112,9 +116,9 @@ for fo = 1:length(folders)
             
         end
         
-        if ~isempty(BP_nans)
+        if ~isempty(spike_nans)
             
-            BP_data(logical(BP_nans)) = nan;
+            BP_data(logical(spike_nans)) = nan;
             
         end
         

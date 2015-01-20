@@ -88,11 +88,15 @@ for b = 1:no_bands
                 
             end
             
-            p_vals = p_vals*all_dimensions(@sum, ~isnan(p_vals));
+            % p_vals = p_vals*all_dimensions(@sum, ~isnan(p_vals));
             
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
             
             pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
+            
+            if strcmp(measure, '_power')
+                
+                h = 
             
             h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
                 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);

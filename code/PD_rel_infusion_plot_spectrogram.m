@@ -98,11 +98,11 @@ for fo = 1:length(folders)
         
         load([subj_name, '_peaks.mat'])
         
-        [~, BP_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
         
-        BP_no_spikes(logical(BP_nans)) = nan;
+        BP_no_spikes(logical(spike_nans)) = nan;
         
-        BP_norm_no_spikes(logical(BP_nans)) = nan;
+        BP_norm_no_spikes(logical(spike_nans)) = nan;
         
     end
         
