@@ -72,6 +72,8 @@ for fo = 1:length(folders)
         
         [laser_wav_nans, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
         
+        laser_wav_nans = repmat(laser_wav_nans, [1 1 2]); laser_nans = repmat(laser_nans, [1 1 2]);
+        
         BP_no_spikes(logical(laser_nans)) = nan;
         
         BP_norm_no_spikes(logical(laser_nans)) = nan;
@@ -85,6 +87,8 @@ for fo = 1:length(folders)
         load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
         
         [outlier_wav_nans, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        
+        outlier_wav_nans = repmat(outlier_wav_nans, [1 1 2]); outlier_nans = repmat(outlier_nans, [1 1 2]);
         
         BP_no_spikes(logical(outlier_nans)) = nan;
         
