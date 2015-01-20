@@ -96,7 +96,7 @@ for b = 1:no_bands
                 
                 if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
                     
-                    mn = [mn mn - 5]; sd = [sd nan];
+                    mn = [mn nan]; sd = [sd nan];
                     
                 end
                 
