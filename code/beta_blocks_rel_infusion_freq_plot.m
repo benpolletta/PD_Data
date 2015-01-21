@@ -1,4 +1,4 @@
-function beta_blocks_rel_infusion_freq_plot(subject_mat)
+function beta_blocks_rel_infusion_freq_plot(subject_mat, norm, h_norm)
     
 close('all')
 
@@ -42,7 +42,7 @@ for ch = 1:no_chans
     
     for pd = 1:no_pds
         
-        Freq_data = load([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_ch', num2str(ch), '_', pd_labels{pd}, '.txt']);
+        Freq_data = load([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt']);
         
         Freq_high_beta = Freq_data(:, 1);
         
@@ -80,9 +80,9 @@ for ch = 1:no_chans
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_group_hist'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_group_hist'])
 
 figure
 
@@ -108,7 +108,7 @@ for ch = 1:no_chans
     
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_group_mean'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_group_mean'])
 
 %% Group average plot (by recording).
 
@@ -160,7 +160,7 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
 Freq_hist_mean = permute(mean(Freq_hist), [2 3 4 1]);
 
@@ -193,7 +193,7 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_individual_hist'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_individual_hist'])
 
 Spec_high_beta_mean_plot = permute(mean(Spec_high_beta_mean), [2 3 4 1]);
 
@@ -226,4 +226,4 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_individual_mean'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_individual_mean'])

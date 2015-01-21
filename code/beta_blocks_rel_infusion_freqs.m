@@ -1,4 +1,4 @@
-function beta_blocks_rel_infusion_freqs(subject_mat)
+function beta_blocks_rel_infusion_freqs(subject_mat, norm)
 
 load(subject_mat)
 
@@ -34,7 +34,7 @@ for pd = 1:no_pds
     
     for ch = 1:no_chans
     
-        fid(pd, ch) = fopen([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
+        fid(pd, ch) = fopen([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
         
     end
     
@@ -80,7 +80,15 @@ for fo = 1:no_folders
         
         Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch) = Spec_beta(logical(BP_high_cum(:, 3, ch)), :, ch);
         
-        [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch), [], 2);
+        if strcmp(norm, '_zscore')
+            
+            [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(zscore(Spec_high_beta(logical(BP_high_cum(:, 3, ch))), :, ch), [], 2);
+            
+        else
+            
+            [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch), [], 2);
+            
+        end
         
         Freqs_high_beta(:, ch) = Freqs_high_beta(:, ch) + min(freqs(band_indices{3})) - 1;
         
@@ -92,7 +100,7 @@ for fo = 1:no_folders
         
     end
     
-    save([subj_name, '_beta_block_freqs'], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
+    save([subj_name, '_beta_block_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
     
 end
 

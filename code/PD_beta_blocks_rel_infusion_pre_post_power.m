@@ -26,7 +26,7 @@ no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
 
-BP_secs = nan(epoch_secs, no_folders, 2, no_bands, 2);
+BP_sec = nan(epoch_secs, no_folders, 2, no_bands, 2);
 
 load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
@@ -64,7 +64,7 @@ for fo = 1:no_folders
             
         elseif no_pds == 1
            
-            pd_indices = ones(size(t));
+            pd_indices = ones(length(t), 1);
             
         end
         
@@ -99,12 +99,12 @@ for fo = 1:no_folders
     for b = 1:no_bands
         
         figure(b)
-                
-        handle = nan(no_pds, 1);
         
-        for pd = 1:no_pds
+        for ch = 1:no_chans
             
-            for ch = 1:no_chans
+            handle = nan(no_pds, 1);
+            
+            for pd = 1:no_pds
                 
                 bp_max_start = All_bp_max_start(fo, ch, b, pd);
                 
@@ -120,30 +120,6 @@ for fo = 1:no_folders
                 
                 hold on
                 
-                if fo == 1
-                    
-                    title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
-                    
-                elseif fo == no_folders
-                    
-                    xlabel('Time Rel. Infusion (Min.)')
-                    
-                end
-                
-                if ch == 1
-                    
-                    ylabel({folder; 'High Power Density per Min.'})
-                    
-                    if fo == 1
-                        
-                        legend(handle, {['Peak ', num2str(epoch_secs/60), ' Min., Pre-Infusion'], ['Peak ', num2str(epoch_secs/60), ' Min., Post-Infusion']})
-                        
-                    end
-                    
-                end
-                
-                plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
-                
                 handle(pd) = plot(t(bp_max_start:bp_max_end)/60, BP_plot(bp_max_start:bp_max_end), pd_colors{pd}, 'LineWidth', 2);
                 
                 for sec = 1:epoch_secs
@@ -157,6 +133,36 @@ for fo = 1:no_folders
                 end
                 
             end
+            
+            if fo == 1
+                
+                title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
+                
+            elseif fo == no_folders
+                
+                xlabel('Time Rel. Infusion (Min.)')
+                
+            end
+            
+            if ch == 1
+                
+                ylabel({folder; 'High Power Density per Min.'})
+                
+                if fo == 1
+                    
+                    for pd = 1:no_pds
+                        
+                        ledge{pd} = ['Peak ', num2str(epoch_secs/60), ' Min., ', pd_labels{pd}];
+                        
+                    end
+                    
+                    legend(handle, ledge)
+                    
+                end
+                
+            end
+            
+            plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
             
         end
         

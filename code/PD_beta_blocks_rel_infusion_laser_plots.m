@@ -98,7 +98,7 @@ for b = 1:no_bands
             
             ylabel([chan_labels{ch}, 'Beta Power'])
             
-            title([chan_labels{ch}, ', Boxplot of High ', band_labels{b}, ' Power (Per Trial)'])
+            title([chan_labels{ch}, ', High ', band_labels{b}, ' Power (Per Trial)'])
             
         else
             
@@ -107,7 +107,7 @@ for b = 1:no_bands
             
             ylabel([chan_labels{ch}, 'Beta Density'])
             
-            title([chan_labels{ch}, ', Boxplot of High ', band_labels{b}, ' Density (Per Trial)'])
+            title([chan_labels{ch}, ', High ', band_labels{b}, ' Density (Per Trial)'])
             
         end
         
@@ -147,7 +147,7 @@ for b = 1:no_bands
         
     end
 
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_boxplot'])
+    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_barplot', measure])
     
 end
 
