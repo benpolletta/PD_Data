@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure)
+function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure, no_trials)
     
 close('all')
 
@@ -26,37 +26,45 @@ no_pds = length(pd_labels);
 
 pd_indices = cell(no_folders, 1);
 
-trials = cell(no_folders, no_pds);
+if isempty(no_trials)
 
-no_trials = nan(no_folders, no_pds);
-
-for fo = 1:no_folders
+    trials = cell(no_folders, no_pds);
     
-    folder = folders{fo};
+    no_trials = nan(no_folders, no_pds);
     
-    prefix = prefixes{fo};
-    
-    subj_name = [folder,'/',prefix];
-    
-    load([subj_name, '_wav_laser_artifacts.mat'])
-    
-    pd_indices{fo} = logical(laser_periods);
-    
-    for pd = 1:no_pds
+    for fo = 1:no_folders
         
-        trials{fo, pd} = index_to_blocks(laser_periods(:, pd));
+        folder = folders{fo};
         
-        no_trials(fo, pd) = size(trials, 1);
+        prefix = prefixes{fo};
+        
+        subj_name = [folder,'/',prefix];
+        
+        load([subj_name, '_wav_laser_artifacts.mat'])
+        
+        pd_indices{fo} = logical(laser_periods);
+        
+        for pd = 1:no_pds
+            
+            trials{fo, pd} = index_to_blocks(laser_periods(:, pd));
+            
+            no_trials(fo, pd) = size(trials, 1);
+            
+        end
         
     end
     
+    max_no_trials = all_dimensions(@max, no_trials);
+    
+else
+    
+    max_no_trials = no_trials;
+    
 end
-
-max_no_trials = all_dimensions(@max, no_trials);
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials', measure, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
 
@@ -88,7 +96,7 @@ for b = 1:no_bands
                 
             end
             
-            % p_vals = p_vals*all_dimensions(@sum, ~isnan(p_vals));
+            % p_vals = p_vals*all_dimensions(@sum, ~isnan(p_vals(:, b, :, :)));
             
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
             
@@ -147,7 +155,7 @@ for b = 1:no_bands
             
         end
         
-        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, measure, '_bar_individual'])
+        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual'])
         
     end
     

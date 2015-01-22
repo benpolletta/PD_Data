@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure, no_trials)
+function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure, no_trials_analyzed)
     
 close('all')
 
@@ -52,13 +52,13 @@ for fo = 1:no_folders
     
 end
 
-if isempty(no_trials)
+if isempty(no_trials_analyzed)
 
     max_no_trials = all_dimensions(@max, no_trials);
 
 else
     
-    max_no_trials = no_trials;
+    max_no_trials = no_trials_analyzed;
     
 end
     
@@ -154,10 +154,10 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials_', short_band_labels{b}, measure])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'], 'pct_bp_high')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, '.mat'], 'pct_bp_high')
 
 end

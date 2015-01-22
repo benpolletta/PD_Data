@@ -16,7 +16,7 @@ for fo = 1:length(folders)
     
     laser_transitions = zeros(data_length, 1);
     
-    laser_periods = zeros(data_length, 3);
+    laser_periods = zeros(data_length, 4);
     
     laser_on = laseron(fo);
     
@@ -43,6 +43,8 @@ for fo = 1:length(folders)
         laser_periods(trial_laser_on:trial_laser_off, 2) = 1;
         
         laser_periods(trial_laser_off + (1:(5*sampling_freq)), 3) = 1;
+        
+        laser_periods(trial_laser_off + 5*sampling_freq + (1:(5*sampling_freq)), 4) = 1;
         
         laser_periods(trial_off - (1:(5*sampling_freq)), 1) = 1;
         
@@ -76,7 +78,7 @@ for fo = 1:length(folders)
     
     title([folder, ', Laser On & Off Times'])
     
-    legend({chan_labels{:}, 'Laser On', 'Post-Laser', 'Pre-Laser', 'Laser Transitions'})
+    legend({chan_labels{:}, 'Laser On', '0 - 5 s Post-Laser', '5 - 10 s Post-Laser', 'Pre-Laser', 'Laser Transitions'})
     
     xlabel('Time (s)')
     

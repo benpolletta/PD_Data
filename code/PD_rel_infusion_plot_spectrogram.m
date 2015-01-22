@@ -68,7 +68,7 @@ for fo = 1:length(folders)
     
     if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
-        load([subj_name, '_wav_laser_times.mat'])
+        load([subj_name, '_wav_laser_artifacts.mat'])
         
         [laser_wav_nans, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
         
@@ -107,6 +107,10 @@ for fo = 1:length(folders)
         BP_no_spikes(logical(spike_nans)) = nan;
         
         BP_norm_no_spikes(logical(spike_nans)) = nan;
+        
+    else
+        
+        Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
         
     end
         
