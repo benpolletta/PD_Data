@@ -56,8 +56,16 @@ for fo = 1:no_folders
         
         pd_indices(:, 1) = t > (min(t) + epoch_secs/2 - 1) & t < (-epoch_secs/2 + 1);
         
-        pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (1800 - epoch_secs/2 + 1);
+        if strcmp(folder, '130328')
+            
+            pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (t(end) - epoch_secs/2 + 1);
+            
+        else
         
+            pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (1800 - epoch_secs/2 + 1);
+        
+        end
+            
     elseif no_pds == 1
         
         pd_indices = ones(length(t), 1);
@@ -71,22 +79,22 @@ for fo = 1:no_folders
         figure(b)
         
         beta_blocks_find = conv(BP_high_cum(:, b, strcmp(chan_labels, 'Striatum')), ones(epoch_secs*sampling_freq, 1)/(epoch_secs*sampling_freq), 'same');
+            
+        for ch = 1:no_chans
+            
+            handle = nan(no_pds, 1);
+            
+            for pd = 1:no_pds
                 
-        handle = nan(no_pds, 1);
-        
-        for pd = 1:no_pds
-            
-            % first_possible_index = find(pd_indices(:, pd), 1, 'first') + epoch_secs*sampling_freq/2 - 1;
-            %
-            % last_possible_index = find(pd_indices(:, pd), 1, 'last') - epoch_secs*sampling_freq/2 + 1;
-            
-            [~, bp_max_index] = max(beta_blocks_find(logical(pd_indices(:, pd))));
-            
-            bp_max_start = max(bp_max_index - floor((epoch_secs/2)*sampling_freq) + find(pd_indices(:, pd), 1, 'first') - 1, 1);
-            
-            bp_max_end = min(bp_max_start + epoch_secs*sampling_freq, length(t));
-            
-            for ch = 1:no_chans
+                % first_possible_index = find(pd_indices(:, pd), 1, 'first') + epoch_secs*sampling_freq/2 - 1;
+                %
+                % last_possible_index = find(pd_indices(:, pd), 1, 'last') - epoch_secs*sampling_freq/2 + 1;
+                
+                [~, bp_max_index] = max(beta_blocks_find(logical(pd_indices(:, pd))));
+                
+                bp_max_start = max(bp_max_index - floor((epoch_secs/2)*sampling_freq) + find(pd_indices(:, pd), 1, 'first') - 1, 1);
+                
+                bp_max_end = min(bp_max_start + epoch_secs*sampling_freq, length(t));
                 
                 beta_blocks_plot = conv(BP_high_cum(:, b, ch), ones(60*sampling_freq, 1)/(60*sampling_freq), 'same');
                 
@@ -98,34 +106,10 @@ for fo = 1:no_folders
                 
                 hold on
                 
-                if fo == 1
-                    
-                    title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
-                    
-                elseif fo == no_folders
-                    
-                    xlabel('Time Rel. Infusion (Min.)')
-                    
-                end
-                
-                if ch == 1
-                    
-                    ylabel({folder; 'High Power Density per Min.'})
-                    
-                    if fo == 1
-                        
-                        legend(handle, {['Peak ', num2str(epoch_secs/60), ' Min., Pre-Infusion'], ['Peak ', num2str(epoch_secs/60), ' Min., Post-Infusion']})
-                        
-                    end
-                    
-                end
-                
-                plot([0; 0], [min(beta_blocks_plot); max(beta_blocks_plot)], 'k', 'LineWidth', 1)
-                
                 handle(pd) = plot(t(bp_max_start:bp_max_end)/60, beta_blocks_plot(bp_max_start:bp_max_end), pd_colors{pd}, 'LineWidth', 2);
                 
                 for sec = 1:epoch_secs
-                   
+                    
                     sec_start = max(bp_max_start + (sec - 1)*sampling_freq + 1, 1);
                     
                     sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
@@ -139,6 +123,32 @@ for fo = 1:no_folders
                 All_bp_max_end(fo, ch, b, pd) = bp_max_end;
                 
             end
+            
+            if fo == 1
+                
+                title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
+                
+            elseif fo == no_folders
+                
+                xlabel('Time Rel. Infusion (Min.)')
+                
+            end
+            
+            if ch == 1
+                
+                ylabel({folder; 'High Power Density per Min.'})
+                
+                if fo == 1
+                    
+                    ledge = {['Peak ', num2str(epoch_secs/60), ' Min., ', pd_labels{1}], ['Peak ', num2str(epoch_secs/60), ' Min., ', pd_labels{2}]};
+                    
+                    legend(handle, ledge)
+                    
+                end
+                
+            end
+            
+            plot([0; 0], [min(beta_blocks_plot); max(beta_blocks_plot)], 'k', 'LineWidth', 1)
             
         end
         

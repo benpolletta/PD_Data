@@ -10,6 +10,8 @@ load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
 freqs = 1:200;
 
+cycle_lengths = sampling_freq./freqs;
+
 bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
 
 [band_indices, short_band_labels, band_labels] = deal(cell(no_bands, 1));
@@ -48,8 +50,16 @@ for ch = 1:no_chans
         
         [h, ~] = hist(Freq_high_beta, freqs(band_indices{3}));
         
-        Freq_hist(:, pd, ch) = h/sum(h);
+        if strcmp(h_norm, '_cycles')
+            
+            Freq_hist(:, pd, ch) = h./cycle_lengths(band_indices{3});
+            
+        else
         
+            Freq_hist(:, pd, ch) = h/sum(h);
+        
+        end
+            
         figure(1)
         
         subplot(1, no_chans, ch)
@@ -80,9 +90,9 @@ for ch = 1:no_chans
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_group_hist'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_group_hist'])
 
 figure
 
@@ -108,7 +118,7 @@ for ch = 1:no_chans
     
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_group_mean'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_group_mean'])
 
 %% Group average plot (by recording).
 
@@ -122,7 +132,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    load([subj_name, '_beta_block_freqs.mat'])
+    load([subj_name, '_beta_block_freqs', norm, '.mat'])
     
     if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
         
@@ -160,7 +170,7 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
 Freq_hist_mean = permute(mean(Freq_hist), [2 3 4 1]);
 
@@ -179,7 +189,7 @@ for ch = 1:no_chans
     
     xlabel('Freq. (Hz)')
     
-    xlim([10 30])
+    xlim([8 30])
     
     ylabel('Proportion of High Beta')
     
@@ -193,7 +203,7 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_individual_hist'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_individual_hist'])
 
 Spec_high_beta_mean_plot = permute(mean(Spec_high_beta_mean), [2 3 4 1]);
 
@@ -208,7 +218,7 @@ for ch = 1:no_chans
     boundedline(freqs(band_indices{3})', Spec_high_beta_mean_plot(:, :, ch),...
         prep_for_boundedline(Spec_high_beta_std_plot(:, :, ch)), 'cmap', pd_cmap)
     
-    xlim([10 30])
+    xlim([8 30])
 
     axis tight
     
@@ -226,4 +236,4 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_individual_mean'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_individual_mean'])

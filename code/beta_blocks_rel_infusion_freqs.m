@@ -82,7 +82,9 @@ for fo = 1:no_folders
         
         if strcmp(norm, '_zscore')
             
-            [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(zscore(Spec_high_beta(logical(BP_high_cum(:, 3, ch))), :, ch), [], 2);
+            Spec_hb_zs = zscore(Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch));
+            
+            [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(Spec_hb_zs, [], 2);
             
         else
             
