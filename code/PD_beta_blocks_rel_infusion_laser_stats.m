@@ -85,8 +85,10 @@ for fo = 1:no_folders
         load([subj_name, '_2sd_BP_high.mat'], 'BP_high_cum')
    
     end
+    
+    length_plotted = min(max_no_trials*triallength(fo)*sampling_freq, size(BP_high_cum, 1));
         
-    t = (1:size(BP_high_cum, 1))/sampling_freq;
+    t = (1:length_plotted)/sampling_freq;
     
     for ch = 1:no_chans
         
@@ -94,7 +96,7 @@ for fo = 1:no_folders
             
             figure(b)
             
-            beta_blocks_plot = nanconv(BP_high_cum(:, b, ch), ones(sampling_freq, 1)/sampling_freq, 'same');
+            beta_blocks_plot = nanconv(BP_high_cum(1:length_plotted, b, ch), ones(sampling_freq, 1)/sampling_freq, 'same');
             
             subplot(no_folders, 2, (fo - 1)*2 + ch)
             
@@ -108,7 +110,7 @@ for fo = 1:no_folders
             
             for pd = 1:no_pds
                 
-                handle(pd) = plot(t(pd_indices{fo}(:, pd))/60, beta_blocks_plot(pd_indices{fo}(:, pd)), [pd_colors{pd}, '.']);
+                handle(pd) = plot(t(pd_indices{fo}(1:length_plotted, pd))/60, beta_blocks_plot(pd_indices{fo}(1:length_plotted, pd)), [pd_colors{pd}, '.']);
                 
                 for tr = 1:min(max_no_trials, no_trials(fo, pd))
                     

@@ -94,7 +94,7 @@ for b = 1:no_bands
             
         end
         
-        p_vals = p_vals*all_dimensions(@sum, ~isnan(p_vals(:, b, :, :)));
+        p_vals = p_vals*all_dimensions(@sum, ~isnan(permute(p_vals(:, b, :, :), [ 1 3 4 2])));
         
         subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
         

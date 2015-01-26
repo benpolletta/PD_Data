@@ -1,4 +1,4 @@
-function PD_spikes_by_freq_individual_save(folder, prefix, spike_boundaries, band, no_cycles, min_secs_apart, min_prominences, min_prominences_flag)
+function PD_spikes_by_freq_individual_save(folder, prefix, channel_multipliers, spike_boundaries, band, no_cycles, min_secs_apart, min_prominence, min_prominences_flag)
 
 % Script to find spikes in time series from carbachol data.
 
@@ -6,9 +6,13 @@ subj_name = [folder, '/', prefix];
 
 load([subj_name, '_all_channel_data_dec.mat'])
 
-min_prominence = min_prominences;
-
 min_samples_apart = min_secs_apart*sampling_freq;
+
+if isempty(channel_multipliers)
+   
+    channel_multipliers = [1 1];
+    
+end
 
 if isempty(spike_boundaries)
     
@@ -41,9 +45,9 @@ for ch = 1:2
     
     [~, BP_locs] = findpeaks(Spike_data_BP(:, ch), 'MinPeakDistance', min_samples_apart); %((-1)^(ch + 1))*
     
-    [peaks, locs] = BP_to_LFP(Spike_data(:, ch), BP_locs, 100);
+    [peaks, locs] = BP_to_LFP(channel_multipliers(ch)*Spike_data(:, ch), BP_locs, 100);
     
-    [peak_widths, peak_prominences] = peak_details(Spike_data(:, ch), locs, min_samples_apart);
+    [peak_widths, peak_prominences] = peak_details(channel_multipliers(ch)*Spike_data(:, ch), locs, min_samples_apart);
     
     locs = locs + spike_start - 1;
     
@@ -53,11 +57,11 @@ for ch = 1:2
     
     if strcmp(min_prominences_flag, '')
         
-        Peak_data{ch}(peak_prominences < min_prominence, :) = [];
+        Peak_data{ch}(peak_prominences < min_prominence(ch), :) = [];
         
     elseif strcmp(min_prominences_flag, 'std')
         
-        Peak_data{ch}(peak_prom_std < min_prominence, :) = [];
+        Peak_data{ch}(peak_prom_std < min_prominence(ch), :) = [];
         
     end
     
@@ -67,7 +71,7 @@ end
 
 %% Saving peaks.
 
-save([subj_name, '_peaks.mat'], 'Peak_data', 'Spike_indicator', 'min_secs_apart', 'min_prominences', 'min_prominences_flag')
+save([subj_name, '_peaks.mat'], 'Peak_data', 'Spike_indicator', 'band', 'no_cycles', 'min_secs_apart', 'min_prominence', 'min_prominences_flag')
 
 end
 

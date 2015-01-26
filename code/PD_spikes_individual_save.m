@@ -1,12 +1,10 @@
-function PD_spikes_individual_save(folder, prefix, channel_multipliers, spike_boundaries, min_secs_apart, min_prominences, min_prominences_flag)
+function PD_spikes_individual_save(folder, prefix, channel_multipliers, spike_boundaries, min_secs_apart, min_prominence, min_prominences_flag)
 
 % Script to find spikes in time series from carbachol data.
 
 subj_name = [folder, '/', prefix];
 
 load([subj_name, '_all_channel_data_dec.mat'])
-
-min_prominence = min_prominences;
 
 min_samples_apart = min_secs_apart*sampling_freq;
 
@@ -53,11 +51,11 @@ for ch = 1:2
     
     if strcmp(min_prominences_flag, '')
         
-        Peak_data{ch}(peak_prominences < min_prominence, :) = [];
+        Peak_data{ch}(peak_prominences < min_prominence(ch), :) = [];
         
     elseif strcmp(min_prominences_flag, 'std')
         
-        Peak_data{ch}(peak_prom_std < min_prominence, :) = [];
+        Peak_data{ch}(peak_prom_std < min_prominence(ch), :) = [];
         
     end
     
@@ -67,7 +65,7 @@ end
 
 %% Saving peaks.
 
-save([subj_name, '_peaks.mat'], 'Peak_data', 'Spike_indicator', 'min_secs_apart', 'min_prominences', 'min_prominences_flag')
+save([subj_name, '_peaks.mat'], 'Peak_data', 'Spike_indicator', 'min_secs_apart', 'min_prominence', 'min_prominences_flag')
 
 end
 

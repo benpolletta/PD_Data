@@ -1,4 +1,4 @@
-function PD_spikes_by_freq_individual_plot(folder, prefix, basetime, channel_multipliers, spike_boundaries, band, band_label, no_cycles, min_secs_apart, min_prominences, min_prominences_flag, plot_opt)
+function PD_spikes_by_freq_individual_plot(folder, prefix, basetime, channel_multipliers, spike_boundaries, band, band_label, no_cycles, min_secs_apart, min_prominence, min_prominences_flag, plot_opt)
 
 % Script to find spikes in time series from carbachol data.
 
@@ -7,8 +7,6 @@ subj_name = [folder, '/', prefix];
 load([subj_name, '_all_channel_data_dec.mat'])
 
 t = (1:length(PD_dec))/sampling_freq - basetime;
-
-min_prominence = min_prominences;
 
 min_samples_apart = min_secs_apart*sampling_freq;
 
@@ -30,7 +28,7 @@ else
     
 end
 
-fig_name = sprintf('%s_%dto%d_%s_%.1fHz_%.1f%sprom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
+fig_name = sprintf('%s_%dto%d_%s_%.1fHz_%.0f_%.0f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
     band_label, sampling_freq/min_samples_apart, min_prominence, min_prominences_flag);
 
 %% Finding spikes, their width and prominence.
@@ -59,11 +57,11 @@ for ch = 1:2
     
     if strcmp(min_prominences_flag, '')
         
-        Peak_data{ch}(peak_prominences < min_prominence, :) = [];
+        Peak_data{ch}(peak_prominences < min_prominence(ch), :) = [];
         
     elseif strcmp(min_prominences_flag, 'std')
         
-        Peak_data{ch}(peak_prom_std < min_prominence, :) = [];
+        Peak_data{ch}(peak_prom_std < min_prominence(ch), :) = [];
         
     end
     
@@ -145,7 +143,7 @@ end
 
 end
 
-function plot_peaks_1(t, PD_dec, Peak_data, min_sample_apart)
+function plot_peaks_1(t, PD_dec, channel_multipliers, Peak_data, min_sample_apart)
 
 no_rows = 8;
 
@@ -225,7 +223,7 @@ end
 
 end
 
-function plot_peaks_2(fig_name, t, sampling_freq, PD_dec, Peak_data, plot_bounds)
+function plot_peaks_2(fig_name, t, sampling_freq, PD_dec, channel_multipliers, Peak_data, plot_bounds)
 
 epoch_secs = 20;
 
