@@ -78,7 +78,7 @@ for fo = 1:no_folders
     
     if strcmp(measure, '_power')
         
-        BP_high_cum = get_BP(subj_name, outlier_lims(fo));
+        BP_high_cum = get_BP(subj_name, outlier_lims(fo), '_pct');
         
     else
         

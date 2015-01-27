@@ -2,11 +2,15 @@ function wav_inner(folder, prefix, basetime, freqs, no_cycles, bands)
 
 subj_name = [folder,'/',prefix];
 
+save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%.0bands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+
 load([subj_name,'_all_channel_data_dec.mat'])
 
 no_freqs = length(freqs); no_bands = size(bands, 1);
 
-wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
+cycle_lengths = no_cycles.*(sampling_freq./freqs);
+
+wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', max(sampling_freq, max(cycle_lengths)));
 
 segment_length = sampling_freq;
 
@@ -28,7 +32,7 @@ for ch = 1:2
         
         conv_prod = conv(data_reflected, wavelets(f,:), 'same');
         
-        Spec(:, f, ch) = abs(conv_prod((segment_length + 1):(end - segment_length)));
+        Spec(:, f, ch) = conv_prod((segment_length + 1):(end - segment_length));
         
     end
     
@@ -40,7 +44,7 @@ for ch = 1:2
     
     %% Normalize by total power.
     
-    Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(sqrt(sum(Spec(:, :, ch).^2, 2)), 1, no_freqs);
+    Spec_norm(:, :, ch) = abs(Spec(:, :, ch))./repmat(sqrt(sum(abs(Spec(:, :, ch)).^2, 2)), 1, no_freqs);
     
     %% Baseline normalize percent of total power.
     
@@ -52,10 +56,10 @@ end
 
 % save([subj_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', '-v7.3')
 
-save([subj_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', '-v7.3')
-save([subj_name, '_wt_norm.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm', '-v7.3')
-save([subj_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
-save([subj_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
+save([save_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', '-v7.3')
+save([save_name, '_wt_norm.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm', '-v7.3')
+save([save_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
+save([save_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
     
 %% Band power.
 
@@ -79,4 +83,4 @@ for ch = 1:2
     
 end
 
-save([subj_name, '_wt_BP.mat'], 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', '-v7.3')
+save([save_name, '_wt_BP.mat'], 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', '-v7.3')
