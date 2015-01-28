@@ -2,8 +2,22 @@ function wav_inner(folder, prefix, basetime, freqs, no_cycles, bands)
 
 subj_name = [folder,'/',prefix];
 
-save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%.0bands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    no_cycles = linspace(3, 21, 200);
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    save_name = subj_name;
+    
+else
 
+    save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+
+end
+    
 load([subj_name,'_all_channel_data_dec.mat'])
 
 no_freqs = length(freqs); no_bands = size(bands, 1);
