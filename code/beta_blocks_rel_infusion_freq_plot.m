@@ -42,7 +42,7 @@ fid = nan(no_pds, no_chans);
     
 for ch = 1:no_chans
     
-    Freq_high_beta = cell(2, 1);
+    Freq_high_beta = cell(no_pds, 1);
     
     for pd = 1:no_pds
         
@@ -68,20 +68,6 @@ for ch = 1:no_chans
         
         plot(freqs(band_indices{3}), h/sum(h), pd_colors{pd}, 'LineWidth', 2)
         
-        axis tight
-        
-        xlabel('Freq. (Hz)')
-        
-        ylabel('Proportion High Beta Datapoints Observed')
-        
-        if ch == 1
-            
-            legend(pd_labels)
-            
-        end
-        
-        title([chan_labels{ch}, ', Histogram of High Beta Frequencies'])
-        
         hold on
         
         Spec_high_beta_mean(:, pd, ch) = nanmean(Freq_data(:, 2:end))';
@@ -90,19 +76,79 @@ for ch = 1:no_chans
         
     end
     
-    figure(2)
-    
-    subplot(1, no_chans, ch)
-    
-    qqplot(Freq_high_beta{1}, Freq_high_beta{2})
-    
     axis tight
     
-    xlabel(pd_labels{1}), ylabel(pd_labels{2})
+    xlabel('Freq. (Hz)')
     
-    [~, p] = kstest2(Freq_high_beta{1}, Freq_high_beta{2});
+    ylabel('Proportion High Beta Datapoints Observed')
     
-    title({'Pre- vs. Post-Infusion Frequency Distribution'; ['p = ', num2str(p), ', Kolmogorov-Smirnov Test']})
+    if ch == 1
+        
+        legend(pd_labels)
+        
+    end
+    
+    title([chan_labels{ch}, ', Histogram of High Beta Frequencies'])
+    
+    if no_pds >= 2
+        
+        no_comps = nchoosek(no_pds, 2);
+        
+        comparisons = nchoosek(1:no_pds, 2);
+        
+        comp_colors = colormap(hsv(no_comps + 1));
+        
+        [handles, p_vals] = deal(nan(no_comps, 1));
+        
+        comp_labels = cell(no_comps, 1);
+        
+        % comp_titles = cell(no_comps, 1);
+        
+        figure(2)
+        
+        subplot(1, no_chans, ch)
+        
+        for comp = 1:no_comps
+            
+            h = qqplot(Freq_high_beta{comparisons(comp, 1)}, Freq_high_beta{comparisons(comp, 2)});
+            
+            hold on
+                
+            [~, p] = kstest2(Freq_high_beta{comparisons(comp, 1)}, Freq_high_beta{comparisons(comp, 2)});
+            
+            if no_pds == 2
+            
+                xlabel(pd_labels{1}), ylabel(pd_labels{2})
+        
+                title({[chan_labels{ch}, 'Pre- vs. Post-Infusion Frequency Distribution']; ['p = ', num2str(p), ', Kolmogorov-Smirnov Test']})
+            
+            else
+                
+                handles(comp) = h(1);
+                
+                comp_labels{comp} = [pd_labels{comparisons(comp, 1)}, ' vs. ', pd_labels{comparisons(comp, 2)}];
+                
+                comp_labels{comp} = [comp_labels{comp}, ', p = ', num2str(p*no_comps), ', K-S Test'];
+                
+                set(h(1), 'Marker', 'x', 'MarkerEdgeColor', comp_colors(comp, :))
+                
+                set(h(2), 'Color', comp_colors(comp, :))
+                
+                set(h(3), 'Color', comp_colors(comp, :))
+                
+            end
+            
+        end
+            
+        if no_comps > 2
+            
+            legend(handles, comp_labels)
+            
+            title(chan_labels{ch}) % title(comp_titles)
+            
+        end
+            
+    end
     
 end
 
@@ -110,7 +156,11 @@ save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm,
 
 save_as_pdf(1, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_hist'])
 
-save_as_pdf(2, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_qq'])
+if no_pds >= 2
+    
+    save_as_pdf(2, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_qq'])
+    
+end
 
 figure
 

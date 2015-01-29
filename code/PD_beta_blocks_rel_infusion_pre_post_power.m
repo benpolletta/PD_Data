@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, epoch_secs, pd_handle)
+function PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, epoch_secs, pd_handle, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -22,9 +22,7 @@ no_folders = length(folders);
 
 load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
-freqs = 1:200;
-
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
