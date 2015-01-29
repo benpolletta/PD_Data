@@ -1,10 +1,22 @@
-function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, outlier_lims)
+function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, outlier_lims, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
     
 load(subject_mat)
 
-freqs = 1:200;
-
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 no_norms = length(norms);
 
@@ -23,8 +35,10 @@ for fo = 1:length(folders)
     prefix = prefixes{fo};
     
     subj_name = [folder,'/',prefix];
+    
+    no_bands = size(bands, 1);
 
-    load([subj_name, '_wt_BP.mat'])
+    load([subj_name, BP_suffix, '_wt_BP.mat'])
     
     base_index = basetimes(fo)*sampling_freq;
         
@@ -102,7 +116,7 @@ for fo = 1:length(folders)
     
     for n = 1:no_norms
         
-        BP_data = load([subj_name,'_wt_BP.mat'], ['BP', norms{n}]);
+        BP_data = load([subj_name, BP_suffix, '_wt_BP.mat'], ['BP', norms{n}]);
         
         BP_data = getfield(BP_data, ['BP', norms{n}]);
         
@@ -144,7 +158,7 @@ for fo = 1:length(folders)
         
         BP_high_cum(cumsum(BP_high, 2) > 1) = 0;
         
-        save([subj_name, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
+        save([subj_name, BP_suffix, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
         
         % for pd = 1:no_pds
         % 
@@ -162,7 +176,7 @@ for fo = 1:length(folders)
           
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
 
 end
 

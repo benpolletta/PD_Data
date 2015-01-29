@@ -1,4 +1,18 @@
 function PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, epoch_secs, pd_handle)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
     
 close('all')
 
@@ -28,7 +42,7 @@ no_pds = length(pd_labels);
 
 BP_sec = nan(epoch_secs, no_folders, 2, no_bands, 2);
 
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
 for fo = 1:no_folders
     
@@ -38,7 +52,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    load([subj_name, '_wt_BP.mat'])
+    load([subj_name, BP_suffix, '_wt_BP.mat'])
     
     t = (1:size(BP_pct, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
@@ -172,11 +186,11 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, pd_handle, '_power'])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, pd_handle, '_power'])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '_power.mat'], 'BP_sec')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '_power.mat'], 'BP_sec')
 
 end
 

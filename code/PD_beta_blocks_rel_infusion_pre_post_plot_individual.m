@@ -1,4 +1,18 @@
-function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, epoch_secs, test_handle, pd_handle)
+function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, epoch_secs, test_handle, pd_handle, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
     
 close('all')
 
@@ -8,7 +22,7 @@ no_folders = length(folders);
 
 load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
@@ -34,7 +48,7 @@ no_pds = length(pd_labels);
 
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
     
-load([subj_mat_name, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+load([subj_mat_name, BP_suffix '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
 if exist('BP_sec')
     
@@ -157,11 +171,11 @@ for b = 1:no_bands
             
         end
     
-        save([subj_name, '_pct_BP_high_pvals'], 'p_val')
+        save([subj_name, BP_suffix, '_pct_BP_high_pvals'], 'p_val')
         
     end
         
-    save_as_pdf(gcf, [subj_mat_name, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot_individual_', test_handle, pd_handle])
+    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot_individual_', test_handle, pd_handle])
     
 end
 
