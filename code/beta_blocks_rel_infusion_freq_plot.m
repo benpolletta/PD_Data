@@ -1,4 +1,4 @@
-function beta_blocks_rel_infusion_freq_plot(subject_mat, norm, h_norm)
+function beta_blocks_rel_infusion_freq_plot(subject_mat, norm, hist_norm)
     
 close('all')
 
@@ -42,15 +42,17 @@ fid = nan(no_pds, no_chans);
     
 for ch = 1:no_chans
     
+    Freq_high_beta = cell(2, 1);
+    
     for pd = 1:no_pds
         
         Freq_data = load([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt']);
         
-        Freq_high_beta = Freq_data(:, 1);
+        Freq_high_beta{pd} = Freq_data(:, 1);
         
-        [h, ~] = hist(Freq_high_beta, freqs(band_indices{3}));
+        [h, ~] = hist(Freq_high_beta{pd}, freqs(band_indices{3}));
         
-        if strcmp(h_norm, '_cycles')
+        if strcmp(hist_norm, '_cycles')
             
             Freq_hist(:, pd, ch) = h./cycle_lengths(band_indices{3});
             
@@ -88,11 +90,27 @@ for ch = 1:no_chans
         
     end
     
+    figure(2)
+    
+    subplot(1, no_chans, ch)
+    
+    qqplot(Freq_high_beta{1}, Freq_high_beta{2})
+    
+    axis tight
+    
+    xlabel(pd_labels{1}), ylabel(pd_labels{2})
+    
+    [~, p] = kstest2(Freq_high_beta{1}, Freq_high_beta{2});
+    
+    title({'Pre- vs. Post-Infusion Frequency Distribution'; ['p = ', num2str(p), ', Kolmogorov-Smirnov Test']})
+    
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_group_hist'])
+save_as_pdf(1, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_hist'])
+
+save_as_pdf(2, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_qq'])
 
 figure
 
@@ -118,7 +136,7 @@ for ch = 1:no_chans
     
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_group_mean'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_group_mean'])
 
 %% Group average plot (by recording).
 
@@ -170,7 +188,7 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
+save([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
 Freq_hist_mean = permute(mean(Freq_hist), [2 3 4 1]);
 
@@ -203,7 +221,7 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_individual_hist'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_individual_hist'])
 
 Spec_high_beta_mean_plot = permute(mean(Spec_high_beta_mean), [2 3 4 1]);
 
@@ -236,4 +254,4 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, h_norm, '_individual_mean'])
+save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, hist_norm, '_individual_mean'])

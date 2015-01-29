@@ -68,7 +68,7 @@ for b = 1:no_bands
                 
             end
             
-            if no_pds == 2 %for comp = 1:no_comparisons
+            if no_pds == 2 && any(~isnan(pct_bp_high_for_test(:, 1))) && any(~isnan(pct_bp_high_for_test(:, 2))) %for comp = 1:no_comparisons
                 
                 if strcmp(test_handle, 't-test')
                 

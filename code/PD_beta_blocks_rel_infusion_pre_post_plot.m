@@ -34,7 +34,7 @@ no_pds = length(pd_labels);
     
 load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
-if exist('BP_sec')
+if exist('BP_sec', 'var')
     
     pct_bp_high = BP_sec;
     
@@ -78,7 +78,7 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
-        if exist('BP_sec')
+        if exist('BP_sec', 'var')
             
             mn = nanmean(pct_bp_high_for_test);
             

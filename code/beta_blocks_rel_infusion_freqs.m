@@ -48,8 +48,18 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    load([subj_name, '_wt.mat'], 'Spec')
+    if strcmp(norm, '_pct')
+        
+        load([subj_name, '_wt_pct.mat'], 'Spec_pct')
+        
+        Spec = Spec_pct;
+        
+    else
     
+        load([subj_name, '_wt.mat'], 'Spec')
+    
+    end
+        
     load([subj_name, '_2sd_BP_high.mat'], 'BP_high_cum')
     
     t = (1:size(BP_high_cum, 1))/sampling_freq - basetimes(fo); % t = t/60;
