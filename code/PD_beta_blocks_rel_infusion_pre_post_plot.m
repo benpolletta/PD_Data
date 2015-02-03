@@ -20,7 +20,15 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+if exist([folders{1}, '/', prefixes{1}, '_wt.mat'])
+    
+    load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+    
+else
+    
+    sampling_freq = 500;
+    
+end
 
 no_bands = size(bands, 1);
 
@@ -68,7 +76,11 @@ end
 
 %% Group bar plots.
 
-p_val = nan(no_bands, no_chans);
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+    
+p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
 for b = 1:no_bands
     
@@ -86,7 +98,21 @@ for b = 1:no_bands
         
         if no_pds == 2 %for comp = 1:no_comparisons
         
-            p_val(b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
+            p_vals(:, b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
+                
+        else
+            
+            for comp = 1:no_comparisons
+                
+                if any(~isnan(pct_bp_high_for_test(:, comparisons(comp, 1)))) && any(~isnan(pct_bp_high_for_test(:, comparisons(comp, 2))))
+                    
+                    p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                    
+                    p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                    
+                end
+                
+            end
             
         end
         
@@ -130,17 +156,37 @@ for b = 1:no_bands
         
         box off
         
-        if p_val(b, ch) < .05
+        bar_pos = get_bar_pos(h);
+        
+        for comp_type = 1:2
             
-            bar_pos = get_bar_pos(h);
+            bar_pairs = {};
             
-            sigstar(bar_pos, p_val(b, ch))
+            for comp = 1:no_comparisons
+                
+                if p_vals(comp, b, ch, comp_type) < .05
+                    
+                    bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
+                    
+                end
+                
+            end
+            
+            sigstar(bar_pairs, p_vals(p_vals(:, b, ch, comp_type) < .05, b, ch, comp_type))
             
         end
         
-        title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-            [band_labels{b}, ', p-value = ', num2str(p_val(b, ch)), ' (ranksum test)']})
-        
+        if no_pds == 2
+            
+            title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
+                [band_labels{b}, ', p-value = ', num2str(p_vals(:, b, ch)), ' (ranksum test)']})
+            
+        else
+            
+            title({[chan_labels{ch}, ', ' band_labels{b}];[num2str(epoch_secs/60), ' Minutes of Densest High Power']})
+            
+        end
+            
         xlim([0 (no_pds + 1)])
         
         set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)

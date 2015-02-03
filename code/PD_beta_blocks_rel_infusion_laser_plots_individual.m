@@ -1,6 +1,20 @@
-function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure, no_trials)
+function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure, no_trials, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-close('all')
+    % freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
+    
+% close('all')
 
 load(subject_mat)
 
@@ -8,7 +22,7 @@ no_folders = length(folders);
 
 load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
@@ -64,16 +78,18 @@ end
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
-
-comparisons = nchoosek(1:no_pds, 2);
     
-p_vals = nan(no_comparisons, no_bands, no_chans, 2);
+p_vals = nan(no_comparisons, no_folders, no_bands, no_chans, 2);
+
+All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
 for b = 1:no_bands
-    
+
+    All_mean = nan(no_folders, no_pds, no_chans);
+
     figure
     
     for ch = 1:no_chans
@@ -88,66 +104,17 @@ for b = 1:no_bands
                 
             end
             
-            for comp = 1:no_comparisons
-                
-                p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
-                
-                p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
-                
-            end
+            All_mean(fo, :, ch) = nanmean(pct_bp_high_for_test);
+            
+            subj_p_vals = run_stats(pct_bp_high_for_test, 'ranksum');
+            
+            p_vals(:, fo, b, ch, :) = permute(subj_p_vals, [1 3 4 5 2]);
             
             % p_vals = p_vals*all_dimensions(@sum, ~isnan(p_vals(:, b, :, :)));
             
-            subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
+            subplot(no_chans, no_folders, (ch - 1)*no_folders + fo) % subplot(no_bands, 2, (b - 1)*2 + ch)pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
             
-            pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
-            
-            if strcmp(measure, '_power')
-                
-                h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
-                
-                if fo == 1
-                    
-                    ylabel([chan_labels{ch}, 'Beta Power'])
-                    
-                end
-                
-            else
-            
-                h = barwitherr(nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test))))), nanmean(log(pct_bp_high_for_test)),...
-                    0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
-                
-                if fo == 1
-                    
-                    ylabel([chan_labels{ch}, 'Beta Density'])
-                    
-                end
-                
-            end
-            
-            box off
-            
-            bar_pos = get_bar_pos(h);
-            
-            for comp_type = 1:2
-                
-                bar_pairs = {};
-                
-                for comp = 1:no_comparisons
-                    
-                    if p_vals(comp, b, ch, comp_type) < .05
-                        
-                        bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
-                        
-                    end
-                    
-                end
-                
-                sigstar(bar_pairs, p_vals(p_vals(:, b, ch, comp_type) < .05, b, ch, comp_type))
-                
-            end
-            
-            xlim([0 (no_pds + 1)])
+            plot_data(pct_bp_high_for_test, fo, strcmp(measure, '_power'), subj_p_vals)
             
             set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
             
@@ -155,10 +122,187 @@ for b = 1:no_bands
             
         end
         
-        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual'])
+        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_',...
+            num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual'])
         
     end
     
+    %% Stats & figures treating each individual as an observation.
+        
+    figure
+    
+    for ch = 1:no_chans
+        
+        across_p_vals = run_stats(All_mean(:, :, ch), 'ranksum');
+        
+        All_p_vals(:, b, ch, :) = permute(across_p_vals, [1 3 4 2]);
+        
+        subplot(1, no_chans, ch)
+        
+        plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var'), across_p_vals)
+        
+        if no_pds == 2
+            
+            title({[chan_labels{ch}, ', ', band_labels{b}];...
+                ['p-value = ', num2str(across_p_vals(1)), ' (', test_handle, ')']})
+            
+        else
+            
+            title([chan_labels{ch}, ', ', band_labels{b}])
+            
+        end
+        
+        set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
+        
+    end
+    
+    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_',... 
+        num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual_avg'])
+    
+end
+
+end
+
+function pos_bars = get_bar_pos(handle)
+
+    for i = 1:length(handle)
+
+        x = get(get(handle(i), 'children'), 'xdata');
+
+        x = mean(x([1 3],:));
+
+        pos_bars(i,:) = x;
+
+    end
+
+end
+
+function p_vals = run_stats(data_for_test, test_handle)
+
+no_pds = size(data_for_test, 2);
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+p_vals = nan(no_comparisons, 2);
+
+if no_pds == 2 && any(~isnan(data_for_test(:, 1))) && any(~isnan(data_for_test(:, 2)))
+    
+    if strcmp(test_handle, 't-test')
+        
+        [~, p_vals(1)] = ttest(data_for_test(:, 1), data_for_test(:, 2), [], 'left'); % 'tail', 'left');
+        
+    elseif strcmp(test_handle, 'ranksum')
+        
+        p_vals(1) = ranksum(data_for_test(:, 1), data_for_test(:, 2), 'tail', 'left');
+        
+    end
+    
+else
+    
+    for comp = 1:no_comparisons
+        
+        if any(~isnan(data_for_test(:, comparisons(comp, 1)))) && any(~isnan(data_for_test(:, comparisons(comp, 2))))
+            
+            if strcmp(test_handle, 'ranksum')
+                
+                p_vals(comp, 1) = ranksum(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                
+                p_vals(comp, 2) = ranksum(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                
+            elseif strcmp(test_handle, 't-test')
+                
+                [~, p_vals(comp, 1)] = ttest(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), [], 'left');
+                
+                [~, p_vals(comp, 2)] = ttest(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), [], 'right');
+                
+            end
+            
+        end
+        
+    end
+    
+end
+
+end
+
+function plot_data(data, fo, power_flag, p_vals)
+
+no_pds = size(data, 2);
+
+if power_flag
+    
+    mn = nanmean(data);
+    
+    sd = nanstd(data)*diag(1./sqrt(sum(~isnan(data))));
+    
+    if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+        
+        mn = [mn nan]; sd = [sd nan];
+        
+    end
+    
+    h = barwitherr(sd, mn, 0.6);
+    
+    if fo == 1
+        
+        ylabel('Beta Power')
+        
+    end
+    
+else
+    
+    data = max(data, eps);
+    
+    mn = nanmean(log(data));
+    
+    sd = nanstd(log(data))*diag(1./sqrt(sum(~isnan(log(data)))));
+    
+    if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+        
+        mn = [mn mn - 5]; sd = [sd nan];
+        
+    end
+    
+    h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(data))) - 5);
+    
+    if fo == 1
+        
+        ylabel('Beta Density')
+    
+    end
+        
+end
+
+box off
+            
+xlim([0 (no_pds + 1)])
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+bar_pos = get_bar_pos(h);
+
+for comp_type = 1:2
+    
+    bar_pairs = {};
+    
+    for comp = 1:no_comparisons
+        
+        if p_vals(comp, comp_type) < .05
+            
+            bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
+            
+        end
+        
+    end
+    
+    sigstar(bar_pairs, p_vals(p_vals(:, comp_type) < .05, comp_type))
+    
+end
+
 end
 
 %% Boxplots.
@@ -278,19 +422,3 @@ end
 %     save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_hist'])
 %     
 % end
-
-end
-
-function pos_bars = get_bar_pos(handle)
-
-    for i = 1:length(handle)
-
-        x = get(get(handle(i), 'children'), 'xdata');
-
-        x = mean(x([1 3],:));
-
-        pos_bars(i,:) = x;
-
-    end
-
-end

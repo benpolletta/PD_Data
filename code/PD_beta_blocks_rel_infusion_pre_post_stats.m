@@ -38,7 +38,7 @@ no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
 
-%pd_colors = {'g', 'r'};
+% pd_colors = {'g', 'r'};
 
 % norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
 % 

@@ -1,4 +1,18 @@
-function collect_striatal_freq(epoch_secs, measure)
+function collect_striatal_power_density(epoch_secs, measure, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    no_bands = 6;
+    
+    BP_suffix = '';
+    
+else
+    
+    no_bands = size(bands, 1);
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
 
 subject_matnames = {'st_m1', 'st_stn'};
 
@@ -14,19 +28,19 @@ for s = 1:2
     
 end
 
-no_pds = length(pd_labels); no_chans = length(chan_labels);
+no_pds = length(pd_labels); % no_chans = length(chan_labels);
 
 subj_mat_limits = [0 cumsum(no_folders)];
 
 total_folders = subj_mat_limits(end);
 
-All_pct_bp_high = nan(epoch_secs, total_folders, no_pds, 6);
+All_pct_bp_high = nan(epoch_secs, total_folders, no_pds, no_bands);
 
 for s = 1:2
    
     clear pct_bp_high
     
-    load([subject_matnames{s}, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR', measure, '.mat'])
+    load([subject_matnames{s}, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR', measure, '.mat'])
     
     if exist('BP_sec')
         
@@ -42,4 +56,4 @@ clear pct_bp_high
 
 pct_bp_high = All_pct_bp_high;
 
-save(['STR_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', measure, '.mat'], 'pct_bp_high')
+save(['STR', BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', measure, '.mat'], 'pct_bp_high')

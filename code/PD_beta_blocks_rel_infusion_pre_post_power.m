@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, epoch_secs, pd_handle, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, epoch_secs, pd_handle, norm, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -50,59 +50,63 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    load([subj_name, BP_suffix, '_wt_BP.mat'])
-    
-    t = (1:size(BP_pct, 1))/sampling_freq - basetimes(fo); % t = t/60;
-    
-    clear pd_indices
-    
-    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
-    
-        load([subj_name, '_wav_laser_artifacts.mat'])
+    if strcmp(norm, '_peaks')
         
-        [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        load([subj_name, '_peaks.mat'])
         
-        laser_nans = repmat(laser_nans, [1 1 2]);
+        BP_pct = repmat(permute(Spike_indicator, [1 2 3]), [1 no_bands 1]);
         
-        BP_pct(logical(laser_nans)) = nan;
-        
-        pd_indices = laser_periods;
-    
     else
+    
+        load([subj_name, BP_suffix, '_wt_BP.mat'])
         
-        if no_pds == 2
-        
-            pd_indices(:, 1) = t < 0; pd_indices(:, 2) = t > 0;
+        if strcmp(norm, '_raw')
             
-        elseif no_pds == 1
-           
-            pd_indices = ones(length(t), 1);
+            BP_pct = BP;
             
         end
         
     end
     
-    pd_indices = logical(pd_indices);
+    t = (1:size(BP_pct, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
-    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
+    clear pd_indices
     
-        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+    if no_pds == 2
         
-        [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        pd_indices(:, 1) = t < 0; pd_indices(:, 2) = t > 0;
         
-        outlier_nans = repmat(outlier_nans, [1 1 2]);
+    elseif no_pds == 1
         
-        BP_pct(logical(outlier_nans)) = nan;
+        pd_indices = ones(length(t), 1);
         
     end
     
-    if ~isempty(dir([subj_name, '_peaks.mat']))
+    pd_indices = logical(pd_indices);
+    
+    if ~strcmp(norm, '_spikes')
         
-        load([subj_name, '_peaks.mat'])
+        if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
+            
+            load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+            
+            [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+            
+            outlier_nans = repmat(outlier_nans, [1 1 2]);
+            
+            BP_pct(logical(outlier_nans)) = nan;
+            
+        end
         
-        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        BP_pct(logical(spike_nans)) = nan;
+        if ~isempty(dir([subj_name, '_peaks.mat']))
+            
+            load([subj_name, '_peaks.mat'])
+            
+            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+            
+            BP_pct(logical(spike_nans)) = nan;
+            
+        end
         
     end
     
@@ -184,11 +188,11 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, pd_handle, '_power'])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, pd_handle, norm, '_power'])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '_power.mat'], 'BP_sec')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_power.mat'], 'BP_sec')
 
 end
 

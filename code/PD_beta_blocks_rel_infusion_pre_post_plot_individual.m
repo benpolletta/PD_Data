@@ -2,7 +2,7 @@ function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, epoch
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-    freqs = 1:200;
+    % freqs = 1:200;
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
@@ -20,7 +20,15 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+% if exist([folders{1}, '/', prefixes{1}, '_wt.mat'])
+%     
+%     load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+%     
+% else
+%     
+%     sampling_freq = 500;
+%     
+% end
 
 no_bands = size(bands, 1);
 
@@ -50,17 +58,25 @@ subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
     
 load([subj_mat_name, BP_suffix '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
-if exist('BP_sec')
+if exist('BP_sec', 'var')
     
     pct_bp_high = BP_sec;
     
 end
+
+no_comparisons = nchoosek(no_pds, 2);
+    
+p_vals = nan(no_comparisons, no_folders, no_bands, no_chans, 2);
+    
+All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
 %% Individual bar plots.
 
 for b = 1:no_bands
     
     figure
+    
+    All_mean = nan(no_folders, no_pds, no_chans);
     
     for fo = 1:no_folders
         
@@ -69,8 +85,6 @@ for b = 1:no_bands
         prefix = prefixes{fo};
         
         subj_name = [folder, '/', prefix];
-        
-        p_val = nan(no_bands, no_chans);
         
         for ch = 1:no_chans
             
@@ -82,101 +96,224 @@ for b = 1:no_bands
                 
             end
             
-            if no_pds == 2 && any(~isnan(pct_bp_high_for_test(:, 1))) && any(~isnan(pct_bp_high_for_test(:, 2))) %for comp = 1:no_comparisons
-                
-                if strcmp(test_handle, 't-test')
-                
-                    [~, p_val(b, ch)] = ttest(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), [], 'left'); % 'tail', 'left');
-                
-                elseif strcmp(test_handle, 'ranksum')
-                    
-                    p_val(b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
-                    
-                end
-                
-            end
+            subj_p_vals = run_stats(pct_bp_high_for_test, test_handle);
+            
+            p_vals(:, fo, b, ch, :) = permute(subj_p_vals, [1 3 4 5 2]);
             
             % p_val = p_val*all_dimensions(@sum, ~isnan(p_val))*no_folders;
             
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
             
-            if exist('BP_sec')
-                
-                mn = nanmean(pct_bp_high_for_test);
-                
-                sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
-                
-                if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
-                    
-                    mn = [mn nan]; sd = [sd nan];
-                    
-                end
-                
-                h = barwitherr(sd, mn, 0.6);
+            plot_data(pct_bp_high_for_test, fo, exist('BP_sec', 'var'), subj_p_vals)
+            
+            All_mean(fo, :, ch) = nanmean(pct_bp_high_for_test);
+            
+            if no_pds == 2
                 
                 if fo == 1
                     
-                    ylabel({chan_labels{ch}; 'Beta Power'})
+                    title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
+                        [folder, ', ', band_labels{b}];['p-value = ', num2str(p_vals(:, fo, b, ch)), ' (', test_handle, ')']})
+                    
+                else
+                    
+                    title({[folder, ','];['p-value = ', num2str(p_vals(:, fo, b, ch)), ' (', test_handle, ')']})
                     
                 end
                 
             else
-            
-                pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
                 
-                mn = nanmean(log(pct_bp_high_for_test));
-                
-                sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
-                
-                if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
-                    
-                    mn = [mn mn - 5]; sd = [sd nan];
-                    
-                end
-            
-                h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
-                
-                if fo == 1
-                    
-                    ylabel({chan_labels{ch}; 'Beta Density'})
-                    
-                end
-            
-            end
-                
-            box off
-            
-            if p_val(b, ch) < 0.05
-                
-                bar_pos = get_bar_pos(h);
-                
-                sigstar(bar_pos, p_val(b, ch))
+                title(folder)
                 
             end
-            
-            if fo == 1
-            
-                title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-                    [folder, ', ', band_labels{b}];['p-value = ', num2str(p_val(b, ch)), ' (', test_handle, ')']})
-                
-            else
-                
-                title({[folder, ','];['p-value = ', num2str(p_val(b, ch)), ' (', test_handle, ')']})
-            
-            end
-            
-            xlim([0 (no_pds + 1)])
             
             set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
             
         end
     
-        save([subj_name, BP_suffix, '_pct_BP_high_pvals'], 'p_val')
+        save([subj_name, BP_suffix, '_pct_BP_high_pvals'], 'p_vals')
         
     end
         
-    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot_individual_', test_handle, pd_handle])
+    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
+        '_barplot_individual_', test_handle, pd_handle])
     
+    %% Stats & figures treating each individual as an observation.
+        
+    figure
+    
+    for ch = 1:no_chans
+        
+        across_p_vals = run_stats(All_mean(:, :, ch), test_handle);
+        
+        All_p_vals(:, b, ch, :) = permute(across_p_vals, [1 3 4 2]);
+        
+        subplot(1, no_chans, ch)
+        
+        plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var'), across_p_vals)
+        
+        if no_pds == 2
+            
+            title({[chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{b}];...
+                ['p-value = ', num2str(across_p_vals(1)), ' (', test_handle, ')']})
+            
+        else
+            
+            title([chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{b}])
+            
+        end
+        
+        set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
+        
+    end
+    
+    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
+        '_barplot_individual_avg_', test_handle, pd_handle])
+
+end
+
+end
+
+function pos_bars = get_bar_pos(handle)
+
+    for i = 1:length(handle)
+
+        x = get(get(handle(i), 'children'), 'xdata');
+
+        x = mean(x([1 3],:));
+
+        pos_bars(i,:) = x;
+
+    end
+
+end
+
+function p_vals = run_stats(data_for_test, test_handle)
+
+no_pds = size(data_for_test, 2);
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+p_vals = nan(no_comparisons, 2);
+
+if no_pds == 2 && any(~isnan(data_for_test(:, 1))) && any(~isnan(data_for_test(:, 2)))
+    
+    if strcmp(test_handle, 't-test')
+        
+        [~, p_vals(1)] = ttest(data_for_test(:, 1), data_for_test(:, 2), [], 'left'); % 'tail', 'left');
+        
+    elseif strcmp(test_handle, 'ranksum')
+        
+        p_vals(1) = ranksum(data_for_test(:, 1), data_for_test(:, 2), 'tail', 'left');
+        
+    end
+    
+else
+    
+    for comp = 1:no_comparisons
+        
+        if any(~isnan(data_for_test(:, comparisons(comp, 1)))) && any(~isnan(data_for_test(:, comparisons(comp, 2))))
+            
+            if strcmp(test_handle, 'ranksum')
+                
+                p_vals(comp, 1) = ranksum(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                
+                p_vals(comp, 2) = ranksum(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                
+            elseif strcmp(test_handle, 't-test')
+                
+                [~, p_vals(comp, 1)] = ttest(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), [], 'left');
+                
+                [~, p_vals(comp, 2)] = ttest(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), [], 'right');
+                
+            end
+            
+        end
+        
+    end
+    
+end
+
+end
+
+function plot_data(data, fo, power_flag, p_vals)
+
+no_pds = size(data, 2);
+
+if power_flag
+    
+    mn = nanmean(data);
+    
+    sd = nanstd(data)*diag(1./sqrt(sum(~isnan(data))));
+    
+    if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+        
+        mn = [mn nan]; sd = [sd nan];
+        
+    end
+    
+    h = barwitherr(sd, mn, 0.6);
+    
+    if fo == 1
+        
+        ylabel('Beta Power')
+        
+    end
+    
+else
+    
+    data = max(data, eps);
+    
+    mn = nanmean(log(data));
+    
+    sd = nanstd(log(data))*diag(1./sqrt(sum(~isnan(log(data)))));
+    
+    if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+        
+        mn = [mn mn - 5]; sd = [sd nan];
+        
+    end
+    
+    h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(data))) - 5);
+    
+    if fo == 1
+        
+        ylabel('Beta Density')
+    
+    end
+        
+end
+
+box off
+            
+xlim([0 (no_pds + 1)])
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+bar_pos = get_bar_pos(h);
+
+for comp_type = 1:2
+    
+    bar_pairs = {};
+    
+    for comp = 1:no_comparisons
+        
+        if p_vals(comp, comp_type) < .05
+            
+            bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
+            
+        end
+        
+    end
+    
+    sigstar(bar_pairs, p_vals(p_vals(:, comp_type) < .05, comp_type))
+    
+end
+
 end
 
 %% Group boxplots.
@@ -294,19 +431,3 @@ end
 %     save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_hist'])
 %     
 % end
-
-end
-
-function pos_bars = get_bar_pos(handle)
-
-    for i = 1:length(handle)
-
-        x = get(get(handle(i), 'children'), 'xdata');
-
-        x = mean(x([1 3],:));
-
-        pos_bars(i,:) = x;
-
-    end
-
-end

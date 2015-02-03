@@ -1,4 +1,18 @@
-function PD_beta_blocks_rel_infusion_laser_plots(subject_mat, measure, no_trials)
+function PD_beta_blocks_rel_infusion_laser_plots(subject_mat, measure, no_trials, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
     
 close('all')
 
@@ -8,7 +22,7 @@ no_folders = length(folders);
 
 load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
@@ -64,7 +78,7 @@ end
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
 
@@ -155,7 +169,7 @@ for b = 1:no_bands
         
     end
 
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials), 'trials_', short_band_labels{b}, '_barplot', measure])
+    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials_', short_band_labels{b}, '_barplot', measure])
     
 end
 

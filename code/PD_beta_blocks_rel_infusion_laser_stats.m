@@ -1,4 +1,18 @@
-function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure, no_trials_analyzed)
+function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure, no_trials_analyzed, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
     
 close('all')
 
@@ -8,7 +22,7 @@ no_folders = length(folders);
 
 load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
@@ -78,12 +92,18 @@ for fo = 1:no_folders
     
     if strcmp(measure, '_power')
         
-        BP_high_cum = get_BP(subj_name, outlier_lims(fo), '_pct');
+        BP_high_cum = get_BP([subj_name, BP_suffix], outlier_lims(fo), '_pct');
         
+    elseif isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+        load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high_cum')
+    
     else
         
-        load([subj_name, '_2sd_BP_high.mat'], 'BP_high_cum')
-   
+        load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high')
+        
+        BP_high_cum = BP_high;
+        
     end
     
     length_plotted = min(max_no_trials*triallength(fo)*sampling_freq, size(BP_high_cum, 1));
@@ -156,10 +176,10 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, '.mat'], 'pct_bp_high')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, '.mat'], 'pct_bp_high')
 
 end

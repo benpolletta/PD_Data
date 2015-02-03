@@ -20,7 +20,7 @@ norms = {'', '_pct', '_zscore'};
 %     
 % end
 
-for i = 4:length(subject_matnames)
+for i = 1:length(subject_matnames)
     
     cd (dirs{i})
     
