@@ -52,7 +52,7 @@ for ch = 1:2
     
     %% Baseline normalize.
     
-    baseline_mean = mean(abs(Spec(t <= basetime, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+    baseline_mean = mean(abs(Spec(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
     
     Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
     
@@ -62,7 +62,7 @@ for ch = 1:2
     
     %% Baseline normalize percent of total power.
     
-    baseline_mean = mean(abs(Spec_norm(t <= basetime, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+    baseline_mean = mean(abs(Spec_norm(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
     
     Spec_norm_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
     

@@ -93,6 +93,8 @@ end
 end
 
 function chunk_plot(save_name, title_name, chunk_size, PD_struct, t, Spec, BP, LFP)
+    
+tick_indices = 1:(chunk_size/10):chunk_size;
 
 data_length = size(Spec, 1);
 
@@ -150,9 +152,9 @@ for c = 1:no_chunks
         
         axis(ax(1), 'tight'), axis(ax(2), 'tight'), xlim(ax(2),xlim(ax(1)))
         
-        set(ax(1), 'XTickLabel', t_chunk)
+        set(ax(1), 'XTick', t_for_plot(tick_indices), 'XTickLabel', t_chunk(tick_indices))
         
-        set(ax(2), 'XTickLabel', t_chunk)
+        set(ax(2), 'XTick', t_for_plot(tick_indices), 'XTickLabel', t_chunk(tick_indices))
         
         set(ax,{'ycolor'},{'black';'black'})
         
@@ -166,9 +168,9 @@ for c = 1:no_chunks
             
         end
         
-        axis tight
+        % axis tight
         
-        yl = ylim;
+        % yl = ylim;
         
         % set(gca, 'YTick', ceil(yl(1)):floor(yl(2)), 'YTickLabel', ceil(yl(1)):2:floor(yl(2)), 'YGrid', 'on')
         
