@@ -36,6 +36,10 @@ for b = 1:no_bands
     
 end
 
+band_indices{no_bands + 1} = ones(size(freqs));
+
+short_band_labels{no_bands + 1} = ''; band_labels{no_bands + 1} = '';
+
 no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
@@ -117,7 +121,7 @@ for fo = 1:no_folders
 end
 
 save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
-    num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum.mat'], 'WT_sec')
+    num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum.mat'], 'freqs', 'band_indices', 'band_index', 'WT_sec')
 
 end
 
