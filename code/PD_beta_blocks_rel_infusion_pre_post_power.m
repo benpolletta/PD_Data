@@ -54,21 +54,17 @@ for fo = 1:no_folders
         
         load([subj_name, '_peaks.mat'])
         
-        BP_pct = repmat(permute(Spike_indicator, [1 2 3]), [1 no_bands 1]);
+        BP = repmat(permute(Spike_indicator, [1 2 3]), [1 no_bands 1]);
         
     else
     
         load([subj_name, BP_suffix, '_wt_BP.mat'])
         
-        if strcmp(norm, '_raw')
-            
-            BP_pct = BP;
-            
-        end
+        eval(['BP = BP',norm])
         
     end
     
-    t = (1:size(BP_pct, 1))/sampling_freq - basetimes(fo); % t = t/60;
+    t = (1:size(BP, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
     clear pd_indices
     
@@ -94,7 +90,7 @@ for fo = 1:no_folders
             
             outlier_nans = repmat(outlier_nans, [1 1 2]);
             
-            BP_pct(logical(outlier_nans)) = nan;
+            BP(logical(outlier_nans)) = nan;
             
         end
         
@@ -104,7 +100,7 @@ for fo = 1:no_folders
             
             [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
             
-            BP_pct(logical(spike_nans)) = nan;
+            BP(logical(spike_nans)) = nan;
             
         end
         
@@ -126,7 +122,7 @@ for fo = 1:no_folders
                 
                 bp_max_end = All_bp_max_end(fo, ch, b, pd);
                 
-                BP_plot = nanconv(BP_pct(:, b, ch), ones(60*sampling_freq, 1)/(60*sampling_freq), 'nanout');
+                BP_plot = nanconv(BP(:, b, ch), ones(60*sampling_freq, 1)/(60*sampling_freq), 'nanout');
                 
                 subplot(no_folders, 2, (fo - 1)*2 + ch)
                 
@@ -144,7 +140,7 @@ for fo = 1:no_folders
                     
                     sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
                     
-                    BP_sec(sec, fo, pd, b, ch) = nanmean(BP_pct(sec_start:sec_end, b, ch));
+                    BP_sec(sec, fo, pd, b, ch) = nanmean(BP(sec_start:sec_end, b, ch));
                     
                 end
                 

@@ -1,14 +1,26 @@
-function beta_blocks_rel_infusion_freqs(subject_mat, norm)
+function beta_blocks_rel_infusion_freqs(subject_mat, norm, freqs, no_cycles, bands)
+
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
 
 load(subject_mat)
 
 no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+load([folders{1}, '/', prefixes{1}, BP_suffix, '_wt.mat'], 'sampling_freq')
 
-freqs = 1:200;
-
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_bands = size(bands, 1);
 
 [band_indices, short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
@@ -34,7 +46,7 @@ for pd = 1:no_pds
     
     for ch = 1:no_chans
     
-        fid(pd, ch) = fopen([subject_mat(1:(end - length('_subjects.mat'))), '_beta_block_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
+        fid(pd, ch) = fopen([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_beta_block_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
         
     end
     
@@ -72,11 +84,25 @@ for fo = 1:no_folders
         
     else
         
-        pd_indices = nan(length(t), 2);
+        pd_indices = zeros(length(t), 2);
         
-        pd_indices(:, 1) = t < 0;
+        load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
         
-        pd_indices(:, 2) = t > 0;
+        for pd = 1:no_pds
+            
+            bp_max_start = All_bp_max_start(fo, 1, 3, pd);
+            
+            bp_max_end = All_bp_max_end(fo, 1, 3, pd);
+            
+            bp_max_index = zeros(size(t));
+            
+            pd_indices(bp_max_start:bp_max_end) = 1;
+            
+        end
+        
+        % pd_indices(:, 1) = t < 0;
+        % 
+        % pd_indices(:, 2) = t > 0;
         
     end
     

@@ -2,9 +2,9 @@ function run_6OHDA(freqs, no_cycles, bands)
 
 subject_mat = 'st_m1_6OHDA_subjects.mat';
 
-% PD_beta_blocks_rel_infusion(subject_mat, 2, [], freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion(subject_mat, 2, [], freqs, no_cycles, bands)
 
-% PD_beta_blocks_rel_infusion_pre_post_stats(subject_mat, 150, freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion_pre_post_stats(subject_mat, 150, freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, 150, '', freqs, no_cycles, bands)
 

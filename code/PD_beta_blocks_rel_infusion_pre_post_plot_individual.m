@@ -104,7 +104,7 @@ for b = 1:no_bands
             
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
             
-            plot_data(pct_bp_high_for_test, fo, exist('BP_sec', 'var'), subj_p_vals)
+            plot_data(pct_bp_high_for_test, fo, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), subj_p_vals)
             
             All_mean(fo, :, ch) = nanmean(pct_bp_high_for_test);
             
@@ -150,7 +150,7 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch)
         
-        plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var'), across_p_vals)
+        plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), across_p_vals)
         
         if no_pds == 2
             
