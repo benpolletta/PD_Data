@@ -127,8 +127,8 @@ for fo = 1:no_folders
     
 end
 
-save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
-    '_spectrum_individual_', pd_handle, norm])
+save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{band_index},...
+    '_spectrum_individual', pd_handle, norm])
 
 %% Stats & figures treating each individual as an observation.
 
@@ -154,14 +154,14 @@ for ch = 1:no_chans
     
     axis tight
     
-    title([chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{b}])
+    title([chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{band_index}])
     
     legend(pd_labels)
     
 end
 
-save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
-    '_spectrum_individual_avg_', pd_handle, norm])
+save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{band_index},...
+    '_spectrum_individual_avg', pd_handle, norm])
 
 end
 

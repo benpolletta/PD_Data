@@ -24,6 +24,8 @@ for fo = 1:length(folders)
     
     subj_name = [folder,'/',prefix];
     
+    load([subj_name, '_all_channel_data_dec.mat'], 'sampling_freq')
+    
     for n = 1:no_norms
         
         clear All_spec_pct
