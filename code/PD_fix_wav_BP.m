@@ -50,7 +50,7 @@ for fo = 1:length(folders)
     
     for n = 1:no_norms
         
-        All_spec = load([subj_name, suffix, '_wt.mat'], ['Spec', norms{n}]);
+        All_spec = load([subj_name, suffix, '_wt', norms{n}, '.mat'], ['Spec', norms{n}]);
         
         All_spec = getfield(All_spec, ['Spec', norms{n}]);
         
@@ -74,7 +74,7 @@ for fo = 1:length(folders)
                 
             end
             
-        end=
+        end
         
         save([subj_name, new_suffix, '_wt_BP.mat'], '-v7.3', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct')
     
