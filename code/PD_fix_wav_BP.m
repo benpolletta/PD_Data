@@ -76,7 +76,7 @@ for fo = 1:length(folders)
             
         end
         
-        save([subj_name, new_suffix, '_wt_BP.mat'], '-v7.3', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct')
+        save([subj_name, new_suffix, '_wt_BP.mat'], '-v7.3', 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct')
     
     end
         
