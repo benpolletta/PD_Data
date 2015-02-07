@@ -46,7 +46,15 @@ no_pds = length(pd_labels);
 
 WT_sec = nan(sum(band_indices{band_index}), epoch_secs, no_folders, no_pds, no_chans);
 
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+if band_indices == no_bands + 1
+    
+    load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+    
+else
+    
+    load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+    
+end
 
 for fo = 1:no_folders
     
