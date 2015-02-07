@@ -30,7 +30,7 @@ for fo = 1:length(folders)
         
         clear All_spec_pct
         
-        All_spec = load([subj_name, '_wt.mat'], ['Spec', norms{n}]);
+        All_spec = load([subj_name, '_wt', norms{n}, '.mat'], ['Spec', norms{n}]);
         
         All_spec = getfield(All_spec, ['Spec', norms{n}]);
         
