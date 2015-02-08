@@ -14,14 +14,18 @@ for i = 1:2
     
     for j = 1:3
         
-        if j == 1 && i == 2
+        if i == 2 && j == 1
             
             PD_fix_Spec_pct([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j})
             
         end
         
-        PD_fix_wav_BP([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j}, new_bands{j})
+        if i == 1 && j > 1
         
+            PD_fix_wav_BP([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j}, new_bands{j})
+        
+        end
+            
     end
     
 end
