@@ -40,13 +40,11 @@ for fo = 1:length(folders)
     
     load([subj_name,'_all_channel_data_dec.mat'])
     
-    no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
-    
-    % t = (1:no_secs*sampling_freq)/sampling_freq - basetime;
+    t = (1:length(PD_dec))/sampling_freq - basetime;
     
     clear BP BP_norm BP_pct BP_norm_pct
     
-    [BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(no_secs*sampling_freq, no_bands, 2));
+    [BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(length(PD_dec), no_bands, 2));
     
     for n = 1:no_norms
         
