@@ -65,14 +65,31 @@ if exist('BP_sec', 'var')
 end
 
 no_comparisons = nchoosek(no_pds, 2);
+            
+p_val_labels = comp_labels(pd_labels);
     
 p_vals = nan(no_comparisons, no_folders, no_bands, no_chans, 2);
     
 All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
+format = make_format(2*no_pds + 2*no_comparisons, 'f');
+
+format = ['%s\t', format];
+
 %% Individual bar plots.
 
 for b = 1:no_bands
+    
+    fid = nan(no_chans, 1);
+    
+    for ch = 1:no_chans
+        
+        fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
+            '_individual_', test_handle, pd_handle, '_', chan_labels{ch}, '_stats.txt'], 'w');
+        
+        fprintf(fid(ch), make_format(1 + 2*no_pds + 2*no_comparisons, 's'), 'Recording', pd_labels{:}, pd_labels{:}, p_val_labels{:});
+        
+    end
     
     figure
     
@@ -105,6 +122,9 @@ for b = 1:no_bands
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
             
             plot_data(pct_bp_high_for_test, fo, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), subj_p_vals)
+            
+            fprintf(fid(ch), format, folder, nanmean(pct_bp_high_for_test), nanstd(pct_bp_high_for_test)/sqrt(epoch_secs),...
+                reshape(subj_p_vals, 1, 2*no_comparisons));
             
             All_mean(fo, :, ch) = nanmean(pct_bp_high_for_test);
             
@@ -151,6 +171,9 @@ for b = 1:no_bands
         subplot(1, no_chans, ch)
         
         plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), across_p_vals)
+            
+        fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/no_folders,...
+            reshape(across_p_vals, 1, 2*no_comparisons));
         
         if no_pds == 2
             
@@ -188,7 +211,7 @@ function pos_bars = get_bar_pos(handle)
 
 end
 
-function p_vals = run_stats(data_for_test, test_handle)
+function [p_vals] = run_stats(data_for_test, test_handle)
 
 no_pds = size(data_for_test, 2);
 
@@ -233,6 +256,26 @@ else
         end
         
     end
+    
+end
+
+end
+
+function p_val_labels = comp_labels(pd_labels)
+
+no_pds = length(pd_labels);
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+p_val_labels = cell(2*no_comparisons);
+
+for comp = 1:no_comparisons
+    
+    p_val_labels{comp} = [pd_labels{comparisons(comp, 1)}, '<', pd_labels{comparisons(comp, 2)}];
+    
+    p_val_labels{no_comparisons + comp} = [pd_labels{comparisons(comp, 1)}, '>', pd_labels{comparisons(comp, 2)}];
     
 end
 
