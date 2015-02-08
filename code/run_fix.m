@@ -20,10 +20,18 @@ for i = 1:2
             
         end
         
-        if i == 1 && j > 1
-        
+        if i == 1
+            
+            if j > 1
+                
+                PD_fix_wav_BP([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j}, new_bands{j})
+                
+            end
+            
+        else
+            
             PD_fix_wav_BP([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j}, new_bands{j})
-        
+            
         end
             
     end
