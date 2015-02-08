@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure, no_trials_analyzed, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_laser_stats(subject_mat, measure, norm_for_power, no_trials_analyzed, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -92,7 +92,7 @@ for fo = 1:no_folders
     
     if strcmp(measure, '_power')
         
-        BP_high_cum = get_BP([subj_name, BP_suffix], outlier_lims(fo), '_pct');
+        BP_high_cum = get_BP([subj_name, BP_suffix], outlier_lims(fo), norm_for_power, freqs, no_cycles, bands);
         
     elseif isempty(freqs) && isempty(no_cycles) && isempty(bands)
     

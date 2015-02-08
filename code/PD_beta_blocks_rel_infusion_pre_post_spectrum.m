@@ -64,9 +64,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    Spec_data = load([subj_name, BP_suffix, '_wt', norm, '.mat']);
-    
-    Spec_data = getfield(Spec_data, ['Spec', norm]);
+    [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, freqs, no_cycles, bands);
     
     t = (1:size(Spec_data, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
@@ -83,28 +81,6 @@ for fo = 1:no_folders
     end
     
     pd_indices = logical(pd_indices);
-    
-    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
-        
-        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
-        
-        [outlier_nans, ~] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        outlier_nans = repmat(outlier_nans, [1 1 2]);
-        
-        Spec_data(logical(outlier_nans)) = nan;
-        
-    end
-    
-    if ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-        [spike_nans, ~] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        Spec_data(logical(spike_nans)) = nan;
-        
-    end
     
     for ch = 1:no_chans
         

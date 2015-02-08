@@ -70,7 +70,7 @@ for fo = 1:length(folders)
     
         load([subj_name, '_wav_laser_artifacts.mat'])
         
-        [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands); 
+        [~, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, no_cycles, bands); 
         % Transform indicators of laser on/off periods to matrices
         % containing nans where spectrograms/band power should be blocked
         % out.
@@ -113,7 +113,7 @@ for fo = 1:length(folders)
     
         load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
         
-        [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, no_cycles, bands);
         
         outlier_nans = repmat(outlier_nans, [1 1 2]);
         
@@ -127,7 +127,7 @@ for fo = 1:length(folders)
         
         load([subj_name, '_peaks.mat'])
         
-        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
         
     else
         
