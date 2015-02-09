@@ -4,6 +4,8 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
     
+    no_cycles = linspace(3, 21, length(freqs));
+    
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
     BP_suffix = '';
@@ -60,7 +62,7 @@ for fo = 1:no_folders
     
         load([subj_name, BP_suffix, '_wt_BP.mat'])
         
-        eval(['BP = BP',norm])
+	eval(['BP = BP', norm, ';'])
         
     end
     
@@ -86,7 +88,7 @@ for fo = 1:no_folders
             
             load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
             
-            [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
+            [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, no_cycles, bands);
             
             outlier_nans = repmat(outlier_nans, [1 1 2]);
             
@@ -98,7 +100,7 @@ for fo = 1:no_folders
             
             load([subj_name, '_peaks.mat'])
             
-            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
+            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
             
             BP(logical(spike_nans)) = nan;
             

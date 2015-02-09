@@ -4,6 +4,8 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
     
+    no_cycles = linspace(3, 21, length(freqs));
+    
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
     BP_suffix = '';
@@ -36,8 +38,6 @@ for b = 1:no_bands
     
 end
 
-band_indices{no_bands + 1} = ones(size(freqs));
-
 short_band_labels{no_bands + 1} = ''; band_labels{no_bands + 1} = '';
 
 no_chans = length(chan_labels);
@@ -45,16 +45,8 @@ no_chans = length(chan_labels);
 no_pds = length(pd_labels);
 
 WT_sec = nan(sum(band_indices{band_index}), epoch_secs, no_folders, no_pds, no_chans);
-
-if band_indices == no_bands + 1
     
-    load([subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
-    
-else
-    
-    load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
-    
-end
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
 for fo = 1:no_folders
     

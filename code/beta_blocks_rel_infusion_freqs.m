@@ -138,7 +138,7 @@ for fo = 1:no_folders
         
     end
     
-    save([subj_name, '_beta_block_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
+    save([subj_name, BP_suffix, '_beta_block_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
     
 end
 

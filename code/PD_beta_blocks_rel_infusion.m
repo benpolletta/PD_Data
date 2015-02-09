@@ -26,6 +26,8 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands) % Defaults.
     
     freqs = 1:200;
     
+    no_cycles = linspace(3, 21, length(freqs));
+    
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
     BP_suffix = '';
@@ -79,7 +81,7 @@ for fo = 1:length(folders)
         
         pd_indices = laser_periods; % Matrix containing periods for analysis.
         
-        base_index = logical(ones(size(BP, 1), 1)); % pd_indices(:, 1);
+        base_index = true(size(BP, 1), 1); % pd_indices(:, 1);
         % Index of timepoints to use when calculating high power cutoff;
         % for optogenetics data, use entire data span.
     
@@ -99,7 +101,7 @@ for fo = 1:length(folders)
            
             pd_indices = ones(size(t)); % Matrix containing periods for analysis.
             
-            base_index = logical(ones(size(BP, 1), 1));
+            base_index = true(size(BP, 1), 1);
             % Index of timepoints to use when calculating high power cutoff;
             % for 6OHDA data, use entire data span.
             
@@ -197,7 +199,7 @@ for fo = 1:length(folders)
           
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
+% save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
 
 end
 

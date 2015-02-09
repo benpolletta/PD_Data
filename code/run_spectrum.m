@@ -10,7 +10,7 @@ no_cycles = {[], linspace(3, 7, length(freqs{2})), linspace(7, 7^2, length(freqs
 
 bands = {[], [8 13; 13 18; 18 25; 13 25; 18 30], [8 13; 13 18; 18 25; 13 25; 18 30]};
 
-for i = 1:2
+for i = 1 % 1:2
     
     for j = 1:3
         
