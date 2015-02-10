@@ -4,6 +4,8 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
     
+    no_cycles = linspace(3, 21, length(freqs));
+    
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
     BP_suffix = '';
@@ -83,6 +85,10 @@ for fo = 1:no_folders
         if strcmp(folder, '130328')
             
             pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (t(end) - epoch_secs/2 + 1);
+            
+        elseif strcmp(folder, '130718')
+            
+            pd_indices(:, 2) = t > (5*60 + (epoch_secs/2 - 1)) & t < (1800 - epoch_secs/2 + 1);
             
         else
         
