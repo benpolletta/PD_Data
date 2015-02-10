@@ -14,7 +14,7 @@ no_cycles = {[], linspace(3, 7, length(freqs{2})), linspace(7, 7^2, length(freqs
 
 bands = {[], [8 13; 13 18; 18 25; 13 25; 18 30; 8 30], [8 13; 13 18; 18 25; 13 25; 18 30; 8 30]};
 
-for k = 2:length(freqs)
+for k = 1:length(freqs)
     
     for i = 1:length(subject_matnames)
         
@@ -26,7 +26,7 @@ for k = 2:length(freqs)
             
         end
         
-        cd '/home/bp/PD_Data'
+        cd (home_dir)
         
     end
     

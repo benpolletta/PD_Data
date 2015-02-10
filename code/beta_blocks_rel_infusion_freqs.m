@@ -84,7 +84,7 @@ for fo = 1:no_folders
         
     else
         
-        pd_indices = zeros(length(t), 2);
+        pd_indices = zeros(length(t), no_pds);
         
         load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
         
@@ -96,7 +96,7 @@ for fo = 1:no_folders
             
             bp_max_index = zeros(size(t));
             
-            pd_indices(bp_max_start:bp_max_end) = 1;
+            pd_indices(bp_max_start:bp_max_end, pd) = 1;
             
         end
         
