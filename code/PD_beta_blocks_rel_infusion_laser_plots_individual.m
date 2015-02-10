@@ -2,7 +2,9 @@ function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-    % freqs = 1:200;
+    freqs = 1:200;
+    
+    no_cycles = linspace(3, 21, length(freqs));
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     

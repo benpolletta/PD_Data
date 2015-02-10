@@ -38,8 +38,6 @@ for b = 1:no_bands
     
 end
 
-short_band_labels{no_bands + 1} = ''; band_labels{no_bands + 1} = '';
-
 no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);

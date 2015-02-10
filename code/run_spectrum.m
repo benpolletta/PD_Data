@@ -1,6 +1,6 @@
 function run_spectrum
 
-subject_matname = {'st_stn', 'st_m1'};
+subject_matname = {'st_stn', 'st_m1', 'st_m1_6OHDA'};
 
 band_indices = [3 6 6];
 

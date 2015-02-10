@@ -1,6 +1,6 @@
 function run_fix
 
-subject_matname = {'st_stn', 'st_m1'};
+subject_matname = {'st_stn', 'st_m1','st_m1_6OHDA'};
 
 freqs = {[], [8:.5:30], [8:.5:30]};
 
@@ -10,15 +10,11 @@ bands = {[], [8 13; 13 18; 18 25; 13 25; 18 30], [8 13; 13 18; 18 25; 13 25; 18 
 
 new_bands = {[], [8 13; 13 18; 18 25; 13 25; 18 30; 8 30], [8 13; 13 18; 18 25; 13 25; 18 30; 8 30]};
 
-for i = 1:2
+for i = 3 % 1:2
     
     for j = 1:3
         
-        if i == 2 && j == 1
-            
-            PD_fix_Spec_pct([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j})
-            
-        end
+        % PD_fix_Spec_pct([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j})
         
         if i == 1
             
