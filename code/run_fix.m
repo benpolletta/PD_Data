@@ -1,6 +1,10 @@
 function run_fix
 
-subject_matname = {'st_stn', 'st_m1','st_m1_6OHDA'};
+home_dir = pwd;
+
+dir = {'', '', '', 'Carb_Opto', '6OHDA_Opto'};
+
+subject_matname = {'st_stn', 'st_m1', 'st_m1_6OHDA', 'st_m1_emxarch', 'st_m1_6OHDA_opto'};
 
 freqs = {[], [8:.5:30], [8:.5:30]};
 
@@ -10,9 +14,9 @@ bands = {[], [8 13; 13 18; 18 25; 13 25; 18 30], [8 13; 13 18; 18 25; 13 25; 18 
 
 new_bands = {[], [8 13; 13 18; 18 25; 13 25; 18 30; 8 30], [8 13; 13 18; 18 25; 13 25; 18 30; 8 30]};
 
-for i = 3 % 1:2
+for i = 4:5 % 1:5
     
-    for j = 1:3
+    for j = 2:3
         
         % PD_fix_Spec_pct([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j})
         
@@ -26,7 +30,11 @@ for i = 3 % 1:2
             
         else
             
+            cd (dir{i})
+            
             PD_fix_wav_BP([subject_matname{i}, '_subjects.mat'], freqs{j}, no_cycles{j}, bands{j}, new_bands{j})
+            
+            cd (home_dir)
             
         end
             

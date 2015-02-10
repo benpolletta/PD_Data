@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure, no_trials, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, measure, norm_for_power, no_trials, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -15,6 +15,8 @@ else
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
     
 end
+
+subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
     
 % close('all')
 
@@ -80,15 +82,32 @@ end
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
+load([subj_mat_name, BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, norm_for_power, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
     
 p_vals = nan(no_comparisons, no_folders, no_bands, no_chans, 2);
 
+p_val_labels = comp_labels(pd_labels);
+
 All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
+format = make_format(2*no_pds + 2*no_comparisons, 'f');
+
+format = ['%s\t', format];
+
 for b = 1:no_bands
+    
+    fid = nan(no_chans, 1);
+    
+    for ch = 1:no_chans
+        
+        fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(no_trials), '_trials_', short_band_labels{b},...
+            '_individual_', measure, '_', chan_labels{ch}, '_stats.txt'], 'w');
+        
+        fprintf(fid(ch), make_format(1 + 2*no_pds + 2*no_comparisons, 's'), 'Recording', pd_labels{:}, pd_labels{:}, p_val_labels{:});
+        
+    end
 
     All_mean = nan(no_folders, no_pds, no_chans);
 
@@ -118,13 +137,16 @@ for b = 1:no_bands
             
             plot_data(pct_bp_high_for_test, fo, strcmp(measure, '_power'), subj_p_vals)
             
+            fprintf(fid(ch), format, folders{fo}, nanmean(pct_bp_high_for_test), nanstd(pct_bp_high_for_test)*diag(1./sum(~isnan(pct_bp_high_for_test))),...
+                reshape(subj_p_vals, 1, 2*no_comparisons));
+            
             set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
             
             title([folders{fo}, ', ', band_labels{b}])
             
         end
         
-        save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_',...
+        save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_laser_',...
             num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual'])
         
     end
@@ -142,6 +164,9 @@ for b = 1:no_bands
         subplot(1, no_chans, ch)
         
         plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var'), across_p_vals)
+            
+        fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/no_folders,...
+            reshape(across_p_vals, 1, 2*no_comparisons));
         
         if no_pds == 2
             
@@ -158,7 +183,7 @@ for b = 1:no_bands
         
     end
     
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_',... 
+    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_laser_',... 
         num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual_avg'])
     
 end
@@ -224,6 +249,26 @@ else
         end
         
     end
+    
+end
+
+end
+
+function p_val_labels = comp_labels(pd_labels)
+
+no_pds = length(pd_labels);
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+p_val_labels = cell(2*no_comparisons);
+
+for comp = 1:no_comparisons
+    
+    p_val_labels{comp} = [pd_labels{comparisons(comp, 1)}, '<', pd_labels{comparisons(comp, 2)}];
+    
+    p_val_labels{no_comparisons + comp} = [pd_labels{comparisons(comp, 1)}, '>', pd_labels{comparisons(comp, 2)}];
     
 end
 
@@ -351,7 +396,7 @@ end
 %         
 %     end
 % 
-%     save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_boxplot'])
+%     save_as_pdf(gcf, [subj_mat_name, '_pct_BP_high_laser_trials_', short_band_labels{b}, '_boxplot'])
 %     
 % end
 
@@ -421,6 +466,6 @@ end
 %         
 %     end
 % 
-%     save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), '_pct_BP_high_laser_trials_', short_band_labels{b}, '_hist'])
+%     save_as_pdf(gcf, [subj_mat_name, '_pct_BP_high_laser_trials_', short_band_labels{b}, '_hist'])
 %     
 % end

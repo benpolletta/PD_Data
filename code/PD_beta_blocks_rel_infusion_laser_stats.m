@@ -176,10 +176,10 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure, norm_for_power])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, '.mat'], 'pct_bp_high')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, norm_for_power, '.mat'], 'pct_bp_high')
 
 end
