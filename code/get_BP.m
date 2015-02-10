@@ -24,7 +24,7 @@ if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
     laser_nans_wt = repmat(laser_nans_wt, [1 1 2]);
     
-    Spec(logical(laser_nans)) = nan;
+    Spec(logical(laser_nans_wt)) = nan;
     
 end
 

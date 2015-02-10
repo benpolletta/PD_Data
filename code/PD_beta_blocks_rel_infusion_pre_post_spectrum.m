@@ -56,6 +56,12 @@ for fo = 1:no_folders
     
     [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, freqs, no_cycles, bands);
     
+    if strcmp(norm, '')
+        
+        Spec_data = abs(Spec_data);
+        
+    end
+    
     t = (1:size(Spec_data, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
     clear pd_indices
@@ -97,34 +103,4 @@ end
 save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
     num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum.mat'], 'freqs', 'band_indices', 'band_index', 'WT_sec')
 
-end
-
-function [wav_nans, BP_nans] = indicator_to_nans(indicator, sampling_freq, freqs, no_cycles, bands)
-
-[no_dps, no_channels] = size(indicator);
-
-wav_nans = nan(no_dps, length(freqs), no_channels);
-
-BP_nans = nan(no_dps, size(bands, 1), no_channels);
-
-for ch = 1:no_channels
-    
-    wav_nans_temp = abs(wavelet_spectrogram(indicator(:, ch), sampling_freq, freqs, no_cycles, 0, ''));
-    
-    wav_nans_temp = wav_nans_temp*diag(1./max(wav_nans_temp));
-    
-    wav_nans(:, :, ch) = wav_nans_temp > .01;
-    
-    for b = 1:size(bands, 1)
-       
-        band_freqs = freqs >= bands(b, 1) & freqs <= bands(b, 2);
-        
-        BP_nans(:, b, ch) = sum(wav_nans(:, band_freqs, ch), 2);
-        
-    end
-    
-    BP_nans(BP_nans > 0) = 1;
-
-end
-    
 end
