@@ -64,10 +64,20 @@ if exist('BP_sec', 'var')
     
 end
 
-no_comparisons = nchoosek(no_pds, 2);
-            
-p_val_labels = comp_labels(pd_labels);
+if no_pds > 1
     
+    no_comparisons = nchoosek(no_pds, 2);
+    
+    p_val_labels = comp_labels(pd_labels);
+    
+else
+    
+    no_comparisons = 0;
+    
+    p_val_labels = {};
+    
+end
+
 p_vals = nan(no_comparisons, no_folders, no_bands, no_chans, 2);
     
 All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
@@ -113,9 +123,17 @@ for b = 1:no_bands
                 
             end
             
-            subj_p_vals = run_stats(pct_bp_high_for_test, test_handle);
+            if no_comparisons > 0
+                
+                subj_p_vals = run_stats(pct_bp_high_for_test, test_handle);
             
-            p_vals(:, fo, b, ch, :) = permute(subj_p_vals, [1 3 4 5 2]);
+                p_vals(:, fo, b, ch, :) = permute(subj_p_vals, [1 3 4 5 2]);
+                
+            else
+               
+                subj_p_vals = [];
+                
+            end
             
             % p_val = p_val*all_dimensions(@sum, ~isnan(p_val))*no_folders;
             
@@ -164,9 +182,17 @@ for b = 1:no_bands
     
     for ch = 1:no_chans
         
-        across_p_vals = run_stats(All_mean(:, :, ch), test_handle);
-        
-        All_p_vals(:, b, ch, :) = permute(across_p_vals, [1 3 4 2]);
+        if no_comparisons > 0
+            
+            across_p_vals = run_stats(All_mean(:, :, ch), test_handle);
+            
+            All_p_vals(:, b, ch, :) = permute(across_p_vals, [1 3 4 2]);
+            
+        else
+            
+            across_p_vals = [];
+            
+        end
         
         subplot(1, no_chans, ch)
         
@@ -333,27 +359,31 @@ box off
             
 xlim([0 (no_pds + 1)])
 
-no_comparisons = nchoosek(no_pds, 2);
-
-comparisons = nchoosek(1:no_pds, 2);
-
-bar_pos = get_bar_pos(h);
-
-for comp_type = 1:2
+if no_pds > 1
     
-    bar_pairs = {};
+    no_comparisons = nchoosek(no_pds, 2);
     
-    for comp = 1:no_comparisons
+    comparisons = nchoosek(1:no_pds, 2);
+    
+    bar_pos = get_bar_pos(h);
+    
+    for comp_type = 1:2
         
-        if p_vals(comp, comp_type) < .05
+        bar_pairs = {};
+        
+        for comp = 1:no_comparisons
             
-            bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
+            if p_vals(comp, comp_type) < .05
+                
+                bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
+                
+            end
             
         end
         
+        sigstar(bar_pairs, p_vals(p_vals(:, comp_type) < .05, comp_type))
+        
     end
-    
-    sigstar(bar_pairs, p_vals(p_vals(:, comp_type) < .05, comp_type))
     
 end
 

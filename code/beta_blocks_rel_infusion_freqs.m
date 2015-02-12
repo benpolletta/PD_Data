@@ -1,4 +1,4 @@
-function beta_blocks_rel_infusion_freqs(subject_mat, norm, freqs, no_cycles, bands)
+function beta_blocks_rel_infusion_freqs(subject_mat, norm, band_index, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -15,6 +15,8 @@ else
 end
 
 load(subject_mat)
+
+subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
 
 no_folders = length(folders);
 
@@ -38,7 +40,7 @@ no_pds = length(pd_labels);
 
 no_chans = length(chan_labels);
 
-format = make_format(sum(band_indices{3}) + 1, 'f');
+format = make_format(sum(band_indices{band_index}) + 1, 'f');
 
 fid = nan(no_pds, no_chans);
 
@@ -46,7 +48,7 @@ for pd = 1:no_pds
     
     for ch = 1:no_chans
     
-        fid(pd, ch) = fopen([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_beta_block_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
+        fid(pd, ch) = fopen([subj_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
         
     end
     
@@ -62,17 +64,19 @@ for fo = 1:no_folders
     
     if strcmp(norm, '_pct')
         
-        load([subj_name, '_wt_pct.mat'], 'Spec_pct')
+        load([subj_name, BP_suffix, '_wt_pct.mat'], 'Spec_pct')
         
         Spec = Spec_pct;
         
     else
     
-        load([subj_name, '_wt.mat'], 'Spec')
+        load([subj_name, BP_suffix, '_wt.mat'], 'Spec')
+        
+        Spec = abs(Spec);
     
     end
         
-    load([subj_name, '_2sd_BP_high.mat'], 'BP_high_cum')
+    load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high_cum')
     
     t = (1:size(BP_high_cum, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
@@ -82,31 +86,51 @@ for fo = 1:no_folders
         
         pd_indices = laser_periods;
         
-    else
+    elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat']))
         
-        pd_indices = zeros(length(t), no_pds);
-        
-        load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
-        
-        for pd = 1:no_pds
-            
-            bp_max_start = All_bp_max_start(fo, 1, 3, pd);
-            
-            bp_max_end = All_bp_max_end(fo, 1, 3, pd);
-            
-            bp_max_index = zeros(size(t));
-            
-            pd_indices(bp_max_start:bp_max_end, pd) = 1;
-            
-        end
-        
-        % pd_indices(:, 1) = t < 0;
+        % load([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
         % 
-        % pd_indices(:, 2) = t > 0;
+        % pd_indices = zeros(length(t), no_pds);
+        % 
+        % for pd = 1:no_pds
+        % 
+        % bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+        % 
+        % bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+        % 
+        % bp_max_index = zeros(size(t));
+        % 
+        % pd_indices(bp_max_start:bp_max_end, pd) = 1;
+        % 
+        % end
+        
+        pd_indices(:, 1) = t < 0;
+        
+        pd_indices(:, 2) = t > 0;
+        
+    elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs.mat']))
+        
+        % load([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs.mat'])
+        % 
+        % pd_indices = zeros(length(t), no_pds);
+        % 
+        % for pd = 1:no_pds
+        % 
+        % bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+        % 
+        % bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+        % 
+        % bp_max_index = zeros(size(t));
+        % 
+        % pd_indices(bp_max_start:bp_max_end, pd) = 1;
+        % 
+        % end
+        
+        pd_indices = ones(length(t), no_pds);
         
     end
     
-    Spec_beta = Spec(:, band_indices{3}, :);
+    Spec_beta = Spec(:, band_indices{band_index}, :);
     
     Spec_high_beta = nan(size(Spec_beta));
     
@@ -114,21 +138,21 @@ for fo = 1:no_folders
         
     for ch = 1:no_chans
         
-        Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch) = Spec_beta(logical(BP_high_cum(:, 3, ch)), :, ch);
+        Spec_high_beta(logical(BP_high_cum(:, band_index, ch)), :, ch) = Spec_beta(logical(BP_high_cum(:, band_index, ch)), :, ch);
         
         if strcmp(norm, '_zscore')
             
-            Spec_hb_zs = zscore(Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch));
+            Spec_hb_zs = nanzscore(Spec_high_beta(:, :, ch));
             
-            [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(Spec_hb_zs, [], 2);
+            [~, Freqs_high_beta(:, ch)] = nanmax(Spec_hb_zs, [], 2);
             
         else
             
-            [~, Freqs_high_beta(logical(BP_high_cum(:, 3, ch)), ch)] = max(Spec_high_beta(logical(BP_high_cum(:, 3, ch)), :, ch), [], 2);
+            [~, Freqs_high_beta(:, ch)] = nanmax(Spec_high_beta(:, :, ch), [], 2);
             
         end
         
-        Freqs_high_beta(:, ch) = Freqs_high_beta(:, ch) + min(freqs(band_indices{3})) - 1;
+        Freqs_high_beta(:, ch) = Freqs_high_beta(:, ch) + min(freqs(band_indices{band_index})) - 1;
         
         for pd = 1:no_pds
             
@@ -138,7 +162,7 @@ for fo = 1:no_folders
         
     end
     
-    save([subj_name, BP_suffix, '_beta_block_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
+    save([subj_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
     
 end
 

@@ -1,4 +1,4 @@
-function combine_carb_6OHDA_power_density(epoch_secs, measure, freqs, no_cycles, bands)
+function combine_carb_6OHDA_power_density(epoch_secs, measure, norm_for_power, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -62,7 +62,7 @@ for s = 1:no_subj_mats
    
     clear pct_bp_high
     
-    load([subject_matnames{s}, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handles{s}, measure, '.mat'])
+    load([subject_matnames{s}, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handles{s}, norm_for_power, measure, '.mat'])
     
     if exist('BP_sec', 'var')
         
@@ -84,4 +84,4 @@ clear pct_bp_high
 
 pct_bp_high = All_pct_bp_high;
 
-save(['CARB_6OHDA', BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', measure, '.mat'], 'pct_bp_high')
+save(['CARB_6OHDA', BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', norm_for_power, measure, '.mat'], 'pct_bp_high')

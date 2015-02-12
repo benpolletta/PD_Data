@@ -76,9 +76,17 @@ end
 
 %% Group bar plots.
 
-no_comparisons = nchoosek(no_pds, 2);
+if no_pds > 1
+    
+    no_comparisons = nchoosek(no_pds, 2);
+    
+    comparisons = nchoosek(1:no_pds, 2);
 
-comparisons = nchoosek(1:no_pds, 2);
+else
+    
+    no_comparisons = 0;
+    
+end
     
 p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
@@ -100,7 +108,7 @@ for b = 1:no_bands
         
             p_vals(:, b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
                 
-        else
+        elseif no_pds > 1
             
             for comp = 1:no_comparisons
                 
