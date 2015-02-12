@@ -103,7 +103,7 @@ for b = 1:no_bands
     for ch = 1:no_chans
         
         fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(no_trials), '_trials_', short_band_labels{b},...
-            '_individual_', measure, '_', chan_labels{ch}, '_stats.txt'], 'w');
+            '_individual', measure, norm_for_power, '_', chan_labels{ch}, '_stats.txt'], 'w');
         
         fprintf(fid(ch), make_format(1 + 2*no_pds + 2*no_comparisons, 's'), 'Recording', pd_labels{:}, pd_labels{:}, p_val_labels{:});
         
@@ -146,8 +146,8 @@ for b = 1:no_bands
             
         end
         
-        save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_laser_',...
-            num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual'])
+        save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials_',...
+            short_band_labels{b}, measure, norm_for_power, '_bar_individual'])
         
     end
     
@@ -183,8 +183,8 @@ for b = 1:no_bands
         
     end
     
-    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_laser_',... 
-        num2str(no_trials), 'trials_', short_band_labels{b}, measure, '_bar_individual_avg'])
+    save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials_',...
+        short_band_labels{b}, measure, norm_for_power '_bar_individual_avg'])
     
 end
 
