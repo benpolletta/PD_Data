@@ -103,7 +103,15 @@ for fo = 1:no_folders
         
         subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
-        boundedline(freqs(band_indices{band_index}), log(WT_mean), prep_for_boundedline(log(WT_se)))
+        if strcmp(norm, '_pct')
+            
+            boundedline(freqs(band_indices{band_index}), WT_mean, prep_for_boundedline(WT_se))
+            
+        else
+            
+            boundedline(freqs(band_indices{band_index}), log(WT_mean), prep_for_boundedline(log(WT_se)))
+            
+        end
         
         axis tight
         
@@ -150,8 +158,16 @@ for ch = 1:no_chans
     
     subplot(1, no_chans, ch)
     
-    boundedline(freqs(band_indices{band_index}), log(All_mean_mean), prep_for_boundedline(log(All_mean_se)))
+    if strcmp(norm, '_pct')
     
+        boundedline(freqs(band_indices{band_index}), All_mean_mean, prep_for_boundedline(All_mean_se))
+    
+    else
+    
+        boundedline(freqs(band_indices{band_index}), log(All_mean_mean), prep_for_boundedline(log(All_mean_se)))
+    
+    end
+        
     axis tight
     
     title([chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{band_index}])

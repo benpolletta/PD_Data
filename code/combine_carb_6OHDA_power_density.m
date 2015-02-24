@@ -2,6 +2,10 @@ function combine_carb_6OHDA_power_density(epoch_secs, measure, norm_for_power, f
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
+    freqs = 1:200;
+    
+    no_cycles = linspace(3, 21, length(freqs));
+    
     no_bands = 6;
     
     BP_suffix = '';

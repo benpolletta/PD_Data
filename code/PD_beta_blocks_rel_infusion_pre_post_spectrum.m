@@ -18,6 +18,8 @@ end
     
 close('all')
 
+subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
+
 load(subject_mat)
 
 no_folders = length(folders); no_pds = length(pd_labels); no_chans = length(chan_labels);
@@ -26,7 +28,7 @@ load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
 
 no_bands = size(bands, 1);
 
-[short_band_labels, band_labels] = deal(cell(no_bands, 1));
+[band_indices, short_band_labels, band_labels] = deal(cell(no_bands, 1));
 
 for b = 1:no_bands
    
@@ -44,7 +46,7 @@ no_pds = length(pd_labels);
 
 WT_sec = nan(sum(band_indices{band_index}), epoch_secs, no_folders, no_pds, no_chans);
     
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
 for fo = 1:no_folders
     
@@ -100,7 +102,7 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
+save([subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
     num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum.mat'], 'freqs', 'band_indices', 'band_index', 'WT_sec')
 
 end

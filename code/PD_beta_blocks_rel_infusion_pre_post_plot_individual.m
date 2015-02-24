@@ -58,6 +58,8 @@ subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
     
 load([subj_mat_name, BP_suffix '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
+power_flag = exist('BP_sec', 'var') || strcmp(pd_handle, '_power') || strcmp(pd_handle, '_pct_power');
+
 if exist('BP_sec', 'var')
     
     pct_bp_high = BP_sec;
@@ -139,7 +141,7 @@ for b = 1:no_bands
             
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
             
-            plot_data(pct_bp_high_for_test, fo, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), subj_p_vals)
+            plot_data(pct_bp_high_for_test, fo, power_flag, subj_p_vals)
             
             fprintf(fid(ch), format, folder, nanmean(pct_bp_high_for_test), nanstd(pct_bp_high_for_test)/sqrt(epoch_secs),...
                 reshape(subj_p_vals, 1, 2*no_comparisons));
@@ -196,7 +198,7 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch)
         
-        plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), across_p_vals)
+        plot_data(All_mean(:, :, ch), 1, power_flag, across_p_vals)
             
         fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/no_folders,...
             reshape(across_p_vals, 1, 2*no_comparisons));

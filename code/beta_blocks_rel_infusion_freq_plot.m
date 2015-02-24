@@ -1,4 +1,4 @@
-function beta_blocks_rel_infusion_freq_plot(subject_mat, norm, hist_norm, band_index, freqs, no_cycles, bands)
+function beta_blocks_rel_infusion_freq_plot(subject_mat, norm, hist_norm, band_index, epoch_secs, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -11,6 +11,16 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
 else
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
+
+if ~isempty(epoch_secs)
+    
+    epoch_label = sprintf('_%.1f_min', epoch_secs/60);
+    
+else
+    
+    epoch_label = '';
     
 end
 
@@ -46,12 +56,6 @@ no_pds = length(pd_labels);
 
 no_chans = length(chan_labels);
 
-% pd_labels = {'pre', 'post'};
-% 
-% pd_colors = {'g', 'r'}; pd_cmap = [0 .5 0; 1 0 0];
-
-fid = nan(no_pds, no_chans);
-
 %% Group average plot (by datapoint). 
 
 [Freq_hist, Spec_high_beta_mean, Spec_high_beta_std] = deal(nan(sum(band_indices{band_index}), no_pds, no_chans));
@@ -62,8 +66,8 @@ for ch = 1:no_chans
     
     for pd = 1:no_pds
         
-        Freq_data = load([subject_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs',...
-            norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt']);
+        Freq_data = load([subject_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index},...
+            '_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt']);
         
         Freq_high_beta{pd} = Freq_data(:, 1);
         
@@ -137,6 +141,8 @@ for ch = 1:no_chans
                 
             [~, p] = kstest2(Freq_high_beta{comparisons(comp, 1)}, Freq_high_beta{comparisons(comp, 2)});
             
+            p_vals(comp) = p;
+            
             if no_pds == 2
             
                 xlabel(pd_labels{1}), ylabel(pd_labels{2})
@@ -175,16 +181,16 @@ for ch = 1:no_chans
     
 end
 
-save([subject_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs',...
+save([subject_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index}, '_freqs',...
     norm, hist_norm, '_group_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
-save_as_pdf(1, [subject_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs',...
-    norm, hist_norm, '_group_hist'])
+save_as_pdf(1, [subject_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index},...
+    '_freqs', norm, hist_norm, '_group_hist'])
 
 if no_pds >= 2
     
-    save_as_pdf(2, [subject_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs',...
-        norm, hist_norm, '_group_qq'])
+    save_as_pdf(2, [subject_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index},...
+        '_freqs', norm, hist_norm, '_group_qq'])
     
 end
 
@@ -212,7 +218,7 @@ for ch = 1:no_chans
     
 end
 
-save_as_pdf(gcf, [subject_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs', norm, hist_norm, '_group_mean'])
+save_as_pdf(gcf, [subject_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index}, '_freqs', norm, hist_norm, '_group_mean'])
 
 %% Group average plot (by recording).
 
@@ -226,7 +232,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    load([subj_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs', norm, '.mat'])
+    load([subj_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index}, '_freqs', norm, '.mat'])
     
     if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
         
@@ -264,12 +270,12 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs',...
+save([subject_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index}, '_freqs',...
     norm, hist_norm, '_individual_stats'], 'Freq_hist', 'Spec_high_beta_mean', 'Spec_high_beta_std')
 
-Freq_hist_mean = permute(mean(Freq_hist), [2 3 4 1]);
+Freq_hist_mean = permute(nanmean(Freq_hist), [2 3 4 1]);
 
-Freq_hist_std = permute(std(Freq_hist), [2 3 4 1])/sqrt(no_folders);
+Freq_hist_std = permute(nanstd(Freq_hist), [2 3 4 1])/sqrt(no_folders);
 
 figure
 
@@ -298,11 +304,11 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat_name, '_beta_block_freqs', norm, hist_norm, '_individual_hist'])
+save_as_pdf(gcf, [subject_mat_name, BP_suffix, epoch_label, '_beta_block_freqs', norm, '_individual_hist'])
 
-Spec_high_beta_mean_plot = permute(mean(Spec_high_beta_mean), [2 3 4 1]);
+Spec_high_beta_mean_plot = permute(nanmean(Spec_high_beta_mean), [2 3 4 1]);
 
-Spec_high_beta_std_plot = permute(std(Spec_high_beta_mean), [2 3 4 1])/sqrt(no_folders);
+Spec_high_beta_std_plot = permute(nanstd(Spec_high_beta_mean), [2 3 4 1])/sqrt(no_folders);
 
 figure
 
@@ -331,4 +337,4 @@ for ch = 1:no_chans
    
 end
 
-save_as_pdf(gcf, [subject_mat_name, BP_suffix, '_beta_block_freqs', norm, hist_norm, '_individual_mean'])
+save_as_pdf(gcf, [subject_mat_name, BP_suffix, epoch_label, '_beta_block_freqs', norm, hist_norm, '_individual_mean'])

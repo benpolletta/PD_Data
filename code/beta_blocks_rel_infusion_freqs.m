@@ -1,4 +1,4 @@
-function beta_blocks_rel_infusion_freqs(subject_mat, norm, band_index, freqs, no_cycles, bands)
+function beta_blocks_rel_infusion_freqs(subject_mat, norm, band_index, epoch_secs, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -11,6 +11,16 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
 else
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
+
+if ~isempty(epoch_secs)
+    
+    epoch_label = sprintf('_%.1f_min', epoch_secs/60);
+    
+else
+    
+    epoch_label = '';
     
 end
 
@@ -48,7 +58,8 @@ for pd = 1:no_pds
     
     for ch = 1:no_chans
     
-        fid(pd, ch) = fopen([subj_mat_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
+        fid(pd, ch) = fopen([subj_mat_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index},...
+            '_freqs', norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
         
     end
     
@@ -86,47 +97,55 @@ for fo = 1:no_folders
         
         pd_indices = laser_periods;
         
-    elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat']))
+    elseif ~isempty(epoch_secs)
         
-        % load([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
-        % 
-        % pd_indices = zeros(length(t), no_pds);
-        % 
-        % for pd = 1:no_pds
-        % 
-        % bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
-        % 
-        % bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
-        % 
-        % bp_max_index = zeros(size(t));
-        % 
-        % pd_indices(bp_max_start:bp_max_end, pd) = 1;
-        % 
-        % end
+        if ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat']))
+            
+            load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat'])
+            
+            pd_indices = zeros(length(t), no_pds);
+            
+            for pd = 1:no_pds
+                
+                bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+                
+                bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+                
+                pd_indices(bp_max_start:bp_max_end, pd) = 1;
+                
+            end
+            
+        elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat']))
+            
+            load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat'])
+            
+            pd_indices = zeros(length(t), no_pds);
+            
+            for pd = 1:no_pds
+                
+                bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+                
+                bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+                
+                pd_indices(bp_max_start:bp_max_end, pd) = 1;
+                
+            end
+            
+        end
         
-        pd_indices(:, 1) = t < 0;
-        
-        pd_indices(:, 2) = t > 0;
-        
-    elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs.mat']))
-        
-        % load([subj_mat_name, BP_suffix, '_pct_BP_high_2.5_min_secs.mat'])
-        % 
-        % pd_indices = zeros(length(t), no_pds);
-        % 
-        % for pd = 1:no_pds
-        % 
-        % bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
-        % 
-        % bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
-        % 
-        % bp_max_index = zeros(size(t));
-        % 
-        % pd_indices(bp_max_start:bp_max_end, pd) = 1;
-        % 
-        % end
-        
-        pd_indices = ones(length(t), no_pds);
+    else
+    
+        if no_pds == 2
+            
+            pd_indices(:, 1) = t < 0;
+            
+            pd_indices(:, 2) = t > 0;
+            
+        elseif no_pds == 1
+            
+            pd_indices = ones(length(t), no_pds);
+            
+        end
         
     end
     
@@ -162,7 +181,7 @@ for fo = 1:no_folders
         
     end
     
-    save([subj_name, BP_suffix, '_beta_block_', short_band_labels{band_index}, '_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
+    save([subj_name, BP_suffix, epoch_label, '_beta_block_', short_band_labels{band_index}, '_freqs', norm], 't', 'Spec_high_beta', 'Freqs_high_beta') %, 'Freqs_for_plot')
     
 end
 
