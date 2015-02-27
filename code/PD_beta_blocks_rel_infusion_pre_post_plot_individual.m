@@ -200,7 +200,7 @@ for b = 1:no_bands
         
         plot_data(All_mean(:, :, ch), 1, power_flag, across_p_vals)
             
-        fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/no_folders,...
+        fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/sqrt(no_folders),...
             reshape(across_p_vals, 1, 2*no_comparisons));
         
         if no_pds == 2
