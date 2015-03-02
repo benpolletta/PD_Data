@@ -1,4 +1,14 @@
-function beta_blocks_consolidated_plot(subject_mat, time_window, percent)
+function beta_blocks_consolidated_plot(subject_mat, epoch_secs, time_window, percent)
+
+if ~isempty(epoch_secs)
+    
+    epoch_label = sprintf('_%ddensest', epoch_secs);
+    
+else
+    
+    epoch_label = '';
+    
+end
 
 PD_struct = PD_initialize(subject_mat);
 
@@ -10,7 +20,7 @@ for fo = 1:PD_struct.no_folders
     
     subj_name = [folder,'/',prefix];
     
-    cons_name = [subj_name, '_2sd_BP_high_', num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated'];
+    cons_name = [subj_name, '_2sd_BP_high_', epoch_label, num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated'];
     
     cons_title = [folder, ', High Power, ', num2str(percent), ' Percent of ', num2str(time_window/PD_struct.sampling_freq), ' s'];
     
@@ -19,6 +29,8 @@ for fo = 1:PD_struct.no_folders
     load([subj_name, '_all_channel_data_dec.mat'])
     
     t = (1:length(PD_dec))/PD_struct.sampling_freq - PD_struct.basetimes(fo);
+    
+    pd_indices = get_pd_indices(t, fo, subj_name, epoch_secs, BP_suffix, band_index, no_pds);
     
     for n = 1 %:PD_struct.no_norms
         
@@ -38,49 +50,53 @@ for fo = 1:PD_struct.no_folders
             
             for b = 3 % 1:PD_struct.no_bands
                 
-                %% Get spec & BP data.
-                
-                interval_length = 10;
-                
-                BP_hc_length = sum(BP_high_cons(:, b, 3));
-                
-                BP_hc_blocks = index_to_blocks(BP_high_cons(:, b, 3));
-                
-                no_blocks = size(BP_hc_blocks, 1);
-                
-                plot_length = BP_hc_length + (no_blocks - 2)*interval_length;
-                
-                BP_hc_plot = nan(plot_length, PD_struct.no_bands, 2);
-                
-                Spec_hc_plot = nan(plot_length, 75, 2);
-                
-                LFP_hc_plot = nan(plot_length, 2);
-                
-                t_hc_plot = nan(plot_length, 1);
-                
-                last_index = 0;
-                
-                for bl = 1:no_blocks
+                for pd = 1:PD_struct.no_pds
                     
-                    block_length = BP_hc_blocks(bl, 2) - BP_hc_blocks(bl, 1) + 1;
+                    %% Get spec & BP data.
                     
-                    block_indices = last_index + (bl > 1)*5 + (1:block_length);
+                    interval_length = 10;
                     
-                    t_hc_plot(block_indices) = t(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2));
+                    BP_hc_length = sum(BP_high_cons(:, b, 3));
                     
-                    BP_hc_plot(block_indices, :, :) = BP_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :, :);
+                    BP_hc_blocks = index_to_blocks(BP_high_cons(:, b, 3) & pd_indices(:, p));
                     
-                    Spec_hc_plot(block_indices, :, :) = Spec_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), 1:75, :);
+                    no_blocks = size(BP_hc_blocks, 1);
                     
-                    LFP_hc_plot(block_indices, :) = PD_dec(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :);
+                    plot_length = BP_hc_length + (no_blocks - 2)*interval_length;
                     
-                    last_index = last_index + (bl > 1)*interval_length + block_length;
+                    BP_hc_plot = nan(plot_length, PD_struct.no_bands, 2);
+                    
+                    Spec_hc_plot = nan(plot_length, 75, 2);
+                    
+                    LFP_hc_plot = nan(plot_length, 2);
+                    
+                    t_hc_plot = nan(plot_length, 1);
+                    
+                    last_index = 0;
+                    
+                    for bl = 1:no_blocks
+                        
+                        block_length = BP_hc_blocks(bl, 2) - BP_hc_blocks(bl, 1) + 1;
+                        
+                        block_indices = last_index + (bl > 1)*5 + (1:block_length);
+                        
+                        t_hc_plot(block_indices) = t(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2));
+                        
+                        BP_hc_plot(block_indices, :, :) = BP_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :, :);
+                        
+                        Spec_hc_plot(block_indices, :, :) = Spec_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), 1:75, :);
+                        
+                        LFP_hc_plot(block_indices, :) = PD_dec(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :);
+                        
+                        last_index = last_index + (bl > 1)*interval_length + block_length;
+                        
+                    end
+                    
+                    save([cons_name, PD_struct.pd_label{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
+                    
+                    chunk_plot(cons_name, cons_title, 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
                     
                 end
-                
-                save([cons_name, '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
-                
-                chunk_plot(cons_name, cons_title, 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
                 
             end
             
@@ -177,6 +193,68 @@ for c = 1:no_chunks
     end
     
     save_as_pdf(gcf, chunk_name)
+    
+end
+
+end
+
+function pd_indices = get_pd_indices(t, fo, subj_name, epoch_secs, BP_suffix, band_index, no_pds)
+
+if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
+    
+    load([subj_name, '_wav_laser_artifacts.mat'], 'laser_periods')
+    
+    pd_indices = laser_periods;
+    
+elseif ~isempty(epoch_secs)
+    
+    if ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat']))
+        
+        load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat'])
+        
+        pd_indices = zeros(length(t), no_pds);
+        
+        for pd = 1:no_pds
+            
+            bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+            
+            bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+            
+            pd_indices(bp_max_start:bp_max_end, pd) = 1;
+            
+        end
+        
+    elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat']))
+        
+        load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat'])
+        
+        pd_indices = zeros(length(t), no_pds);
+        
+        for pd = 1:no_pds
+            
+            bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+            
+            bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+            
+            pd_indices(bp_max_start:bp_max_end, pd) = 1;
+            
+        end
+        
+    end
+    
+else
+    
+    if no_pds == 2
+        
+        pd_indices(:, 1) = t < 0;
+        
+        pd_indices(:, 2) = t > 0;
+        
+    elseif no_pds == 1
+        
+        pd_indices = ones(length(t), no_pds);
+        
+    end
     
 end
 

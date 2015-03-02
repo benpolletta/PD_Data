@@ -91,63 +91,7 @@ for fo = 1:no_folders
     
     t = (1:size(BP_high_cum, 1))/sampling_freq - basetimes(fo); % t = t/60;
     
-    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
-        
-        load([subj_name, '_wav_laser_artifacts.mat'], 'laser_periods')
-        
-        pd_indices = laser_periods;
-        
-    elseif ~isempty(epoch_secs)
-        
-        if ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat']))
-            
-            load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat'])
-            
-            pd_indices = zeros(length(t), no_pds);
-            
-            for pd = 1:no_pds
-                
-                bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
-                
-                bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
-                
-                pd_indices(bp_max_start:bp_max_end, pd) = 1;
-                
-            end
-            
-        elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat']))
-            
-            load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat'])
-            
-            pd_indices = zeros(length(t), no_pds);
-            
-            for pd = 1:no_pds
-                
-                bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
-                
-                bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
-                
-                pd_indices(bp_max_start:bp_max_end, pd) = 1;
-                
-            end
-            
-        end
-        
-    else
-    
-        if no_pds == 2
-            
-            pd_indices(:, 1) = t < 0;
-            
-            pd_indices(:, 2) = t > 0;
-            
-        elseif no_pds == 1
-            
-            pd_indices = ones(length(t), no_pds);
-            
-        end
-        
-    end
+    pd_indices = get_pd_indices(t, fo, subj_name, epoch_secs, BP_suffix, band_index, no_pds);
     
     Spec_beta = Spec(:, band_indices{band_index}, :);
     
@@ -186,3 +130,67 @@ for fo = 1:no_folders
 end
 
 fclose('all');
+
+end
+
+function pd_indices = get_pd_indices(t, fo, subj_name, epoch_secs, BP_suffix, band_index, no_pds)
+
+if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
+    
+    load([subj_name, '_wav_laser_artifacts.mat'], 'laser_periods')
+    
+    pd_indices = laser_periods;
+    
+elseif ~isempty(epoch_secs)
+    
+    if ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat']))
+        
+        load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat'])
+        
+        pd_indices = zeros(length(t), no_pds);
+        
+        for pd = 1:no_pds
+            
+            bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+            
+            bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+            
+            pd_indices(bp_max_start:bp_max_end, pd) = 1;
+            
+        end
+        
+    elseif ~isempty(dir([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat']))
+        
+        load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs.mat'])
+        
+        pd_indices = zeros(length(t), no_pds);
+        
+        for pd = 1:no_pds
+            
+            bp_max_start = All_bp_max_start(fo, 1, band_index, pd);
+            
+            bp_max_end = All_bp_max_end(fo, 1, band_index, pd);
+            
+            pd_indices(bp_max_start:bp_max_end, pd) = 1;
+            
+        end
+        
+    end
+    
+else
+    
+    if no_pds == 2
+        
+        pd_indices(:, 1) = t < 0;
+        
+        pd_indices(:, 2) = t > 0;
+        
+    elseif no_pds == 1
+        
+        pd_indices = ones(length(t), no_pds);
+        
+    end
+    
+end
+
+end

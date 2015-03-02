@@ -1,5 +1,8 @@
 function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, epoch_secs, pd_handle, norm, band_index, freqs, no_cycles, bands)
 
+% Leave epoch_secs empty when using for optogenetics data, and enter
+% '_ntrials' for the argument pd_handle.
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
@@ -20,16 +23,6 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-% if exist([folders{1}, '/', prefixes{1}, '_wt.mat'])
-%     
-%     load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
-%     
-% else
-%     
-%     sampling_freq = 500;
-%     
-% end
-
 no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
@@ -48,26 +41,25 @@ no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
 
-% pd_colors = {'g', 'r'};
-
-% norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
-% 
-% long_norms = {'', ', Increase Over Baseline Power', ', % Total Power', ', Increase in % Total Power Over Baseline'};
-
-% high_type = {'', '_cum'}; no_types = length(high_type);
-
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
+
+if ~isempty(epoch_secs)
     
-load([subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
-    num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum.mat'])
+    spectrum_name = [subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
+        num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum'];
+    
+else
+    
+    spectrum_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_',...
+        short_band_labels{band_index}, pd_handle, norm, '_spectrum'];
+    
+    epoch_secs = str2num(pd_handle(2:(end - length('trials'))));
+    
+end
+
+load([spectrum_name, '.mat'])
 
 no_freqs = size(WT_sec, 1);
-
-% no_comparisons = nchoosek(no_pds, 2);
-%     
-% p_vals = nan(size(WT_sec, 1), no_comparisons, no_folders, no_bands, no_chans, 2);
-%     
-% All_p_vals = nan(size(WT_sec, 1), no_comparisons, no_bands, no_chans, 2);
 
 %% Individual bar plots.
 
@@ -95,12 +87,6 @@ for fo = 1:no_folders
             
         end
         
-        % subj_p_vals = run_stats(pct_bp_high_for_test, test_handle);
-        
-        % p_vals(:, fo, b, ch, :) = permute(subj_p_vals, [1 3 4 5 2]);
-        
-        % p_val = p_val*all_dimensions(@sum, ~isnan(p_val))*no_folders;
-        
         subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
         if strcmp(norm, '_pct')
@@ -114,8 +100,6 @@ for fo = 1:no_folders
         end
         
         axis tight
-        
-        % plot_data(pct_bp_high_for_test, fo, exist('BP_sec', 'var') || strcmp(pd_handle, '_power'), subj_p_vals)
         
         All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
         
@@ -135,18 +119,13 @@ for fo = 1:no_folders
     
 end
 
-save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{band_index},...
-    '_spectrum_individual', pd_handle, norm])
+save_as_pdf(gcf, [spectrum_name, '_individual'])
 
 %% Stats & figures treating each individual as an observation.
 
 figure
 
 for ch = 1:no_chans
-    
-    % across_p_vals = run_stats(All_mean(:, :, ch), test_handle);
-    % 
-    % All_p_vals(:, b, ch, :) = permute(across_p_vals, [1 3 4 2]);
     
     for pd = 1:no_pds
         
@@ -176,7 +155,6 @@ for ch = 1:no_chans
     
 end
 
-save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{band_index},...
-    '_spectrum_individual_avg', pd_handle, norm])
+save_as_pdf(gcf, [spectrum_name, '_individual_avg'])
 
 end

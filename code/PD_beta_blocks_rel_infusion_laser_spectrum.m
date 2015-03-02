@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, norm_for_power, no_trials_analyzed, band_index, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, norm, no_trials_analyzed, band_index, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -124,7 +124,7 @@ for fo = 1:no_folders
                     
                     sec_end = trial_start + sec*sampling_freq;
                     
-                    WT_sec(:, (tr - 1)*5 + sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, :, ch))';
+                    WT_sec(:, (tr - 1)*5 + sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, band_indices{band_index}, ch))';
                     
                 end
                 
@@ -136,7 +136,7 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(no_trials_analyzed), 'trials',...
-    short_band_labels{band_index}, norm_for_power, '_spectrum.mat'], 'WT_sec')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', short_band_labels{band_index},...
+    '_', num2str(no_trials_analyzed), 'trials', norm, '_spectrum.mat'], 'WT_sec')
 
 end
