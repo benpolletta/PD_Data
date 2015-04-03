@@ -114,7 +114,7 @@ for fo = 1:length(folders)
                         F_flipped = [flipud(F(1:smooth_winsize,ch1)); F(:,ch1); flipud(F((end-smooth_winsize+1):end,ch1))];
                         
                         % F_conv = conv(F_flipped,hann(smooth_winsize)/sum(hann(smooth_winsize)),'same');
-                        F_conv = conv(F_flipped,ones(smooth_winsize,1)/smooth_winsize,'same');
+                        F_conv = conv(F_flipped, ones(smooth_winsize,1)/smooth_winsize, 'same');
                         
                         F_smooth(:,ch1) = F_conv(smooth_winsize + (1:size(Pd_smooth,1)));
                         

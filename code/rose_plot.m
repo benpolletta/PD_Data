@@ -1,4 +1,4 @@
-function [MR_vec,p_hist,freqs,conf_vec]=rose_plot(p_vec,f_vec,no_p_bins,f_bins)
+function [MR_vec, p_hist, freqs, conf_vec] = rose_plot(p_vec, f_vec, no_p_bins, f_bins)
 
 % Produces a rose plot, with mean resultant vectors, from time series of
 % frequencies and phases.

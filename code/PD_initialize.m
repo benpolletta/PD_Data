@@ -12,7 +12,7 @@ PD_struct.infusetimes = infusetimes;
 
 PD_struct.pd_labels = pd_labels;
 
-PD_struct.chan_labels = chan_labels;
+PD_struct.chan_labels = chan_labels; PD_struct.no_chans = length(chan_labels);
 
 PD_struct.subj_prefix = subject_mat(1:(end - length('_subjects.mat')));
 
@@ -55,3 +55,5 @@ PD_struct.long_norms = {'', ', Increase Over Baseline Power', ', % Total Power',
 PD_struct.high_type = {'', '_cum'}; 
 
 PD_struct.no_types = length(PD_struct.high_type);
+
+PD_struct.pd_labels = pd_labels; PD_struct.no_pds = length(pd_labels);
