@@ -3,13 +3,13 @@ function make_spectrogram_figures(subject_no, subject_name, basetime, striatum_c
 data = load([subject_name, '/', subject_name([1 2 4:end]), '_wt.mat']);
 Spec = data.Spec;
 
-for i = 1:2
+for ch = 1:2
     
     figure
     
     %% Plotting spectrogram for whole data recording.
     
-    Str_spec = abs(Spec(:, :, i));
+    Str_spec = abs(Spec(:, :, ch));
     
     dims = size(Str_spec);
     
@@ -27,7 +27,7 @@ for i = 1:2
     
     imagesc(t, 1:80, Spec_dec(1:80, :))
     
-    title([subject_name, ', Channel ', num2str(i)])
+    title([subject_name, ', Channel ', num2str(ch)])
     
     ylabel('Frequency (Hz)')
     
@@ -53,10 +53,10 @@ for i = 1:2
     
     colors = {'g', 'r'};
     
-    for i = 1:2
+    for pd = 1:2
         
-        plot(([1 1]*starts(i)/500 - basetime)/60, [0 80], colors{i})
-        plot(([1 1]*ends(i)/500 - basetime)/60, [0 80], colors{i})
+        plot(([1 1]*starts(pd)/500 - basetime)/60, [0 80], colors{pd})
+        plot(([1 1]*ends(pd)/500 - basetime)/60, [0 80], colors{pd})
         
     end
     
@@ -66,7 +66,7 @@ for i = 1:2
     
     subplot(4, 1, 2)
     
-    plot(t, PD_dec(t <= 30, i), 'k')
+    plot(t, PD_dec(t <= 30, ch), 'k')
     
     box off
     
@@ -80,9 +80,9 @@ for i = 1:2
     
     pd_labels = {'Pre-Infusion', 'Post-Infusion'};
     
-    for i = 1:2
+    for pd = 1:2
         
-        midpoint = ((starts(i)/500 - basetime)/60 + (ends(i)/500 - basetime)/60)/2;
+        midpoint = ((starts(pd)/500 - basetime)/60 + (ends(pd)/500 - basetime)/60)/2;
         
         start_time = midpoint - 5/60; end_time = midpoint + 5/60;
         
@@ -90,11 +90,11 @@ for i = 1:2
         
         t_interval = t(t_index);
         
-        subplot(4, 2, 4 + i)
+        subplot(4, 2, 4 + pd)
         
         imagesc(t_interval, 1:80, Str_spec(t_index, 1:80)')
         
-        title(pd_labels{i})
+        title(pd_labels{pd})
         
         ylabel('Frequency (Hz)')
         
@@ -110,9 +110,9 @@ for i = 1:2
         
         plot([t_interval(1) t_interval(end)], [8 8], ':w', 'LineWidth', 2)
         
-        subplot(4, 2, 6 + i)
+        subplot(4, 2, 6 + pd)
         
-        plot(t_interval, PD_dec(t_index, i), 'k')
+        plot(t_interval, PD_dec(t_index, pd), 'k')
         
         box off
         
@@ -124,11 +124,11 @@ for i = 1:2
         
         try
             
-            save_as_pdf(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(i)])
+            save_as_eps(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch)])
             
         catch
             
-            saveas(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(i), '.fig'])
+            save(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch), '.fig'])
             
         end
         
