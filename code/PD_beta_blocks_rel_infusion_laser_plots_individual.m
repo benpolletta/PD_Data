@@ -94,6 +94,20 @@ All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
 format = make_format(5*no_pds + 2*no_comparisons, 'f');
 
+for i = 1:no_pds
+   
+    mean_labels = {mean_labels{:}, 'Mean'};
+    
+    se_labels = {se_labels{:}, 'S.E.'};
+    
+    median_labels = {median_labels{:}, 'Median'};
+    
+    q1_labels = {q1_labels{:}, 'Q1'};
+    
+    q3_labels = {q3_labels{:}, 'Q3'};
+    
+end
+
 format = ['%s\t', format];
 
 for b = 1:no_bands
@@ -105,8 +119,8 @@ for b = 1:no_bands
         fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(no_trials), '_trials_', short_band_labels{b},...
             '_individual', measure, norm_for_power, '_', chan_labels{ch}, '_stats.txt'], 'w');
         
-        fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), 'Recording', 'Mean', 'Mean', 'S.E.', 'S.E.',...
-            'Median', 'Median', 'Q1', 'Q1', 'Q3', 'Q3', p_val_labels{:});
+        fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), 'Recording', mean_labels, se_labels,...
+            median_labels, q1_labels, q3_labels, p_val_labels{:});
         
         fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), 'Recording', pd_labels{:}, pd_labels{:},...
             pd_labels{:}, pd_labels{:}, pd_labels{:}, p_val_labels{:});
