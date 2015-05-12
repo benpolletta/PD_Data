@@ -94,6 +94,8 @@ All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
 format = make_format(5*no_pds + 2*no_comparisons, 'f');
 
+[mean_labels, se_labels, median_labels, q1_labels, q3_labels] = deal({});
+
 for i = 1:no_pds
    
     mean_labels = {mean_labels{:}, 'Mean'};
