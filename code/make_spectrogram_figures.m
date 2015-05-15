@@ -1,4 +1,4 @@
-function make_spectrogram_figures(subject_no, subject_name, basetime, striatum_channel)
+function make_spectrogram_figures(group_prefix, subject_no, subject_name, basetime, striatum_channel)
     
 data = load([subject_name, '/', subject_name([1 2 4:end]), '_wt.mat']);
 Spec = data.Spec;
@@ -43,7 +43,7 @@ for ch = 1:2
     
     plot([t(1) t(end)], [8 8], ':w', 'LineWidth', 2)
     
-    load('st_m1_pct_BP_high_2.5_min_secs_by_STR.mat')
+    load([group_prefix, '_pct_BP_high_2.5_min_secs.mat'])
     
     starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
     starts = starts(striatum_channel, :);
