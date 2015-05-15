@@ -43,20 +43,22 @@ for ch = 1:2
     
     plot([t(1) t(end)], [8 8], ':w', 'LineWidth', 2)
     
-    load('st_m1_pct_BP_high_2.5_min_secs.mat')
+    load('st_m1_pct_BP_high_2.5_min_secs_by_STR.mat')
     
     starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
     starts = starts(striatum_channel, :);
+    starts = (starts/s_rate - basetime)/60;
     
     ends = reshape(All_bp_max_end(subject_no, :, 3, :), 2, 2);
     ends = ends(striatum_channel, :);
+    ends = (ends/s_rate - basetime)/60;
     
     colors = {'g', 'r'};
     
     for pd = 1:2
         
-        plot(([1 1]*starts(pd)/500 - basetime)/60, [0 80], colors{pd})
-        plot(([1 1]*ends(pd)/500 - basetime)/60, [0 80], colors{pd})
+        plot([1 1]*starts(pd), [0 80], colors{pd})
+        plot([1 1]*ends(pd), [0 80], colors{pd})
         
     end
     
@@ -82,13 +84,13 @@ for ch = 1:2
     
     for pd = 1:2
         
-        midpoint = ((starts(pd)/500 - basetime)/60 + (ends(pd)/500 - basetime)/60)/2;
+        midpoint = (starts(pd) + ends(pd))/2;
         
         start_time = midpoint - 5/60; end_time = midpoint + 5/60;
         
         t_index = t >= start_time & t <= end_time;
         
-        t_interval = t(t_index);
+        t_interval = t(t_index)*60;
         
         subplot(4, 2, 4 + pd)
         
@@ -106,9 +108,9 @@ for ch = 1:2
         
         plot([0 0], [0 80], ':w', 'LineWidth', 2)
         
-        plot([t_interval(1) t_interval(end)], [30 30], ':w', 'LineWidth', 2)
+        plot([t_interval(1) t_interval(end)]*60, [30 30], ':w', 'LineWidth', 2)
         
-        plot([t_interval(1) t_interval(end)], [8 8], ':w', 'LineWidth', 2)
+        plot([t_interval(1) t_interval(end)]*60, [8 8], ':w', 'LineWidth', 2)
         
         subplot(4, 2, 6 + pd)
         
@@ -118,7 +120,7 @@ for ch = 1:2
         
         axis tight
         
-        xlabel('Time (min.) Rel. Infusion')
+        xlabel('Time (sec.) Rel. Infusion')
         
         ylabel('LFP (mV)')
         
