@@ -46,7 +46,19 @@ load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_'
 
 pre_mean_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', norm, '_power_pre'];
 
-pre_mean_fid = fopen([pre_mean_name, '.txt'], 'w');
+pre_mean_fid = nan(no_chans, 1);
+
+for ch = 1:no_chans
+
+    pre_mean_fid(ch) = fopen([pre_mean_name, '_ch', num2str(ch), '.txt'], 'w');
+
+    fprintf(pre_mean_fid(ch), make_format(no_bands + 1, 's'), 'Recording', short_band_labels{:});
+    
+end
+
+pre_mean_format = make_format(no_bands, 'f');
+
+pre_mean_format = ['%s\t', pre_mean_format];
 
 for fo = 1:no_folders
     
@@ -113,16 +125,16 @@ for fo = 1:no_folders
     end
         
     BP_pre_mean(fo, :, :) = nanmean(BP(pd_indices(:, 1), :, :));
+    
+    for ch = 1:no_chans
+        
+        fprintf(pre_mean_fid(ch), pre_mean_format, folder, BP_pre_mean(fo, :, ch));
+        
+    end
        
 end
 
-for ch = 1:no_chans
-    
-    fprintf(pre_mean_fid, pre_mean_format, BP_pre_mean');
-    
-end
-
-close(pre_mean_fid)
+for ch = 1:no_chans, fclose(pre_mean_fid(ch)); end
 
 save([pre_mean_name, '.mat'], 'BP_pre_mean')
 
