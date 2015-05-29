@@ -1,5 +1,7 @@
 function PD_decimate_channels(prefix, detrend_window, plot_opt)
 
+% detrend_window is in seconds.
+
 load([prefix,'_all_channel_data.mat'])
 
 figure;
@@ -19,7 +21,7 @@ for ch = 1:2
     
     PD_dec_temp_reflected = [flipud(PD_dec_temp(1:5*sampling_rate)); PD_dec_temp; fliplr(PD_dec_temp(1:5*sampling_rate))];
     
-    PD_trend = conv(PD_dec_temp_reflected,hanning_window,'same');
+    PD_trend = conv(PD_dec_temp_reflected, hanning_window, 'same');
     
     PD_trend = PD_trend((5*sampling_rate + 1):(end - 5*sampling_rate));
     

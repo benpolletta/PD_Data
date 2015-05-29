@@ -10,7 +10,7 @@ end
 
 % PD_laser_artifacts_wav(subject_mat)
 
-% PD_beta_blocks_rel_infusion(subject_mat, 2, [], freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion(subject_mat, 2, [], freqs, no_cycles, bands)
 
 pd_handles = {'', '_power', '_power'};
 
@@ -20,7 +20,7 @@ for i = 2:length(pd_handles)
 
     PD_beta_blocks_rel_infusion_laser_stats(subject_mat, pd_handles{i}, norm_handles{i}, 10, freqs, no_cycles, bands)
     
-    % PD_beta_blocks_rel_infusion_laser_plots(subject_mat, pd_handles{i}, 10, freqs, no_cycles, bands)
+    PD_beta_blocks_rel_infusion_laser_plots(subject_mat, pd_handles{i}, 10, freqs, no_cycles, bands)
     
     PD_beta_blocks_rel_infusion_laser_plots_individual(subject_mat, pd_handles{i}, norm_handles{i}, 10, freqs, no_cycles, bands)
     

@@ -50,7 +50,7 @@ for fo = 1:length(folders)
         
         %% Normalize by total power.
         
-        Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(sqrt(sum(Spec(:, :, ch).^2, 2)), 1, no_freqs);
+        Spec_norm(:, :, ch) = Spec(:, :, ch)./repmat(sqrt(sum(abs(Spec(:, :, ch)).^2, 2)), 1, no_freqs);
         
         %% Baseline normalize percent of total power.
         

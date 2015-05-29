@@ -1,4 +1,10 @@
-function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size, outlier_lims)
+function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size) % , outlier_lims)
+
+% INPUTS:
+% subject_mat - .mat file containing info about recordings to be processed.
+% sd_lim - standard deviation cutoff above which power in a given frequency
+% band is considered "high".
+% chunk_size - length of data plotted in each figure (20 sec. is standard).
 
 load(subject_mat)
 

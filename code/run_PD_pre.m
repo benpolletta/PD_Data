@@ -1,5 +1,7 @@
 function run_PD_pre(subject_mat, detrend_window, outlier_check)
 
+% detrend_window is in seconds.
+
 present_dir = pwd;
 
 load(subject_mat)
@@ -22,7 +24,7 @@ parfor fo = 1:length(folders)
     
     if ~isempty(outlier_check)
         
-        PD_epoch_list_artifacts(prefix,basetimes(fo),outlier_check)
+        PD_epoch_list_artifacts(prefix, basetimes(fo), outlier_check)
         
         PD_plot_artifacts(prefix)
         

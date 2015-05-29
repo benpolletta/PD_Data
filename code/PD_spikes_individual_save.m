@@ -1,6 +1,28 @@
 function PD_spikes_individual_save(folder, prefix, channel_multipliers, spike_boundaries, min_secs_apart, min_prominence, min_prominences_flag)
 
-% Script to find spikes in time series from carbachol data.
+% Script to save peaks in time series from carbachol data. To help in
+% locating peaks, this script first finds peaks in band power, then locates
+% peaks in the LFP (above a certain prominence cutoff) that are close to
+% these peaks in band power.
+
+% INPUTS:
+% folder - folder name (string).
+% prefix - prefix name (string).
+% basetime - time of infusion/first laser on, in seconds (integer).
+% channel_multipliers - searches for peaks in LFP if +1, troughs in LFP if
+%   -1 (matrix, length = number of channels).
+% spike_boundaries - times within which to search for peaks/troughs
+%   (in seconds, integers).
+% min_secs_aparts - minimum number of seconds separating consecutive peaks
+%   (seconds, fload).
+% min_prominence - prominence cutoff at which peaks are recognized as
+% peaks. Prominence is the sum over a certain time window (given by
+%   min_secs_apart) of the difference between the peak value and the
+%   surrounding values.
+% min_prominence_flag - 'std', if prominence cutoff is given in terms of 
+%   z-scored prominence for all peaks (determined before peaks are excluded
+%   by prominence), or '' if prominence cutoff is given in terms of raw
+%   prominence (usually easier).
 
 subj_name = [folder, '/', prefix];
 
