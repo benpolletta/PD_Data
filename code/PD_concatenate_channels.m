@@ -1,4 +1,4 @@
-function PD_concatenate_channels(prefix,plot_opt)
+function PD_concatenate_channels(prefix, plot_opt, file_format)
 
 datalist = [prefix,'_datafiles.list'];
     
@@ -7,12 +7,20 @@ datalist = [prefix,'_datafiles.list'];
     file_fid = fopen(datalist,'w');
     
     for digit = 0:9
+    
+        if strcmp(file_format, '.mat') || isempty(file_format)
+            
+            file = dir([prefix, '*', num2str(digit), '.mat']);
+            
+        elseif strcmp(file_format, '.abf')
+            
+            file = dir([prefix, '*', num2str(digit), '.abf']);
         
-        file = dir([prefix,'*',num2str(digit),'.mat']);
-        
+        end
+            
         if ~isempty(file)
             
-            fprintf(file_fid,'%s\n',file.name);
+            fprintf(file_fid, '%s\n', file.name);
             
         end
         
@@ -37,11 +45,19 @@ last_index = 0;
 
 for f=1:no_files
     
-    load(datafiles{f})
-    
-    if isstruct(data)
+    if strcmp(file_format, '.mat') || isempty(file_format)
         
-        data = [data.ch1; data.ch2]';
+        load(datafiles{f})
+        
+        if isstruct(data)
+            
+            data = [data.ch1; data.ch2]';
+            
+        end
+    
+    elseif strcmp(file_format, '.abf')
+        
+        data = abf2load(datafiles{f});
         
     end
     
