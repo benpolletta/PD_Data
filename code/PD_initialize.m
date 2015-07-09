@@ -8,8 +8,16 @@ PD_struct.prefixes = prefixes;
 
 PD_struct.basetimes = basetimes;
 
-PD_struct.infusetimes = infusetimes;
+if exist('infusetimes','var')
+    
+    PD_struct.infusetimes = infusetimes;
 
+else
+    
+    PD_struct.infusetimes = nan(size(basetimes));
+    
+end
+    
 PD_struct.pd_labels = pd_labels;
 
 PD_struct.chan_labels = chan_labels; PD_struct.no_chans = length(chan_labels);

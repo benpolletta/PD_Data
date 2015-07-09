@@ -55,75 +55,79 @@ for fo = 1:PD_struct.no_folders
     
     cons_title = [folder, ', High Power, ', num2str(percent), ' Percent of ', num2str(time_window/PD_struct.sampling_freq), ' s'];
     
-    load([cons_name, '.mat'], 'BP_high_consolidated')
-    
-    load([subj_name, '_all_channel_data_dec.mat'])
-    
-    t = (1:length(PD_dec))/PD_struct.sampling_freq - PD_struct.basetimes(fo);
-    
-    pd_indices = get_pd_indices(t, fo, subj_name, PD_struct.subj_prefix, epoch_secs, '', band_index, PD_struct.no_pds);
-    
-    for n = 1 %:PD_struct.no_norms
+    if exist([cons_name, '.mat'], 'file')
         
-        BP_data = load([subj_name, '_wt_BP.mat'], ['BP', PD_struct.norms{n}]);
+        load([cons_name, '.mat'], 'BP_high_consolidated')
         
-        BP_data = getfield(BP_data, ['BP', PD_struct.norms{n}]);
+        load([subj_name, '_all_channel_data_dec.mat'])
         
-        for ch = 1:2, BP_data(:, :, ch) = zscore(BP_data(:, :, ch)); end
+        t = (1:length(PD_dec))/PD_struct.sampling_freq - PD_struct.basetimes(fo);
         
-        Spec_data = load([subj_name, '_wt.mat'], ['Spec', PD_struct.norms{n}]);
+        pd_indices = get_pd_indices(t, fo, subj_name, PD_struct.subj_prefix, epoch_secs, '', band_index, PD_struct.no_pds);
         
-        Spec_data = getfield(Spec_data, ['Spec', PD_struct.norms{n}]);
-        
-        ty = 2;
-        
-        BP_high_cons = getfield(BP_high_consolidated, ['BP', PD_struct.norms{n}, '_high', PD_struct.high_type{ty}]);
-        
-        for pd = 1:PD_struct.no_pds
+        for n = 1 %:PD_struct.no_norms
             
-            %% Get spec & BP data.
+            BP_data = load([subj_name, '_wt_BP.mat'], ['BP', PD_struct.norms{n}]);
             
-            interval_length = 10;
+            BP_data = getfield(BP_data, ['BP', PD_struct.norms{n}]);
             
-            BP_hc_length = sum(BP_high_cons(:, band_index, 3) & pd_indices(:, pd));
+            for ch = 1:2, BP_data(:, :, ch) = zscore(BP_data(:, :, ch)); end
             
-            BP_hc_blocks = index_to_blocks(BP_high_cons(:, band_index, 3) & pd_indices(:, pd));
+            Spec_data = load([subj_name, '_wt.mat'], ['Spec', PD_struct.norms{n}]);
             
-            no_blocks = size(BP_hc_blocks, 1);
+            Spec_data = getfield(Spec_data, ['Spec', PD_struct.norms{n}]);
             
-            plot_length = BP_hc_length + (no_blocks - 2)*interval_length;
+            ty = 2;
             
-            BP_hc_plot = nan(plot_length, PD_struct.no_bands, 2);
+            BP_high_cons = getfield(BP_high_consolidated, ['BP', PD_struct.norms{n}, '_high', PD_struct.high_type{ty}]);
             
-            Spec_hc_plot = nan(plot_length, sum(band_indices{band_index}), 2);
-            
-            LFP_hc_plot = nan(plot_length, 2);
-            
-            t_hc_plot = nan(plot_length, 1);
-            
-            last_index = 0;
-            
-            for bl = 1:no_blocks
+            for pd = 1:PD_struct.no_pds
                 
-                block_length = BP_hc_blocks(bl, 2) - BP_hc_blocks(bl, 1) + 1;
+                %% Get spec & BP data.
                 
-                block_indices = last_index + (bl > 1)*5 + (1:block_length);
+                interval_length = 10;
                 
-                t_hc_plot(block_indices) = t(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2));
+                BP_hc_length = sum(BP_high_cons(:, band_index, 3) & pd_indices(:, pd));
                 
-                BP_hc_plot(block_indices, :, :) = BP_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :, :);
+                BP_hc_blocks = index_to_blocks(BP_high_cons(:, band_index, 3) & pd_indices(:, pd));
                 
-                Spec_hc_plot(block_indices, :, :) = Spec_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), band_indices{band_index}, :);
+                no_blocks = size(BP_hc_blocks, 1);
                 
-                LFP_hc_plot(block_indices, :) = PD_dec(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :);
+                plot_length = BP_hc_length + (no_blocks - 2)*interval_length;
                 
-                last_index = last_index + (bl > 1)*interval_length + block_length;
+                BP_hc_plot = nan(plot_length, PD_struct.no_bands, 2);
+                
+                Spec_hc_plot = nan(plot_length, sum(band_indices{band_index}), 2);
+                
+                LFP_hc_plot = nan(plot_length, 2);
+                
+                t_hc_plot = nan(plot_length, 1);
+                
+                last_index = 0;
+                
+                for bl = 1:no_blocks
+                    
+                    block_length = BP_hc_blocks(bl, 2) - BP_hc_blocks(bl, 1) + 1;
+                    
+                    block_indices = last_index + (bl > 1)*5 + (1:block_length);
+                    
+                    t_hc_plot(block_indices) = t(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2));
+                    
+                    BP_hc_plot(block_indices, :, :) = BP_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :, :);
+                    
+                    Spec_hc_plot(block_indices, :, :) = Spec_data(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), band_indices{band_index}, :);
+                    
+                    LFP_hc_plot(block_indices, :) = PD_dec(BP_hc_blocks(bl, 1):BP_hc_blocks(bl, 2), :);
+                    
+                    last_index = last_index + (bl > 1)*interval_length + block_length;
+                    
+                end
+                
+                save([cons_name, epoch_label, '_', PD_struct.pd_labels{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
+                
+                chunk_plot([cons_name, epoch_label, '_', PD_struct.pd_labels{pd}], [cons_title, PD_struct.pd_labels{pd}], 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
                 
             end
-            
-            save([cons_name, epoch_label, '_', PD_struct.pd_labels{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
-            
-            chunk_plot([cons_name, epoch_label, '_', PD_struct.pd_labels{pd}], [cons_title, PD_struct.pd_labels{pd}], 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
             
         end
         

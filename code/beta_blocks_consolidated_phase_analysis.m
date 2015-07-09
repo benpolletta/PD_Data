@@ -119,7 +119,7 @@ for fo = 1:PD_struct.no_folders
     
     logical(logical == 0) = nan;
 
-    add_stars(gca, freq_bin_centers', logical, [1 0 0], [1 0 0; 0 0 1; 0 .5 0])
+    add_stars(gca, freq_bin_centers', logical, [1 zeros(1, PD_struct.no_pds)], [1 0 0; 0 0 1; 0 .5 0])
    
     axis tight
     
@@ -162,13 +162,13 @@ figure(1)
     
 clear rao_test rayleigh_test zero_test conc_pval angle_pval
 
-for pd = 1:2
+for pd = 1:PD_struct.no_pds
     
     clear f_overlap_index mean_f d_phi
     
     [Freqs, Phases] = deal([]);
     
-    for ch = 1:2
+    for ch = 1:PD_struct.no_chans
         
         Freq_data = load([PD_struct.subj_prefix, BP_suffix, '_2sd_', short_band_labels{band_index}, '_high_',...
             num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated_freqs',...
@@ -214,7 +214,7 @@ logical = [(angle_pval < .05/length(angle_pval)) zero_test];
 
 logical(logical == 0) = nan;
 
-add_stars(gca, freq_bin_centers', logical, [1 0 0], [1 0 0; 0 0 1; 0 .5 0])
+add_stars(gca, freq_bin_centers', logical, [1 zeros(1, PD_struct.no_pds)], [1 0 0; 0 0 1; 0 .5 0])
 
 axis tight
 
@@ -294,11 +294,11 @@ rayleigh_test = min(rayleigh_test*2*no_f_bins, 1);
         
 %% Testing phases against zero.
 
-zero_test = nan(no_f_bins, 2);
+zero_test = nan(no_f_bins, no_pds);
 
 for f = 1:no_f_bins
     
-    for pd = 1:2
+    for pd = 1:no_pds
         
         phi = phases{pd}(freq_cats{pd} == f); phi(isnan(phi)) = [];
         
@@ -316,10 +316,10 @@ end
 zero_test = min(zero_test*2*no_f_bins, 1);
 
 %% Testing phases pre- vs. post-infusion.
+    
+conc_pval = nan(no_f_bins, 1); angle_pval = nan(no_f_bins, 1);
 
 if no_pds > 1
-    
-    conc_pval = nan(no_f_bins, 1); angle_pval = nan(no_f_bins, 1);
     
     for f = 1:no_f_bins
             
