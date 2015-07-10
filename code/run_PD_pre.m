@@ -1,4 +1,4 @@
-function run_PD_pre(subject_mat, detrend_window, outlier_check)
+function run_PD_pre(subject_mat, format, detrend_window, outlier_check)
 
 % detrend_window is in seconds.
 
@@ -18,7 +18,7 @@ parfor fo = 1:length(folders)
     % 
     % PD_decimate(prefix,1)
     
-    PD_concatenate_channels(prefix,1)
+    PD_concatenate_channels(prefix, 1, format)
     
     PD_decimate_channels(prefix, detrend_window, 1)
     

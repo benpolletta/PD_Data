@@ -8,11 +8,11 @@ datalist = [prefix,'_datafiles.list'];
     
     for digit = 0:9
     
-        if strcmp(file_format, '.mat') || isempty(file_format)
+        if strcmp(file_format, 'mat') || isempty(file_format)
             
             file = dir([prefix, '*', num2str(digit), '.mat']);
             
-        elseif strcmp(file_format, '.abf')
+        elseif strcmp(file_format, 'abf')
             
             file = dir([prefix, '*', num2str(digit), '.abf']);
         
@@ -45,7 +45,7 @@ last_index = 0;
 
 for f=1:no_files
     
-    if strcmp(file_format, '.mat') || isempty(file_format)
+    if strcmp(file_format, 'mat') || isempty(file_format)
         
         load(datafiles{f})
         
@@ -55,7 +55,7 @@ for f=1:no_files
             
         end
     
-    elseif strcmp(file_format, '.abf')
+    elseif strcmp(file_format, 'abf')
         
         data = abf2load(datafiles{f});
         
@@ -69,7 +69,7 @@ for f=1:no_files
     
 end
 
-save([prefix,'_all_channel_data.mat'],'PD_data','sampling_rate')
+save([prefix,'_all_channel_data.mat'],'-v7.3','PD_data','sampling_rate')
 
 if plot_opt > 0
    
