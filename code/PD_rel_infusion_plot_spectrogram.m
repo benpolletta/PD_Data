@@ -158,7 +158,7 @@ for fo = 1:length(folders)
             
             subplot(6, 1, (ch - 1)*3 + 1)
             
-            imagesc(t, freqs(1:100), WT_chunk(:, 1:100, ch)')
+            imagesc(t, freqs(1:100), abs(WT_chunk(:, 1:100, ch))')
             
             if ch == 1
                

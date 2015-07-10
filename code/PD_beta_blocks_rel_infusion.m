@@ -48,7 +48,7 @@ no_pds = length(pd_labels);
 
 no_chans = length(chan_labels);
 
-% [BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), no_bands, no_chans, no_pds, no_norms));
+[BP_high_dps, BP_high_cum_dps] = deal(nan(length(folders), no_bands, no_chans, no_pds, no_norms));
 
 for fo = 1:length(folders)
     
@@ -183,23 +183,23 @@ for fo = 1:length(folders)
         
         save([subj_name, BP_suffix, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
         
-        % for pd = 1:no_pds
-        % 
-        %     for ch = 1:no_chans
-        % 
-        %         BP_high_dps(fo, :, ch, pd, n) = nansum(BP_high(pd_indices(:, pd), :, ch))/sum(pd_indices(:, pd));
-        % 
-        %         BP_high_cum_dps(fo, :, ch, pd, n) = nansum(BP_high_cum(pd_indices(:, pd), :, ch))/sum(pd_indices(:, pd));
-        % 
-        %     end
-        % 
-        % end
+        for pd = 1:no_pds
+        
+            for ch = 1:no_chans
+        
+                BP_high_dps(fo, :, ch, pd, n) = nansum(BP_high(pd_indices(:, pd), :, ch))/sum(pd_indices(:, pd));
+        
+                BP_high_cum_dps(fo, :, ch, pd, n) = nansum(BP_high_cum(pd_indices(:, pd), :, ch))/sum(pd_indices(:, pd));
+        
+            end
+        
+        end
         
     end
           
 end
 
-% save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
 
 end
 
