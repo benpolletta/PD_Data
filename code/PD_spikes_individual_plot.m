@@ -52,7 +52,7 @@ if isempty(channel_multipliers)
     
 end
 
-fig_name = sprintf('%s_%dto%d_%.1fHz_%.0f_%.0f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
+fig_name = sprintf('%s_%dto%d_%.1fHz_%.1f_%.1f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
     sampling_freq/min_samples_apart, min_prominence, min_prominences_flag);
 
 %% Finding spikes, their width and prominence.
