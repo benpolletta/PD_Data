@@ -50,7 +50,7 @@ for fo = 1:PD_struct.no_folders
     
     subj_name = [folder,'/',prefix];
     
-    cons_name = [subj_name, BP_suffix, '_2sd_BP_high_', short_band_labels{band_index}, '_',...
+    cons_name = [subj_name, BP_suffix, '_2sd_BP_high_',... % short_band_labels{band_index}, '_',...
         num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated'];
     
     cons_title = [folder, ', High Power, ', num2str(percent), ' Percent of ', num2str(time_window/PD_struct.sampling_freq), ' s'];
@@ -123,9 +123,9 @@ for fo = 1:PD_struct.no_folders
                     
                 end
                 
-                save([cons_name, epoch_label, '_', PD_struct.pd_labels{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
+                save([cons_name, '_', short_band_labels{band_index}, '_', epoch_label, '_', PD_struct.pd_labels{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
                 
-                chunk_plot([cons_name, epoch_label, '_', PD_struct.pd_labels{pd}], [cons_title, PD_struct.pd_labels{pd}], 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
+                chunk_plot([cons_name, '_', short_band_labels{band_index}, '_', epoch_label, '_', PD_struct.pd_labels{pd}], [cons_title, PD_struct.pd_labels{pd}], 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
                 
             end
             

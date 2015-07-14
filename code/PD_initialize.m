@@ -26,9 +26,17 @@ PD_struct.subj_prefix = subject_mat(1:(end - length('_subjects.mat')));
 
 PD_struct.no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
-
-PD_struct.sampling_freq = sampling_freq;
+try
+    
+    load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+    
+    PD_struct.sampling_freq = sampling_freq;
+    
+catch
+    
+    PD_struct.sampling_freq = 500;
+    
+end
 
 PD_struct.freqs = 1:200;
 

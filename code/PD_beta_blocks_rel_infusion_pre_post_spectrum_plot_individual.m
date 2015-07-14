@@ -107,6 +107,8 @@ for fo = 1:no_folders
             
             title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];[folder, ', ', band_labels{b}]})
             
+            ylabel(chan_labels{ch})
+            
             legend(pd_labels)
             
         else
