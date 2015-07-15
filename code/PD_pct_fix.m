@@ -68,7 +68,7 @@ for fo = 1:length(folders)
         
         %% Band power.
         
-        for b = 1:no_bands
+        for b = 1:size(bands, 1)
             
             band_indices = freqs >= bands(b, 1) & freqs <= bands(b, 2);
             
