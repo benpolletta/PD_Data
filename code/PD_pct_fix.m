@@ -54,9 +54,9 @@ for fo = 1:length(folders)
     
     Spec = abs(Spec.Spec);
     
-    Spec_pct = nan(no_secs*sampling_freq, no_freqs, 2);
+    Spec_pct = nan(no_secs*sampling_freq, length(freqs), 2);
     
-    BP_pct = nan(no_secs*sampling_freq, no_bands, 2);
+    BP_pct = nan(no_secs*sampling_freq, size(bands, 1), 2);
     
     for ch = 1:2
         
