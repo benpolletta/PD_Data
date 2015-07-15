@@ -62,7 +62,7 @@ for fo = 1:no_folders
     
         load([subj_name, BP_suffix, '_wt_BP.mat'])
         
-	eval(['BP = BP', norm, ';'])
+        eval(['BP = BP', norm, ';'])
         
     end
     

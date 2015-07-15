@@ -1,16 +1,22 @@
-function PD_all_data_wav_fix(subjects_mat)
+function PD_all_data_wav_fix(subjects_mat, freqs, no_cycles, bands)
 
 load(subjects_mat)
 
-% sampling_freq = 1000;
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    no_cycles = linspace(3, 21, 200);
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    save_name = subj_name;
+    
+else
 
-freqs = 1:200; % no_freqs = length(freqs);
+    save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
 
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
-
-% no_cycles = linspace(3, 21, no_freqs);
-% 
-% wavelets = dftfilt3(freqs, no_cycles, sampling_freq, 'winsize', sampling_freq);
+end
 
 for fo = 1:length(folders)
     
@@ -20,8 +26,6 @@ for fo = 1:length(folders)
     
     basetime = basetimes(fo);
     
-    base_index = basetime*sampling_freq;
-    
     subj_name = [folder,'/',prefix];
     
     load([subj_name,'_all_channel_data_dec.mat'])
@@ -30,9 +34,21 @@ for fo = 1:length(folders)
     
     t = (1:no_secs*sampling_freq)/sampling_freq;
     
+    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
+    
+        load([subj_name, '_wav_laser_artifacts.mat'])
+       
+        base_index = logical(laser_periods(:, 1));
+        
+    else
+        
+        base_index = t <= basetime;
+        
+    end
+    
     clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
     
-    Spec = load([subj_name, '_wt.mat'], 'Spec');
+    Spec = load([save_name, '_wt.mat'], 'Spec');
     
     Spec = abs(Spec.Spec);
     
@@ -44,7 +60,7 @@ for fo = 1:length(folders)
         
         %% Baseline normalize.
         
-        baseline_mean = mean(abs(Spec(t <= basetime, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+        baseline_mean = mean(abs(Spec(base_index, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
         
         Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
         
@@ -54,7 +70,7 @@ for fo = 1:length(folders)
         
         %% Baseline normalize percent of total power.
         
-        baseline_mean = mean(abs(Spec_norm(t <= basetime, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+        baseline_mean = mean(abs(Spec_norm(base_index, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
         
         Spec_norm_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
         
@@ -74,9 +90,22 @@ for fo = 1:length(folders)
             
         end
         
+        BP_pct_baseline_mean = mean(BP_pct(base_index, :, ch));
+        
+        BP_pct(:, :, ch) = BP_pct(:, :, ch) - ones(size(BP_pct(:, :, ch)))*diag(BP_pct_baseline_mean);
+        
+        BP_norm_pct_baseline_mean = mean(BP_norm_pct(base_index, :, ch));
+        
+        BP_norm_pct(:, :, ch) = BP_norm_pct(:, :, ch) - ones(size(BP_norm_pct(:, :, ch)))*diag(BP_norm_pct_baseline_mean);
+        
     end
     
-    save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', 't', 'basetime', 'freqs', 'sampling_freq')
+    % save([subj_name, '_wt.mat'], '-v7.3', 'Spec', 'Spec_norm', 'Spec_pct', 'Spec_norm_pct', 't', 'basetime', 'freqs', 'sampling_freq')
+    
+    save([save_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', '-v7.3')
+    save([save_name, '_wt_norm.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm', '-v7.3')
+    save([save_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
+    save([save_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
     
     save([subj_name, '_wt_BP.mat'], '-v7.3', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', 't', 'basetime', 'bands', 'sampling_freq')
     
