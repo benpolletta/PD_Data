@@ -40,7 +40,15 @@ for fo = 1:length(folders)
     
         load([subj_name, '_wav_laser_artifacts.mat'])
        
-        base_index = logical(laser_periods(t < 10*triallength(fo), 1));
+        base_index = laser_periods(:, 1);
+
+        base_trials = index_to_blocks(base_index);
+        
+        base_end = base_trials(10, 2);
+        
+        base_index((base_end + 1):end) = 0;
+        
+        base_index = logical(base_index);
         
     else
         
