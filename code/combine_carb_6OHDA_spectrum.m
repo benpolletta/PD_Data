@@ -15,6 +15,8 @@ else
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
     
 end
+
+no_freqs = length(freqs);
     
 no_bands = size(bands, 1);
 
@@ -72,7 +74,7 @@ end
 
 max_folders = max(no_folders); clear no_folders
 
-All_WT_sec = nan(sum(band_indices{band_index}), epoch_secs, max_folders, 3, 2);
+All_WT_sec = nan(no_freqs, epoch_secs, max_folders, 3, 2);
 
 for s = 1:no_subj_mats
    

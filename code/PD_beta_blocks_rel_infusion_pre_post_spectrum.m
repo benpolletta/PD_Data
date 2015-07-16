@@ -92,7 +92,7 @@ for fo = 1:no_folders
                 
                 sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
                 
-                WT_sec(:, sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, band_indices{band_index}, ch))';
+                WT_sec(:, sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, :, ch))';
                 
             end
             
