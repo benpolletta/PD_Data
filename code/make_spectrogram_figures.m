@@ -114,7 +114,7 @@ for ch = 1:2
         
         subplot(4, 2, 6 + pd)
         
-        plot(t_interval, PD_dec(t_index, pd), 'k')
+        plot(t_interval, PD_dec(t_index, ch), 'k')
         
         box off
         

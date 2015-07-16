@@ -60,6 +60,16 @@ end
 load([spectrum_name, '.mat'])
 
 no_freqs = size(WT_sec, 1);
+        
+% if strcmp(norm, '_pct')
+% 
+%     freq_multiplier = ones(no_freqs, size(WT_sec, 2));
+% 
+% else
+% 
+%     freq_multiplier = repmat(freqs', 1, size(WT_sec, 2));
+% 
+% end
 
 %% Individual bar plots.
 
@@ -81,9 +91,9 @@ for fo = 1:no_folders
         
         for pd = 1:no_pds
             
-            WT_mean(:, pd) = nanmean(WT_sec(:, :, fo, pd, ch), 2);
+            WT_mean(:, pd) = nanmean(WT_sec(:, :, fo, pd, ch), 2); % .*freq_multiplier, 2);
             
-            WT_se(:, pd) = nanstd(WT_sec(:, :, fo, pd, ch), [], 2)/sqrt(epoch_secs);
+            WT_se(:, pd) = nanstd(WT_sec(:, :, fo, pd, ch), [], 2)/sqrt(epoch_secs); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
             
         end
         
@@ -95,7 +105,9 @@ for fo = 1:no_folders
             
         else
             
-            boundedline(freqs(band_indices{band_index}), log(WT_mean), prep_for_boundedline(log(WT_se)))
+            freq_multiplier = repmat(freqs(band_indices{band_index})', 1, no_pds);
+            
+            boundedline(freqs(band_indices{band_index}), WT_mean.*freq_multiplier, prep_for_boundedline(WT_se.*freq_multiplier))
             
         end
         
@@ -139,15 +151,17 @@ for ch = 1:no_chans
     
     subplot(1, no_chans, ch)
     
-    if strcmp(norm, '_pct')
+    % if strcmp(norm, '_pct')
     
         boundedline(freqs(band_indices{band_index}), All_mean_mean, prep_for_boundedline(All_mean_se))
-    
-    else
-    
-        boundedline(freqs(band_indices{band_index}), log(All_mean_mean), prep_for_boundedline(log(All_mean_se)))
-    
-    end
+        
+    % else
+    % 
+    %     freq_multiplier = repmat(freqs(band_indices{band_index})', 1, no_pds);
+    % 
+    %     boundedline(freqs(band_indices{band_index}), All_mean_mean.*freq_multiplier, prep_for_boundedline(All_mean_se.*freq_multiplier))
+    % 
+    % end
         
     axis tight
     
