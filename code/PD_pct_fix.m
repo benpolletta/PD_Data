@@ -26,7 +26,7 @@ for fo = 1:length(folders)
     
     prefix = prefixes{fo};
     
-    basetime = basetimes(fo);
+        basetime = basetimes(fo);
     
     subj_name = [folder,'/',prefix];
     
@@ -40,7 +40,7 @@ for fo = 1:length(folders)
     
         load([subj_name, '_wav_laser_artifacts.mat'])
        
-        base_index = logical(laser_periods(:, 1));
+        base_index = logical(laser_periods(t < 10*triallength(fo), 1));
         
     else
         
