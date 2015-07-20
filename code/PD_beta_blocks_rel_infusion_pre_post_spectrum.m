@@ -2,20 +2,24 @@ function PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, epoch_secs, 
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-    freqs = 1:200;
+    freqs = 1:200; in_freqs = [];
     
-    no_cycles = linspace(3, 21, length(freqs));
+    no_cycles = linspace(3, 21, length(freqs)); in_no_cycles = [];
     
-    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
     BP_suffix = '';
     
 else
-    
+
+    in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
+
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
     
 end
     
+no_freqs = length(freqs);
+
 close('all')
 
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
@@ -44,7 +48,7 @@ no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
 
-WT_sec = nan(sum(band_indices{band_index}), epoch_secs, no_folders, no_pds, no_chans);
+WT_sec = nan(no_freqs, epoch_secs, no_folders, no_pds, no_chans);
     
 load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
@@ -56,7 +60,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, freqs, no_cycles, bands);
+    [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
     
     if strcmp(norm, '')
         

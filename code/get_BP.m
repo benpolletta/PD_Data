@@ -1,12 +1,26 @@
 function [BP, Spec] = get_BP(subj_name, outlier_lim, norm, freqs, no_cycles, bands)
 
-load([subj_name, '_wt.mat'], 'sampling_freq') % , 'freqs')
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200;
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    
+    BP_suffix = '';
+    
+else
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+end
 
-BP_data = load([subj_name, '_wt_BP.mat'], ['BP', norm]);
+load([subj_name, BP_suffix, '_wt.mat'], 'sampling_freq') % , 'freqs')
+
+BP_data = load([subj_name, BP_suffix, '_wt_BP.mat'], ['BP', norm]);
 
 BP = getfield(BP_data, ['BP', norm]);
 
-Spec_data = load([subj_name, '_wt', norm, '.mat'], ['Spec', norm]);
+Spec_data = load([subj_name, BP_suffix, '_wt', norm, '.mat'], ['Spec', norm]);
 
 Spec = getfield(Spec_data, ['Spec', norm]);
 
