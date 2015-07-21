@@ -153,17 +153,17 @@ for ch = 1:no_chans
     
     subplot(1, no_chans, ch)
     
-    % if strcmp(norm, '_pct')
+    if strcmp(norm, '_pct')
     
         boundedline(freqs(display_indices), All_mean_mean, prep_for_boundedline(All_mean_se))
         
-    % else
-    % 
-    %     freq_multiplier = repmat(freqs(band_indices{band_index})', 1, no_pds);
-    % 
-    %     boundedline(freqs(band_indices{band_index}), All_mean_mean.*freq_multiplier, prep_for_boundedline(All_mean_se.*freq_multiplier))
-    % 
-    % end
+    else
+            
+        freq_multiplier = repmat(freqs(display_indices)', 1, no_pds);
+    
+        boundedline(freqs(display_indices), All_mean_mean.*freq_multiplier, prep_for_boundedline(All_mean_se.*freq_multiplier))
+    
+    end
         
     axis tight
     
