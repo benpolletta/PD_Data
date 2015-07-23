@@ -6,16 +6,18 @@ load(subjects_mat)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-    freqs = 1:200;
+    freqs = 1:200; in_freqs = [];
     
-    no_cycles = linspace(3, 21, 200);
+    no_cycles = linspace(3, 21, 200); in_no_cycles = [];
     
-    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
     BP_suffix = '';
     
 else
 
+    in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
+    
     BP_suffix = sprintf('%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
 
 end
@@ -58,9 +60,11 @@ for fo = 1:length(folders)
     
     clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
     
-    Spec = load([subj_name, BP_suffix, '_wt.mat'], 'Spec');
-    
-    Spec = abs(Spec.Spec);
+    [~, Spec] = get_BP(subj_name, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
+
+    % Spec = load([subj_name, BP_suffix, '_wt.mat'], 'Spec');
+    % 
+    % Spec = abs(Spec.Spec);
     
     Spec_pct = nan(no_secs*sampling_freq, length(freqs), 2);
     
@@ -70,7 +74,7 @@ for fo = 1:length(folders)
         
         %% Baseline normalize.
         
-        baseline_mean = mean(abs(Spec(base_index, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+        baseline_mean = nanmean(abs(Spec(base_index, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
         
         Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
         

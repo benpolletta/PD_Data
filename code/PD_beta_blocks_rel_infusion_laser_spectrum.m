@@ -2,13 +2,17 @@ function PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, norm, no_trials
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-    freqs = 1:200;
+    freqs = 1:200; in_freqs = [];
     
-    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    no_cycles = linspace(3,7,length(freqs)); in_no_cycles = [];
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
     BP_suffix = '';
     
 else
+    
+    in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
     
@@ -90,7 +94,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, freqs, no_cycles, bands);
+    [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
     
     if strcmp(norm, '')
         
