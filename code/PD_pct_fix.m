@@ -58,9 +58,9 @@ for fo = 1:length(folders)
         
     end
     
-    clear Spec Spec_norm Spec_pct BP BP_norm BP_pct
+    clear Spec Spec_pct BP BP_pct
     
-    [~, Spec] = get_BP(subj_name, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
+    [~, Spec] = get_BP(subj_name, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
 
     % Spec = load([subj_name, BP_suffix, '_wt.mat'], 'Spec');
     % 
