@@ -28,13 +28,13 @@ for fo = 1:length(folders)
     
     prefix = prefixes{fo};
     
-        basetime = basetimes(fo);
+    basetime = basetimes(fo);
     
     subj_name = [folder,'/',prefix];
     
     load([subj_name,'_all_channel_data_dec.mat'])
     
-    no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
+    % no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
     
     t = (1:no_secs*sampling_freq)/sampling_freq;
     
@@ -66,9 +66,9 @@ for fo = 1:length(folders)
     % 
     % Spec = abs(Spec.Spec);
     
-    Spec_pct = nan(no_secs*sampling_freq, length(freqs), 2);
+    Spec_pct = nan(size(Spec, 1), length(freqs), 2);
     
-    BP_pct = nan(no_secs*sampling_freq, size(bands, 1), 2);
+    BP_pct = nan(size(Spec, 1), size(bands, 1), 2);
     
     for ch = 1:2
         
