@@ -36,7 +36,7 @@ for fo = 1:length(folders)
     
     % no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
     
-    t = (1:no_secs*sampling_freq)/sampling_freq;
+    t = (1:length(PD_dec))/sampling_freq;
     
     if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
     
