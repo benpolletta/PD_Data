@@ -84,11 +84,11 @@ for fo = 1:length(folders)
             
             band_indices = freqs >= bands(b, 1) & freqs <= bands(b, 2);
             
-            BP_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
+            BP_pct(:, b, ch) = nansum(Spec_pct(:, band_indices, ch), 2);
             
         end
         
-        BP_pct_baseline_mean = mean(BP_pct(base_index, :, ch));
+        BP_pct_baseline_mean = nanmean(BP_pct(base_index, :, ch));
         
         BP_pct(:, :, ch) = BP_pct(:, :, ch) - ones(size(BP_pct(:, :, ch)))*diag(BP_pct_baseline_mean);
         
