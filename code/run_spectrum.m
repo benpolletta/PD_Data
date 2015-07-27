@@ -20,9 +20,23 @@ for i = 1:2
         
         for k = 2
             
-            PD_beta_blocks_rel_infusion_pre_post_spectrum([subject_matname{i}, '_subjects.mat'], 150, pd_handles{i}, norms{k}, band_indices(j), freqs{j}, no_cycles{j}, bands{j})
-            
-            PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual([subject_matname{i}, '_subjects.mat'], 150, pd_handles{i}, norms{k}, band_indices(j), freqs{j}, no_cycles{j}, bands{j})
+            if ~isempty(bands)
+                
+                for b = 1:size(bands, 1)
+                    
+                    PD_beta_blocks_rel_infusion_pre_post_spectrum([subject_matname{i}, '_subjects.mat'], 150, pd_handles{i}, norms{k}, b, freqs{j}, no_cycles{j}, bands{j})
+                    
+                    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual([subject_matname{i}, '_subjects.mat'], 150, pd_handles{i}, norms{k}, b, 6, freqs{j}, no_cycles{j}, bands{j})
+                    
+                end
+                
+            else
+                
+                PD_beta_blocks_rel_infusion_pre_post_spectrum([subject_matname{i}, '_subjects.mat'], 150, pd_handles{i}, norms{k}, 3, freqs{j}, no_cycles{j}, bands{j})
+                
+                PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual([subject_matname{i}, '_subjects.mat'], 150, pd_handles{i}, norms{k}, 3, 6, freqs{j}, no_cycles{j}, bands{j})
+                
+            end
             
         end
         
