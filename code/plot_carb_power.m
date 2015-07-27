@@ -13,10 +13,10 @@ parfor i = 1:3
     
 end
 
+matlabpool close
+
 PD_beta_blocks_rel_infusion_pre_post_plot_individual('STR_subjects.mat',...
     150, 'ranksum', [norm, '_power'], freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('CARB_6OHDA_subjects.mat',...
     150, 'ranksum', [norm, '_power'], freqs, no_cycles, bands)
-
-matlabpool close
