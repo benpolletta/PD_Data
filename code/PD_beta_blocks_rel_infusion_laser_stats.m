@@ -24,7 +24,7 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+load([folders{1}, '/', prefixes{1}, BP_suffix, '_wt.mat'], 'sampling_freq')
 
 no_bands = size(bands, 1);
 
@@ -96,7 +96,7 @@ for fo = 1:no_folders
     
     if strcmp(measure, '_power')
         
-        BP_high_cum = get_BP([subj_name, BP_suffix], outlier_lims(fo), norm_for_power, in_freqs, in_no_cycles, in_bands);
+        BP_high_cum = get_BP(subj_name, outlier_lims(fo), norm_for_power, in_freqs, in_no_cycles, in_bands);
         
     elseif isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
