@@ -66,7 +66,7 @@ for fo = 1:length(folders)
         
         %% Baseline normalize.
         
-        BP_pct_baseline_mean = mean(BP_pct(base_index, :, ch));
+        BP_pct_baseline_mean = nanmean(BP_pct(base_index, :, ch));
         
         BP_pct(:, :, ch) = BP_pct(:, :, ch) - ones(size(BP_pct(:, :, ch)))*diag(BP_pct_baseline_mean);
         
