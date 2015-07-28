@@ -94,14 +94,16 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
+    clear BP_high_cum
+    
     if strcmp(measure, '_power')
         
         BP_high_cum = get_BP(subj_name, outlier_lims(fo), norm_for_power, in_freqs, in_no_cycles, in_bands);
         
     elseif isempty(freqs) && isempty(no_cycles) && isempty(bands)
-    
+        
         load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high_cum')
-    
+        
     else
         
         load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high')
