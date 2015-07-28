@@ -184,7 +184,7 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch)
         
-        plot_data(All_mean(:, :, ch), 1, exist('BP_sec', 'var'), across_p_vals)
+        plot_data(All_mean(:, :, ch), 1, strcmp(measure, '_power'), across_p_vals)
             
         fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/no_folders,...
             nanmedian(All_mean(:, :, ch)), quantile(All_mean(:, :, ch), .25), quantile(All_mean(:, :, ch), .75),...
