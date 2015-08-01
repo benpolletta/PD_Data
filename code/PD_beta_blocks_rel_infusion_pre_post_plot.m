@@ -45,30 +45,6 @@ end
 no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
-
-% pd_colors = {'g', 'r'};
-
-% norms = {'', '_pct', '_norm', '_norm_pct'}; no_norms = length(norms);
-% 
-% long_norms = {'', ', Increase Over Baseline Power', ', % Total Power', ', Increase in % Total Power Over Baseline'};
-
-% high_type = {'', '_cum'}; no_types = length(high_type);
-
-if ~isempty(epoch_secs)
-    
-    epoch_secs_label = ['_', num2str(epoch_secs/60), '_min_secs'];
-    
-    epochs_label = ['_', num2str(epoch_secs/60)];
-    
-else
-    
-    epoch_secs = 5*str2num(pd_handle(2:(end - length('trials'))));
-    
-    epoch_secs_label = '_laser';
-    
-    epochs_label = '';
-    
-end
     
 load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
 
@@ -110,11 +86,33 @@ end
     
 p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
-format = make_format(5*no_pds, 'f');
-
-format = [format(1:(end - 2)), '\t', make_format(2*no_comparisons, '.3E')];
-
-format = ['%s\t', format];
+if ~isempty(epoch_secs)
+    
+    epoch_secs_label = ['_', num2str(epoch_secs/60), '_min_secs'];
+    
+    epochs_label = ['_', num2str(epoch_secs/60)];
+    
+    format = make_format(5*no_pds, 'f');
+    
+    format = [format(1:(end - 2)), '\t', make_format(2*no_comparisons, '.3E')];
+    
+    format = ['%s\t', format];
+    
+else
+    
+    epoch_secs = 5*str2num(pd_handle(2:(end - length('trials'))));
+    
+    epoch_secs_label = '_laser';
+    
+    epochs_label = '';
+    
+    format = make_format(2*no_pds, 'f');
+    
+    format = [format(1:(end - 2)), '\t', make_format(3*no_pds + 2*no_comparisons, '.3E')];
+    
+    format = ['%s\t', format];
+    
+end
 
 stat_labels = {'Band'};
 
