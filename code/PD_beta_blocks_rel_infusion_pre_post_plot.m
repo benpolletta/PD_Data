@@ -1,8 +1,8 @@
 function PD_beta_blocks_rel_infusion_pre_post_plot(subject_mat, epoch_secs, pd_handle, freqs, no_cycles, bands)
 
+subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
-    
-    freqs = 1:200;
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
@@ -20,7 +20,7 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-if exist([folders{1}, '/', prefixes{1}, '_wt.mat'])
+if exist([folders{1}, '/', prefixes{1}, '_wt.mat'], 'file')
     
     load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
     
@@ -56,23 +56,13 @@ no_pds = length(pd_labels);
     
 load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
+power_flag = exist('BP_sec', 'var') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle, '_pct_power');
+
 if exist('BP_sec', 'var')
     
     pct_bp_high = BP_sec;
     
 end
-
-% if no_pds > 1
-%     
-%     no_comparisons = nchoosek(no_pds, 2);
-%     
-%     comparisons = nchoosek(1:no_pds, 2);
-%     
-% else
-%     
-%     no_comparisons = 0;
-%     
-% end
 
 %% Group bar plots.
 
@@ -87,8 +77,56 @@ else
     no_comparisons = 0;
     
 end
+
+if no_pds > 1
+    
+    no_comparisons = nchoosek(no_pds, 2);
+    
+    p_val_labels = comp_labels(pd_labels);
+    
+else
+    
+    no_comparisons = 0;
+    
+    p_val_labels = {};
+    
+end
     
 p_vals = nan(no_comparisons, no_bands, no_chans, 2);
+
+format = make_format(5*no_pds, 'f');
+
+format = [format(1:(end - 2)), '\t', make_format(2*no_comparisons, '.3E')];
+
+format = ['%s\t', format];
+
+stat_labels = {'Band'};
+
+stats = {'Mean', 'S.E.', 'Median', 'Q1', 'Q3'};
+
+for s = 1:length(stats)
+    
+    for p = 1:no_pds
+        
+        stat_labels = {stat_labels{:}, stats{s}};
+        
+    end
+    
+end
+    
+fid = nan(no_chans, 1);
+
+for ch = 1:no_chans
+    
+    fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(epoch_secs/60), '_mins_ranksum',...
+        pd_handle, '_', chan_labels{ch}, '_stats.txt'], 'w');
+    
+    fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), stat_labels{:}, p_val_labels{:});
+    
+    fprintf(fid(ch), make_format(1 + 5*no_pds, 's'), '', pd_labels{:}, pd_labels{:},...
+        pd_labels{:}, pd_labels{:}, pd_labels{:});
+    
+end
 
 for b = 1:no_bands
     
@@ -123,22 +161,48 @@ for b = 1:no_bands
             end
             
         end
+            
+        fprintf(fid(ch), format, short_band_labels{b}, nanmean(pct_bp_high_for_test), nanstd(pct_bp_high_for_test)/sqrt(epoch_secs),...
+            nanmedian(pct_bp_high_for_test), quantile(pct_bp_high_for_test, .25), quantile(pct_bp_high_for_test, .75),...
+            reshape(p_vals(:, b, ch, :), 1, 2*no_comparisons));
         
         subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
-        if exist('BP_sec', 'var')
+        if power_flag
             
-            mn = nanmean(pct_bp_high_for_test);
+            % h = boxplot(pct_bp_high_for_test);
             
-            sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
+            md = nanmedian(pct_bp_high_for_test);
             
-            if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+            for p = 1:no_pds
                 
-                mn = [mn nan]; sd = [sd nan];
+                q1(p) = nanmedian(pct_bp_high_for_test(pct_bp_high_for_test(:, p) <= md(p), p));
+                
+                q3(p) = nanmedian(pct_bp_high_for_test(pct_bp_high_for_test(:, p) >= md(p), p));
                 
             end
             
-            h = barwitherr(sd, mn, 0.6);
+            if length(md) == 1
+                
+                md = [md nan]; q1 = [q1 nan]; q3 = [q3 nan];
+                
+            end
+            
+            err(:, :, 1) = q1 - md; err(:, :, 2) = q3 - md;
+            
+            h = barwitherr(err, md, 0.6);
+            
+            % mn = nanmean(pct_bp_high_for_test);
+            % 
+            % sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
+            % 
+            % if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+            % 
+            %     mn = [mn nan]; sd = [sd nan];
+            % 
+            % end
+            % 
+            % h = barwitherr(sd, mn, 0.6);
             
             ylabel('Beta Power')
             
@@ -163,6 +227,8 @@ for b = 1:no_bands
         end
         
         box off
+        
+        set(gca, 'XTick', 1:no_pds, 'XTickLabel', pd_labels)
         
         bar_pos = get_bar_pos(h);
         
@@ -205,6 +271,10 @@ for b = 1:no_bands
         num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot', pd_handle])
     
 end
+
+fclose('all');
+        
+save([subj_mat_name, BP_suffix, '_', num2str(epoch_secs/60), '_mins_ranksum', pd_handle, '_pvals.mat'], 'p_vals')
 
 %% Group boxplots.
 %
@@ -335,5 +405,25 @@ function pos_bars = get_bar_pos(handle)
         pos_bars(i,:) = x;
 
     end
+
+end
+
+function p_val_labels = comp_labels(pd_labels)
+
+no_pds = length(pd_labels);
+
+no_comparisons = nchoosek(no_pds, 2);
+
+comparisons = nchoosek(1:no_pds, 2);
+
+p_val_labels = cell(2*no_comparisons);
+
+for comp = 1:no_comparisons
+    
+    p_val_labels{comp} = [pd_labels{comparisons(comp, 1)}, '<', pd_labels{comparisons(comp, 2)}];
+    
+    p_val_labels{no_comparisons + comp} = [pd_labels{comparisons(comp, 1)}, '>', pd_labels{comparisons(comp, 2)}];
+    
+end
 
 end

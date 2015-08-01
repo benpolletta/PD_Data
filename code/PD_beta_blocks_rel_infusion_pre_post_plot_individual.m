@@ -85,8 +85,22 @@ p_vals = nan(no_comparisons, no_folders, no_bands, no_chans, 2);
 All_p_vals = nan(no_comparisons, no_bands, no_chans, 2);
 
 format = make_format(5*no_pds + 2*no_comparisons, 'f');
-
+    
 format = ['%s\t', format];
+
+stat_labels = {'Recording'};
+
+stats = {'Mean', 'S.E.', 'Median', 'Q1', 'Q3'};
+
+for s = 1:length(stats)
+    
+    for p = 1:no_pds
+        
+        stat_labels = {stat_labels{:}, stats{s}};
+        
+    end
+    
+end
 
 %% Individual bar plots.
 
@@ -99,8 +113,8 @@ for b = 1:no_bands
         fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
             '_individual_', test_handle, pd_handle, '_', chan_labels{ch}, '_stats.txt'], 'w');
         
-        fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), 'Recording', 'Mean', 'Mean', 'S.E.', 'S.E.',...
-            'Median', 'Median', 'Q1', 'Q1', 'Q3', 'Q3', p_val_labels{:});
+        fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), stat_labels{:}, p_val_labels{:}); %'Recording', 'Mean', 'Mean', 'S.E.', 'S.E.',...
+            % 'Median', 'Median', 'Q1', 'Q1', 'Q3', 'Q3', p_val_labels{:});
         
         fprintf(fid(ch), make_format(1 + 5*no_pds, 's'), '', pd_labels{:}, pd_labels{:},...
             pd_labels{:}, pd_labels{:}, pd_labels{:});

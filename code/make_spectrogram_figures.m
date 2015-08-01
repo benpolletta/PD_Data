@@ -1,7 +1,13 @@
 function make_spectrogram_figures(group_prefix, subject_no, subject_name, basetime, striatum_channel)
     
+load([group_prefix, '_pct_BP_high_2.5_min_secs.mat'])
+    
+load([subject_name, '/', subject_name([1 2 4:end]), '_all_channel_data_dec.mat'])
+    
 data = load([subject_name, '/', subject_name([1 2 4:end]), '_wt.mat']);
 Spec = data.Spec;
+
+load([subject_name, '/', subject_name([1 2 4:end]), '_peaks.mat'])
 
 for ch = 1:2
     
@@ -43,8 +49,6 @@ for ch = 1:2
     
     plot([t(1) t(end)], [8 8], ':w', 'LineWidth', 2)
     
-    load([group_prefix, '_pct_BP_high_2.5_min_secs.mat'])
-    
     starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
     starts = starts(striatum_channel, :);
     starts = (starts/s_rate - basetime)/60;
@@ -63,8 +67,6 @@ for ch = 1:2
     end
     
     %% Plotting LFP for whole data recording.
-    
-    load([subject_name, '/', subject_name([1 2 4:end]), '_all_channel_data_dec.mat']);
     
     subplot(4, 1, 2)
     
@@ -94,7 +96,11 @@ for ch = 1:2
         
         subplot(4, 2, 4 + pd)
         
+        [spike_wav_nans, ~] = indicator_to_nans(Spike_indicator(t_index, ch), 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
+        
         imagesc(t_interval, 1:80, Str_spec(t_index, 1:80)')
+        
+        h = imagesc(t_interval, 1:80, ones(size(Str_spec(t_index, 1:80)')));
         
         title(pd_labels{pd})
         
@@ -116,6 +122,14 @@ for ch = 1:2
         
         plot(t_interval, PD_dec(t_index, ch), 'k')
         
+        hold on
+        
+        spikes_w_nans = Spike_indicator(t_index, ch);
+        
+        spikes_w_nans(spikes_w_nans == 0) = nan;
+        
+        plot(t_interval, PD_dec(t_index, ch).*spikes_w_nans, 'vk')
+        
         box off
         
         axis tight
@@ -124,15 +138,15 @@ for ch = 1:2
         
         ylabel('LFP (mV)')
         
-        try
-            
-            save_as_eps(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch)])
-            
-        catch
-            
-            save(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch), '.fig'])
-            
-        end
+    end
+    
+    try
+        
+        save_as_eps(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch)])
+        
+    catch
+        
+        save(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch), '.fig'])
         
     end
     
