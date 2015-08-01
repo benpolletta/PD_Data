@@ -154,6 +154,12 @@ for b = 1:no_bands
         
         for pd = 1:no_pds
             
+            size(pct_bp_high(:, :, pd, b, ch))
+            
+            no_folders
+            
+            epoch_secs
+            
             pct_bp_high_for_test(:, pd) = reshape(pct_bp_high(:, :, pd, b, ch), no_folders*epoch_secs, 1);
             
         end
