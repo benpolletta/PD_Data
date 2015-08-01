@@ -45,34 +45,12 @@ end
 no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
-    
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
-
-power_flag = exist('BP_sec', 'var') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle, '_pct_power');
-
-if exist('BP_sec', 'var')
-    
-    pct_bp_high = BP_sec;
-    
-end
-
-%% Group bar plots.
 
 if no_pds > 1
     
     no_comparisons = nchoosek(no_pds, 2);
     
     comparisons = nchoosek(1:no_pds, 2);
-
-else
-    
-    no_comparisons = 0;
-    
-end
-
-if no_pds > 1
-    
-    no_comparisons = nchoosek(no_pds, 2);
     
     p_val_labels = comp_labels(pd_labels);
     
@@ -111,6 +89,16 @@ else
     format = [format(1:(end - 2)), '\t', make_format(3*no_pds + 2*no_comparisons, '.3E')];
     
     format = ['%s\t', format];
+    
+end
+    
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
+
+power_flag = exist('BP_sec', 'var') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle, '_pct_power');
+
+if exist('BP_sec', 'var')
+    
+    pct_bp_high = BP_sec;
     
 end
 
