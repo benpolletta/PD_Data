@@ -53,8 +53,18 @@ no_pds = length(pd_labels);
 % long_norms = {'', ', Increase Over Baseline Power', ', % Total Power', ', Increase in % Total Power Over Baseline'};
 
 % high_type = {'', '_cum'}; no_types = length(high_type);
+
+if ~isempty(epoch_secs)
     
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+    epoch_secs_label = ['_', num2str(epoch_secs/60)];
+    
+else
+    
+    epoch_secs_label = '';
+    
+end
+    
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, '_min_secs', pd_handle, '.mat'])
 
 power_flag = exist('BP_sec', 'var') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle, '_pct_power');
 
@@ -118,7 +128,7 @@ fid = nan(no_chans, 1);
 
 for ch = 1:no_chans
     
-    fid(ch) = fopen([subj_mat_name, BP_suffix, '_', num2str(epoch_secs/60), '_mins_ranksum',...
+    fid(ch) = fopen([subj_mat_name, BP_suffix, epoch_secs_label, '_mins_ranksum',...
         pd_handle, '_', chan_labels{ch}, '_stats.txt'], 'w');
     
     fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), stat_labels{:}, p_val_labels{:});
@@ -267,14 +277,14 @@ for b = 1:no_bands
         
     end
 
-    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', ...
-        num2str(epoch_secs/60), '_mins_', short_band_labels{b}, '_barplot', pd_handle])
+    save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', ...
+        epoch_secs_label, '_mins_', short_band_labels{b}, '_barplot', pd_handle])
     
 end
 
 fclose('all');
         
-save([subj_mat_name, BP_suffix, '_', num2str(epoch_secs/60), '_mins_ranksum', pd_handle, '_pvals.mat'], 'p_vals')
+save([subj_mat_name, BP_suffix, epoch_secs_label, '_mins_ranksum', pd_handle, '_pvals.mat'], 'p_vals')
 
 %% Group boxplots.
 %
