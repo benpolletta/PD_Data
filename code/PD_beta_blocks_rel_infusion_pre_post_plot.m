@@ -70,12 +70,6 @@ if ~isempty(epoch_secs)
     
     epochs_label = ['_', num2str(epoch_secs/60)];
     
-    format = make_format(5*no_pds, 'f');
-    
-    format = [format(1:(end - 2)), '\t', make_format(2*no_comparisons, '.3E')];
-    
-    format = ['%s\t', format];
-    
 else
     
     epoch_secs = 5*10;
@@ -84,13 +78,13 @@ else
     
     epochs_label = '';
     
-    format = make_format(2*no_pds, 'f');
-    
-    format = [format(1:(end - 2)), '\t', make_format(3*no_pds + 2*no_comparisons, '.3E')];
-    
-    format = ['%s\t', format];
-    
 end
+
+format = make_format(5*no_pds, 'f');
+
+format = [format(1:(end - 2)), '\t', make_format(2*no_comparisons, '.3E')];
+
+format = ['%s\t', format];
     
 load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
 
