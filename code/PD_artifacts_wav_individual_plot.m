@@ -60,9 +60,9 @@ for o = 1:no_outliers
     
     outlier_start = BP_out_blocks(o, 1); outlier_end = BP_out_blocks(o, 2);
     
-    artifact_indicator(outlier_start:outlier_end, ch) = 1;
+    artifact_indicator(outlier_start:outlier_end, :) = 1;
     
-    artifact_plot(outlier_start:outlier_end, ch) = PD_dec(outlier_start:outlier_end, ch);
+    artifact_plot(outlier_start:outlier_end, :) = PD_dec(outlier_start:outlier_end, :);
     
 end
 
