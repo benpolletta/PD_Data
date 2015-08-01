@@ -56,15 +56,19 @@ no_pds = length(pd_labels);
 
 if ~isempty(epoch_secs)
     
-    epoch_secs_label = ['_', num2str(epoch_secs/60)];
+    epoch_secs_label = ['_', num2str(epoch_secs/60), '_min_secs'];
+    
+    epochs_label = ['_', num2str(epoch_secs/60)];
     
 else
     
-    epoch_secs_label = '';
+    epoch_secs_label = '_laser';
+    
+    epochs_label = '';
     
 end
     
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, '_min_secs', pd_handle, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
 
 power_flag = exist('BP_sec', 'var') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle, '_pct_power');
 
@@ -128,7 +132,7 @@ fid = nan(no_chans, 1);
 
 for ch = 1:no_chans
     
-    fid(ch) = fopen([subj_mat_name, BP_suffix, epoch_secs_label, '_mins_ranksum',...
+    fid(ch) = fopen([subj_mat_name, BP_suffix, epochs_label, '_mins_ranksum',...
         pd_handle, '_', chan_labels{ch}, '_stats.txt'], 'w');
     
     fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), stat_labels{:}, p_val_labels{:});
@@ -284,7 +288,7 @@ end
 
 fclose('all');
         
-save([subj_mat_name, BP_suffix, epoch_secs_label, '_mins_ranksum', pd_handle, '_pvals.mat'], 'p_vals')
+save([subj_mat_name, BP_suffix, epochs_label, '_ranksum', pd_handle, '_pvals.mat'], 'p_vals')
 
 %% Group boxplots.
 %
