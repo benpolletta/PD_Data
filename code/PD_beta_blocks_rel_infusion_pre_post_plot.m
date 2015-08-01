@@ -62,7 +62,7 @@ if ~isempty(epoch_secs)
     
 else
     
-    epoch_secs = str2num(pd_handle(2:(end - length('trials'))));
+    epoch_secs = 5*str2num(pd_handle(2:(end - length('trials'))));
     
     epoch_secs_label = '_laser';
     
