@@ -176,6 +176,8 @@ for b = 1:no_bands
         
         if power_flag
             
+            [md, q1, q3] = deal(nan(1, no_pds));
+            
             % h = boxplot(pct_bp_high_for_test);
             
             md = nanmedian(pct_bp_high_for_test);
@@ -188,11 +190,7 @@ for b = 1:no_bands
                 
             end
             
-            if length(md) == 1
-                
-                md = [md nan]; q1 = [q1 nan]; q3 = [q3 nan];
-                
-            end
+            if length(md) == 1, md = [md nan]; q1 = [q1 nan]; q3 = [q3 nan]; end
             
             err(:, :, 1) = q1 - md; err(:, :, 2) = q3 - md;
             

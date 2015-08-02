@@ -12,7 +12,7 @@ function PD_spikes_by_freq_individual_plot(folder, prefix, basetime, channel_mul
 % channel_multipliers - searches for peaks in LFP if +1, troughs in LFP if
 %   -1 (matrix, length = number of channels).
 % spike_boundaries - times within which to search for peaks/troughs
-%   (in seconds, integers).
+%   (in samples, integers).
 % band - limits (in Hz) of band close to whose peaks spikes are sought, e.g. [1 4] (length 2 vector).
 % band_label - name of band for saving figures, e.g. 'delta' (string).
 % no_cycles - number of cycles to use for Morlet wavelets used to get band
