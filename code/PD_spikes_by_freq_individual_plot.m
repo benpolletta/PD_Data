@@ -56,7 +56,7 @@ else
     
 end
 
-fig_name = sprintf('%s_%dto%d_%s_%.1fHz_%.1f_%.1f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
+fig_name = sprintf('%s_%dto%d_%s_%.1fHz_%.2f_%.2f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
     band_label, sampling_freq/min_samples_apart, min_prominence, min_prominences_flag);
 
 %% Finding spikes, their width and prominence.
@@ -309,10 +309,10 @@ for e = 1:no_epochs
     
     for ch = 1:2
         
-        text(epoch_loc_t{ch}, channel_multipliers(ch)*epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prominences{ch})/10)),...
+        text(epoch_loc_t{ch}, channel_multipliers(ch)*epoch_peaks{ch}, cellstr(num2str(round(100*epoch_prominences{ch})/100)),...
             'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold') 
         
-        text(epoch_loc_t{ch}, channel_multipliers(ch)*epoch_peaks{ch}, cellstr(num2str(round(10*epoch_prom_std{ch})/10)),...
+        text(epoch_loc_t{ch}, channel_multipliers(ch)*epoch_peaks{ch}, cellstr(num2str(round(100*epoch_prom_std{ch})/100)),...
             'VerticalAlignment', 'top', 'HorizontalAlignment', 'center', 'Color', colors(ch, :), 'FontSize', 12, 'FontWeight', 'bold')
     
     end
