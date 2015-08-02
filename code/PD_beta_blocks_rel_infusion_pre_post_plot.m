@@ -88,7 +88,17 @@ format = ['%s\t', format];
     
 load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
 
-power_flag = exist('BP_sec', 'var') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle, '_pct_power');
+if length(pd_handle > 5)
+    
+    pd_handle_end = pd_handle((end - 5):end);
+    
+else
+    
+    pd_handle_end = pd_handle;
+    
+end
+
+power_flag = exist('BP_sec', 'var') | strcmp(pd_handle_end, '_power');
 
 if exist('BP_sec', 'var')
     
