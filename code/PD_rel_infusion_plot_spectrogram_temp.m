@@ -28,7 +28,7 @@ end
     
 % BP_chunk = nan(chunk_size*sampling_freq, no_bands); %[total_chunk, beta_chunk] = deal(nan(chunk_size*sampling_freq, 2));
 
-for fo = 1 %:length(folders)
+for fo = 2 %:length(folders)
     
     folder = folders{fo};
     
@@ -120,7 +120,7 @@ for fo = 1 %:length(folders)
         
     end
         
-    for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
+    for c = 157:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
         chunk_name = [subj_name, '_chunk', num2str(c, '%03d'), '_wt'];
     

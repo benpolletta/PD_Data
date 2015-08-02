@@ -75,11 +75,11 @@ for ch = 1:no_chans
     
     for pd = 1:no_pds
         
-        WT_for_mean = reshape(WT_sec(display_indices, :, :, pd, b, ch), no_freqs, no_folders*dps, 1);
+        WT_for_mean = reshape(WT_sec(display_indices, :, :, pd, ch), no_freqs, no_folders*no_dps, 1);
         
         WT_mean(:, pd) = nanmean(WT_for_mean, 2); % .*freq_multiplier, 2);
         
-        WT_std(:, pd) = nanstd(WT_for_mean, [], 2); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
+        WT_std(:, pd) = nanstd(WT_for_mean, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
         
     end
     
