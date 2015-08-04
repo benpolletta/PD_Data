@@ -118,7 +118,7 @@ for ch = 1:2
             
             [spike_wav_nans, ~] = indicator_to_nans(Spike_indicator(t_index, ch), 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
             
-            [patch_X, patch_Y] = nans_to_patch(t_interval, 1:80, spike_wav_nans(:, 1:80));
+            [patch_X, patch_Y] = nans_to_patch(t_interval, 1:90, spike_wav_nans(:, 1:90));
             
             for p = 1:length(patch_X)
                 
