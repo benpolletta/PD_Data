@@ -68,10 +68,12 @@ no_dps = size(WT_sec, 2);
 %% Group mean spectrum plots.
 
 figure
+        
+% matlabpool open; opt = statset('UseParallel', true);
 
 for ch = 1:no_chans
     
-    [WT_mean, WT_std] = deal(nan(no_freqs, no_pds));
+    [WT_mean, WT_std, WT_median, WT_median_low, WT_median_high] = deal(nan(no_freqs, no_pds));
     
     for pd = 1:no_pds
         
@@ -81,13 +83,27 @@ for ch = 1:no_chans
         
         WT_std(:, pd) = nanstd(WT_for_mean, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
         
+        WT_median(:, pd) = nanmedian(WT_for_mean, 2);
+        
+        % WT_median_distn = jackknife(@nanmedian, WT_for_mean', 'Options', opt);
+        % 
+        % WT_median_low(:, pd) = nanmin(WT_median_distn)'; % quantile(WT_median_distn, .025)';
+        % 
+        % WT_median_high(:, pd) = nanmax(WT_median_distn)'; % quantile(WT_median_distn, .975)';
+        
+        WT_median_low(:, pd) = quantile(WT_for_mean, .25, 2);
+        
+        WT_median_high(:, pd) = quantile(WT_for_mean, .75, 2);
+        
     end
     
     subplot(1, no_chans, ch)
     
     if strcmp(norm, '_pct')
         
-        boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(WT_std))
+        % boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(WT_std))
+        
+        boundedline(freqs(display_indices), WT_median, prep_for_boundedline(WT_median - WT_median_low, WT_median_high - WT_median))
         
     else
         
@@ -99,10 +115,12 @@ for ch = 1:no_chans
     
     axis tight
     
-    title({[chan_labels{ch}, num2str(epoch_secs/60), ' Minutes,'];['Densest High Power, ', band_labels{b}]})
+    title({[chan_labels{ch}, num2str(epoch_secs/60), ' Minutes,'];['Densest High Power, ', band_labels{band_index_for_time}]})
     
     legend(pd_labels)
     
 end
+
+% matlabpool close
 
 save_as_pdf(gcf, [spectrum_name, '_', short_band_labels{band_index_for_display}])
