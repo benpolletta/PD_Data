@@ -96,11 +96,7 @@ for ch = 1:2
         
         subplot(4, 2, 4 + pd)
         
-        [spike_wav_nans, ~] = indicator_to_nans(Spike_indicator(t_index, ch), 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
-        
         imagesc(t_interval, 1:80, Str_spec(t_index, 1:80)')
-        
-        h = imagesc(t_interval, 1:80, ones(size(Str_spec(t_index, 1:80)')));
         
         title(pd_labels{pd})
         
@@ -117,6 +113,22 @@ for ch = 1:2
         plot([t_interval(1) t_interval(end)]*60, [30 30], ':w', 'LineWidth', 2)
         
         plot([t_interval(1) t_interval(end)]*60, [8 8], ':w', 'LineWidth', 2)
+        
+        if sum(Spike_indicator(t_index, ch)) > 0
+            
+            [spike_wav_nans, ~] = indicator_to_nans(Spike_indicator(t_index, ch), 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
+            
+            [patch_X, patch_Y] = nans_to_patch(t_interval, 1:80, spike_wav_nans(:, 1:80));
+            
+            for p = 1:length(patch_X)
+                
+                p_handle = patch(patch_X{p}, patch_Y{p}, [.8 .8 .8], 'FaceColor', [.8 .8 .8], 'EdgeColor', 'none');
+                
+                alpha(p_handle, .625)
+                
+            end
+            
+        end
         
         subplot(4, 2, 6 + pd)
         
