@@ -73,49 +73,53 @@ figure
 
 for ch = 1:no_chans
     
-    [WT_mean, WT_std, WT_median, WT_median_low, WT_median_high] = deal(nan(no_freqs, no_pds));
+    [WT_mean, WT_ci] = deal(nan(no_freqs, no_pds)); % [WT_mean, WT_se] [WT_median, WT_median_low, WT_median_high] 
     
     for pd = 1:no_pds
         
-        WT_for_mean = reshape(WT_sec(display_indices, :, :, pd, ch), no_freqs, no_folders*no_dps, 1);
+        WT_for_stats = reshape(WT_sec(display_indices, :, :, pd, ch), no_freqs, no_folders*no_dps, 1);
         
-        WT_mean(:, pd) = nanmean(WT_for_mean, 2); % .*freq_multiplier, 2);
+        WT_mean(:, pd) = nanmean(WT_for_stats, 2); % .*freq_multiplier, 2);
         
-        WT_std(:, pd) = nanstd(WT_for_mean, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
+        WT_ci(:, pd) = norminv(1 - .25/(no_freqs*7*2*3), 0, 1)*nanstd(WT_for_stats, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
         
-        WT_median(:, pd) = nanmedian(WT_for_mean, 2);
-        
-        % WT_median_distn = jackknife(@nanmedian, WT_for_mean', 'Options', opt);
+        % WT_median(:, pd) = nanmedian(WT_for_stats, 2);
         % 
-        % WT_median_low(:, pd) = nanmin(WT_median_distn)'; % quantile(WT_median_distn, .025)';
+        % WT_median_distn = jackknife(@nanmedian, WT_for_stats', 'Options', opt);
         % 
-        % WT_median_high(:, pd) = nanmax(WT_median_distn)'; % quantile(WT_median_distn, .975)';
+        % WT_median_low(:, pd) = 1.5*range(WT_median_distn)'; % norminv(1 - .25/(no_freqs*7*2*3), 0, 1)*std(WT_median_distn)'; % quantile(WT_median_distn, .025)';
+        % 
+        % WT_median_high(:, pd) = 1.5*range(WT_median_distn)'; % norminv(.25/(no_freqs*7*2*3), 0, 1)*std(WT_median_distn)'; % quantile(WT_median_distn, .975)';
         
-        WT_median_low(:, pd) = quantile(WT_for_mean, .25, 2);
-        
-        WT_median_high(:, pd) = quantile(WT_for_mean, .75, 2);
+        % WT_median_low(:, pd) = quantile(WT_for_mean, .25, 2);
+        % 
+        % WT_median_high(:, pd) = quantile(WT_for_mean, .75, 2);
         
     end
+    
+    % WT_median_low = WT_median - WT_median_low;
+    % 
+    % WT_median_high = WT_median_high - WT_median;
     
     subplot(1, no_chans, ch)
     
     if strcmp(norm, '_pct')
         
-        % boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(WT_std))
+        boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(WT_ci))
         
-        boundedline(freqs(display_indices), WT_median, prep_for_boundedline(WT_median - WT_median_low, WT_median_high - WT_median))
+        % boundedline(freqs(display_indices), WT_median, prep_for_boundedline(WT_median_low, WT_median_high))
         
     else
         
         freq_multiplier = repmat(freqs(display_indices)', 1, no_pds);
         
-        boundedline(freqs(display_indices), WT_mean.*freq_multiplier, prep_for_boundedline(WT_std.*freq_multiplier))
+        boundedline(freqs(display_indices), WT_mean.*freq_multiplier, prep_for_boundedline(WT_ci.*freq_multiplier))
         
     end
     
     axis tight
     
-    title({[chan_labels{ch}, num2str(epoch_secs/60), ' Minutes,'];['Densest High Power, ', band_labels{band_index_for_time}]})
+    title({[chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes,'];['Densest High Power, ', band_labels{band_index_for_time}]})
     
     legend(pd_labels)
     

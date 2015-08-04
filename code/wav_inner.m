@@ -50,21 +50,21 @@ for ch = 1:2
         
     end
     
-    %% Baseline normalize.
-    
-    baseline_mean = mean(abs(Spec(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
-    
-    Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
+    % %% Baseline normalize.
+    % 
+    % baseline_mean = mean(abs(Spec(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+    % 
+    % Spec_pct(:, :, ch) = 100*abs(Spec(:, :, ch))./(ones(size(Spec(:, :, ch)))*diag(baseline_mean)) - 100;
     
     %% Normalize by total power.
     
     Spec_norm(:, :, ch) = abs(Spec(:, :, ch))./repmat(sqrt(sum(abs(Spec(:, :, ch)).^2, 2)), 1, no_freqs);
     
-    %% Baseline normalize percent of total power.
-    
-    baseline_mean = mean(abs(Spec_norm(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
-    
-    Spec_norm_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
+    % %% Baseline normalize percent of total power.
+    % 
+    % baseline_mean = mean(abs(Spec_norm(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+    % 
+    % Spec_norm_pct(:, :, ch) = 100*abs(Spec_norm(:, :, ch))./(ones(size(Spec_norm(:, :, ch)))*diag(baseline_mean)) - 100;
     
 end
 
@@ -72,8 +72,8 @@ end
 
 save([save_name, '_wt.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec', '-v7.3')
 save([save_name, '_wt_norm.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm', '-v7.3')
-save([save_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
-save([save_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
+% save([save_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
+% save([save_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
     
 %% Band power.
 
@@ -87,14 +87,14 @@ for ch = 1:2
         
         BP(:, b, ch) = sqrt(sum(abs(Spec(:, band_indices, ch)).^2, 2));
         
-        BP_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
+        % BP_pct(:, b, ch) = sum(Spec_pct(:, band_indices, ch), 2);
         
         BP_norm(:, b, ch) = sum(Spec_norm(:, band_indices, ch), 2);
         
-        BP_norm_pct(:, b, ch) = sum(Spec_norm_pct(:, band_indices, ch), 2);
+        % BP_norm_pct(:, b, ch) = sum(Spec_norm_pct(:, band_indices, ch), 2);
         
     end
     
 end
 
-save([save_name, '_wt_BP.mat'], 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', '-v7.3')
+save([save_name, '_wt_BP.mat'], 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', '-v7.3') % 'BP_norm', 'BP_pct', 'BP_norm_pct', '-v7.3')
