@@ -59,6 +59,16 @@ for f=1:no_files
         
         data = abf2load(datafiles{f});
         
+    elseif strcmp(file_format, 'abf_ali')
+        
+        data = abf2load(datafiles{f});
+        
+        data = permute(data(:, 1:2, :), [1 3 2]);
+        
+        data_size = size(data);
+        
+        data = reshape(data, data_size(1)*data_size(2), data_size(3));
+        
     end
     
     PD_data(last_index+(1:length(data)),:) = data;
