@@ -12,7 +12,7 @@ datalist = [prefix,'_datafiles.list'];
             
             file = dir([prefix, '*', num2str(digit), '.mat']);
             
-        elseif strcmp(file_format, 'abf')
+        elseif strcmp(file_format(1:3), 'abf')
             
             file = dir([prefix, '*', num2str(digit), '.abf']);
         
