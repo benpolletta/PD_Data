@@ -6,7 +6,7 @@ present_dir = pwd;
 
 load(subject_mat)
 
-for fo = 1:length(folders)
+parfor fo = 1:length(folders)
     
     folder = folders{fo};
     
