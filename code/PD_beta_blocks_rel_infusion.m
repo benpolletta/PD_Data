@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, outlier_lims, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, freqs, no_cycles, bands)
 
 % Computes zero-one vectors indicating time points at which band power is
 % above sd_lim standard deviations from the (pre-infusion) mean.

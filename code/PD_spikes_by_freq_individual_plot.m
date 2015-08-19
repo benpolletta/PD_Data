@@ -56,7 +56,7 @@ else
     
 end
 
-fig_name = sprintf('%s_%dto%d_%s_%.1fHz_%.2f_%.2f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
+fig_name = sprintf('%s_%dto%d_%s_%.2fHz_%.2f_%.2f%s_prom_spikes', subj_name, round(floor(spike_start/(sampling_freq*60))), round(ceil(spike_end/(sampling_freq*60))),...
     band_label, sampling_freq/min_samples_apart, min_prominence, min_prominences_flag);
 
 %% Finding spikes, their width and prominence.
