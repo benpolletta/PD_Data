@@ -48,9 +48,11 @@ for fo = 1:length(folders)
     
     no_chunks = no_mins*60/chunk_size;
     
-    load([subj_name, '_wt.mat'], 'Spec') % [BP, Spec] = get_BP(subj_name, outlier_lims(fo), '', [], [], []); 
+    [BP_no_spikes, Spec] = get_BP(subj_name, outlier_lims(fo), '', [], [], []); % load([subj_name, '_wt.mat'], 'Spec') % 
     
-    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm') % [BP_norm, ~] = get_BP(subj_name, outlier_lims(fo), '_norm', [], [], []);
+    [BP_norm_no_spikes, ~] = get_BP(subj_name, outlier_lims(fo), '_norm', [], [], []); % 
+    
+    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm') % 
     
     load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
     
@@ -64,57 +66,25 @@ for fo = 1:length(folders)
     
         BP(:, :, ch) = zscore(BP(:, :, ch));
         
+        BP_mean = ones(size(BP(:,:,ch)))*diag(nanmean(BP(:,:,ch)));
+        
+        BP_std = ones(size(BP(:,:,ch)))*diag(nanstd(BP(:,:,ch)));
+        
+        BP_no_spikes(:, :, ch) = (BP_no_spikes(:, :, ch) - BP_mean)./BP_std;
+        
         BP_norm(:, :, ch) = zscore(BP_norm(:, :, ch));
-    
-    end
-    
-    BP_no_spikes = BP;
-    
-    BP_norm_no_spikes = BP_norm;
-    
-    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
-    
-        load([subj_name, '_wav_laser_artifacts.mat'])
         
-        [laser_wav_nans, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
+        BP_norm_mean = ones(size(BP_norm(:,:,ch)))*diag(nanmean(BP_norm(:,:,ch)));
         
-        laser_wav_nans = repmat(laser_wav_nans, [1 1 2]); laser_nans = repmat(laser_nans, [1 1 2]);
+        BP_norm_std = ones(size(BP_norm(:,:,ch)))*diag(nanstd(BP_norm(:,:,ch)));
         
-        BP_no_spikes(logical(laser_nans)) = nan;
-        
-        BP_norm_no_spikes(logical(laser_nans)) = nan;
-        
-        Spec(logical(laser_wav_nans)) = nan;
-        
-    end
-    
-    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
-    
-        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
-        
-        [outlier_wav_nans, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        outlier_wav_nans = repmat(outlier_wav_nans, [1 1 2]); outlier_nans = repmat(outlier_nans, [1 1 2]);
-        
-        BP_no_spikes(logical(outlier_nans)) = nan;
-        
-        BP_norm_no_spikes(logical(outlier_nans)) = nan;
-        
-        Spec(logical(outlier_wav_nans)) = nan;
+        BP_norm_no_spikes(:, :, ch) = (BP_norm_no_spikes(:, :, ch) - BP_norm_mean)./BP_norm_std;
         
     end
     
     if ~isempty(dir([subj_name, '_peaks.mat']))
         
         load([subj_name, '_peaks.mat'])
-        
-        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        BP_no_spikes(logical(spike_nans)) = nan;
-        
-        BP_norm_no_spikes(logical(spike_nans)) = nan;
-        
-        Spec(logical(spike_nans)) = nan;
         
     else
         
