@@ -48,9 +48,9 @@ for fo = 1:length(folders)
     
     no_chunks = no_mins*60/chunk_size;
     
-    load([subj_name, '_wt.mat'], 'Spec')
+    load([subj_name, '_wt.mat'], 'Spec') % [BP, Spec] = get_BP(subj_name, outlier_lims(fo), '', [], [], []); 
     
-    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm')
+    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm') % [BP_norm, ~] = get_BP(subj_name, outlier_lims(fo), '_norm', [], [], []);
     
     load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
     
@@ -113,6 +113,8 @@ for fo = 1:length(folders)
         BP_no_spikes(logical(spike_nans)) = nan;
         
         BP_norm_no_spikes(logical(spike_nans)) = nan;
+        
+        Spec(logical(spike_nans)) = nan;
         
     else
         
