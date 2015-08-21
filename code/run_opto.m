@@ -10,7 +10,7 @@ end
 
 % PD_laser_artifacts_wav(subject_mat)
 
-PD_beta_blocks_rel_infusion(subject_mat, 2, [], freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion(subject_mat, 2, freqs, no_cycles, bands)
 
 pd_handles = {'', '_power', '_power'};
 

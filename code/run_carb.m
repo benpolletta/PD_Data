@@ -1,6 +1,6 @@
 function run_carb(subject_mat, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion(subject_mat, 2, [], freqs, no_cycles, bands);
+PD_beta_blocks_rel_infusion(subject_mat, 2, freqs, no_cycles, bands);
 
 PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, 150, freqs, no_cycles, bands);
 
