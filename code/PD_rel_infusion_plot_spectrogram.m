@@ -63,22 +63,22 @@ for fo = 1:length(folders)
     % [BP_zs, BP_norm_zs] = deal(nan(size(BP)));
     
     for ch = 1:2
-    
-        BP(:, :, ch) = zscore(BP(:, :, ch));
         
         BP_mean = ones(size(BP(:,:,ch)))*diag(nanmean(BP(:,:,ch)));
         
         BP_std = ones(size(BP(:,:,ch)))*diag(nanstd(BP(:,:,ch)));
         
         BP_no_spikes(:, :, ch) = (BP_no_spikes(:, :, ch) - BP_mean)./BP_std;
-        
-        BP_norm(:, :, ch) = zscore(BP_norm(:, :, ch));
+    
+        BP(:, :, ch) = zscore(BP(:, :, ch));
         
         BP_norm_mean = ones(size(BP_norm(:,:,ch)))*diag(nanmean(BP_norm(:,:,ch)));
         
         BP_norm_std = ones(size(BP_norm(:,:,ch)))*diag(nanstd(BP_norm(:,:,ch)));
         
         BP_norm_no_spikes(:, :, ch) = (BP_norm_no_spikes(:, :, ch) - BP_norm_mean)./BP_norm_std;
+        
+        BP_norm(:, :, ch) = zscore(BP_norm(:, :, ch));
         
     end
     

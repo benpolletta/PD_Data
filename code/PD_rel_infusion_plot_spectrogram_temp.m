@@ -28,7 +28,7 @@ end
     
 % BP_chunk = nan(chunk_size*sampling_freq, no_bands); %[total_chunk, beta_chunk] = deal(nan(chunk_size*sampling_freq, 2));
 
-for fo = 2 %:length(folders)
+for fo = 1:length(folders)
     
     folder = folders{fo};
     
@@ -48,9 +48,11 @@ for fo = 2 %:length(folders)
     
     no_chunks = no_mins*60/chunk_size;
     
-    load([subj_name, '_wt.mat'], 'Spec')
+    [BP_no_spikes, Spec] = get_BP(subj_name, outlier_lims(fo), '', [], [], []); % load([subj_name, '_wt.mat'], 'Spec') % 
     
-    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm')
+    [BP_norm_no_spikes, ~] = get_BP(subj_name, outlier_lims(fo), '_norm', [], [], []); % 
+    
+    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm') % 
     
     load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
     
@@ -61,46 +63,22 @@ for fo = 2 %:length(folders)
     % [BP_zs, BP_norm_zs] = deal(nan(size(BP)));
     
     for ch = 1:2
+        
+        BP_mean = ones(size(BP(:,:,ch)))*diag(nanmean(BP(:,:,ch)));
+        
+        BP_std = ones(size(BP(:,:,ch)))*diag(nanstd(BP(:,:,ch)));
+        
+        BP_no_spikes(:, :, ch) = (BP_no_spikes(:, :, ch) - BP_mean)./BP_std;
     
         BP(:, :, ch) = zscore(BP(:, :, ch));
         
+        BP_norm_mean = ones(size(BP_norm(:,:,ch)))*diag(nanmean(BP_norm(:,:,ch)));
+        
+        BP_norm_std = ones(size(BP_norm(:,:,ch)))*diag(nanstd(BP_norm(:,:,ch)));
+        
+        BP_norm_no_spikes(:, :, ch) = (BP_norm_no_spikes(:, :, ch) - BP_norm_mean)./BP_norm_std;
+        
         BP_norm(:, :, ch) = zscore(BP_norm(:, :, ch));
-    
-    end
-    
-    BP_no_spikes = BP;
-    
-    BP_norm_no_spikes = BP_norm;
-    
-    if ~isempty(dir([subj_name, '_wav_laser_artifacts.mat']))
-    
-        load([subj_name, '_wav_laser_artifacts.mat'])
-        
-        [laser_wav_nans, laser_nans] = indicator_to_nans(double(laser_transitions), sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        laser_wav_nans = repmat(laser_wav_nans, [1 1 2]); laser_nans = repmat(laser_nans, [1 1 2]);
-        
-        BP_no_spikes(logical(laser_nans)) = nan;
-        
-        BP_norm_no_spikes(logical(laser_nans)) = nan;
-        
-        Spec(logical(laser_wav_nans)) = nan;
-        
-    end
-    
-    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
-    
-        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
-        
-        [outlier_wav_nans, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        outlier_wav_nans = repmat(outlier_wav_nans, [1 1 2]); outlier_nans = repmat(outlier_nans, [1 1 2]);
-        
-        BP_no_spikes(logical(outlier_nans)) = nan;
-        
-        BP_norm_no_spikes(logical(outlier_nans)) = nan;
-        
-        Spec(logical(outlier_wav_nans)) = nan;
         
     end
     
@@ -108,19 +86,13 @@ for fo = 2 %:length(folders)
         
         load([subj_name, '_peaks.mat'])
         
-        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, linspace(3, 21, 200), bands);
-        
-        BP_no_spikes(logical(spike_nans)) = nan;
-        
-        BP_norm_no_spikes(logical(spike_nans)) = nan;
-        
     else
         
         Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
         
     end
         
-    for c = 157:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
+    for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
         chunk_name = [subj_name, '_chunk', num2str(c, '%03d'), '_wt'];
     
@@ -306,34 +278,4 @@ for fo = 2 %:length(folders)
     
 end
 
-end
-
-function [wav_nans, BP_nans] = indicator_to_nans(indicator, sampling_freq, freqs, no_cycles, bands)
-
-[no_dps, no_channels] = size(indicator);
-
-wav_nans = nan(no_dps, length(freqs), no_channels);
-
-BP_nans = nan(no_dps, size(bands, 1), no_channels);
-
-for ch = 1:no_channels
-    
-    wav_nans_temp = abs(wavelet_spectrogram(indicator(:, ch), sampling_freq, freqs, no_cycles, 0, ''));
-    
-    wav_nans_temp = wav_nans_temp*diag(1./max(wav_nans_temp));
-    
-    wav_nans(:, :, ch) = wav_nans_temp > .01;
-    
-    for b = 1:size(bands, 1)
-       
-        band_freqs = freqs >= bands(b, 1) & freqs <= bands(b, 2);
-        
-        BP_nans(:, b, ch) = sum(wav_nans(:, band_freqs, ch), 2);
-        
-    end
-    
-    BP_nans(BP_nans > 0) = 1;
-
-end
-    
 end

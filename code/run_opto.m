@@ -16,7 +16,7 @@ pd_handles = {'', '_power', '_power'};
 
 norm_handles = {'', '', '_pct'};
 
-for i = 2:length(pd_handles)
+for i = 1:length(pd_handles)
 
     PD_beta_blocks_rel_infusion_laser_stats(subject_mat, pd_handles{i}, norm_handles{i}, 10, freqs, no_cycles, bands)
     
