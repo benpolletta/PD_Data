@@ -28,7 +28,7 @@ end
     
 % BP_chunk = nan(chunk_size*sampling_freq, no_bands); %[total_chunk, beta_chunk] = deal(nan(chunk_size*sampling_freq, 2));
 
-for fo = 1:length(folders)
+for fo = 3 % 1:length(folders)
     
     folder = folders{fo};
     

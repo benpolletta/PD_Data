@@ -157,6 +157,8 @@ for b = 1:no_bands
             
             plot_data(pct_bp_high_for_test, fo, strcmp(measure, '_power'), subj_p_vals)
             
+            ylabel(chan_labels{ch})
+            
             fprintf(fid(ch), format, folders{fo}, nanmean(pct_bp_high_for_test), nanstd(pct_bp_high_for_test)*diag(1./sum(~isnan(pct_bp_high_for_test))),...
                 nanmedian(pct_bp_high_for_test), quantile(pct_bp_high_for_test, .25), quantile(pct_bp_high_for_test, .75),...
                 reshape(subj_p_vals, 1, 2*no_comparisons));
