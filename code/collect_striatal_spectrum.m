@@ -36,9 +36,11 @@ subject_matnames = {'st_m1', 'st_stn', 'st_m1_ali'};
 
 channels = [1 2 2];
 
-no_folders = nan(1, 2);
+no_groups = length(subject_matnames);
 
-for s = 1:2
+no_folders = nan(1, no_groups);
+
+for s = 1:no_groups
     
     load([subject_matnames{s}, '_subjects.mat'])
     
@@ -54,12 +56,14 @@ total_folders = subj_mat_limits(end);
 
 All_WT_sec = nan(no_freqs, epoch_secs, total_folders, no_pds);
 
-for s = 1:2
+for s = 1:no_groups
    
     clear WT_sec
     
     load([subject_matnames{s}, BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
         num2str(epoch_secs/60), '_min_secs_by_STR', norm_for_power, '_spectrum.mat'])
+    
+    size(All_WT_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :)), size(WT_sec(:, :, :, :, channels(s)))
     
     All_WT_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :) = WT_sec(:, :, :, :, channels(s));
     

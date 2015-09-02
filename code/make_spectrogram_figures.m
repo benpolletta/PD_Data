@@ -17,21 +17,25 @@ for ch = 1:2
     
     Ch_spec = abs(Spec(:, :, ch));
     
+    s_rate = 500;
+    
+    t = ((1:length(Ch_spec))/s_rate - basetime)/60;
+    
     dims = size(Ch_spec);
     
-    dec_factor = 1; s_rate = 500/dec_factor;
+    dec_factor = 10; s_rate_dec = s_rate/dec_factor;
     
     Spec_dec = nanmean(reshape(Ch_spec', dims(2), dec_factor, dims(1)/dec_factor), 2);
     Spec_dec = permute(Spec_dec, [1 3 2]);
     
-    t = ((1:length(Spec_dec))/s_rate - basetime)/60;
+    t_dec = ((1:length(Spec_dec))/s_rate_dec - basetime)/60;
     
-    Spec_dec = Spec_dec(1:80, t <= 30);
-    t(t > 30) = [];
+    Spec_dec = Spec_dec(1:80, t_dec <= 30);
+    t_dec(t_dec > 30) = [];
     
     figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
-    imagesc(t, 1:80, Spec_dec(1:80, :))
+    imagesc(t_dec, 1:80, Spec_dec(1:80, :))
     
     title([subject_name, ', Channel ', num2str(ch)])
     
@@ -45,9 +49,9 @@ for ch = 1:2
     
     plot([0 0], [0 80], ':w', 'LineWidth', 2)
     
-    plot([t(1) t(end)], [30 30], ':w', 'LineWidth', 2)
+    plot([t_dec(1) t_dec(end)], [30 30], ':w', 'LineWidth', 2)
     
-    plot([t(1) t(end)], [8 8], ':w', 'LineWidth', 2)
+    plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
     
     starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
     starts = starts(striatum_channel, :);
@@ -70,7 +74,7 @@ for ch = 1:2
     
     subplot(2, 1, 2) % subplot(4, 1, 2)
     
-    plot(t, PD_dec(t <= 30, ch), 'k')
+    plot(t(t <= 30), PD_dec(t <= 30, ch), 'k')
     
     box off
     
