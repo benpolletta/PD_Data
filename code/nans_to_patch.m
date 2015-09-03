@@ -26,6 +26,8 @@ end
 
 border_indicator = abs(diff([zeros(1, no_freqs); nan_indicator; zeros(1, no_freqs)]));
 
+times = [times, times(end) + mean(diff(times))] - mean(diff(times))/2;
+
 for p = 1:no_patches
     
     patch_border = border_indicator(left_border_indices{1}(p):right_border_indices{1}(p), :);

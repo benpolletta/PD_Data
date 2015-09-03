@@ -14,13 +14,15 @@ else
     
 end
 
-subject_matnames = {'st_m1', 'st_stn'};
+subject_matnames = {'st_m1', 'st_stn', 'st_m1_ali', 'st_stn_kk_chosen'};
 
-channels = [1 2];
+channels = [1 2 2 1];
 
-no_folders = nan(1, 2);
+no_s_mats = length(subject_matnames);
 
-for s = 1:2
+no_folders = nan(1, no_s_mats);
+
+for s = 1:no_s_mats
     
     load([subject_matnames{s}, '_subjects.mat'])
     
@@ -36,7 +38,7 @@ total_folders = subj_mat_limits(end);
 
 All_pct_bp_high = nan(epoch_secs, total_folders, no_pds, no_bands);
 
-for s = 1:2
+for s = 1:no_s_mats
    
     clear pct_bp_high
     

@@ -23,7 +23,7 @@ for ch = 1:2
     
     dims = size(Ch_spec);
     
-    dec_factor = 10; s_rate_dec = s_rate/dec_factor;
+    dec_factor = 50; s_rate_dec = s_rate/dec_factor;
     
     Spec_dec = nanmean(reshape(Ch_spec', dims(2), dec_factor, dims(1)/dec_factor), 2);
     Spec_dec = permute(Spec_dec, [1 3 2]);
@@ -41,7 +41,7 @@ for ch = 1:2
     
     ylabel('Frequency (Hz)')
     
-    caxis([0 10])
+    % caxis([0 10])
     
     axis xy
     
@@ -94,6 +94,10 @@ for ch = 1:2
         
     end
     
+end
+
+for ch = 1:2
+    
     %% Plotting spectrogram & LFP for 10 seconds.
     
     pd_labels = {'Pre-Infusion', 'Post-Infusion'};
@@ -116,7 +120,7 @@ for ch = 1:2
         
         ylabel('Frequency (Hz)')
         
-        caxis([0 10])
+        % caxis([0 10])
         
         axis xy
         

@@ -32,9 +32,9 @@ for b = 1:no_bands
     
 end
 
-subject_matnames = {'st_m1', 'st_stn', 'st_m1_ali'};
+subject_matnames = {'st_m1', 'st_stn', 'st_m1_ali', 'st_stn_kk_chosen'};
 
-channels = [1 2 2];
+channels = [1 2 2 1];
 
 no_groups = length(subject_matnames);
 
@@ -63,7 +63,7 @@ for s = 1:no_groups
     load([subject_matnames{s}, BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
         num2str(epoch_secs/60), '_min_secs_by_STR', norm_for_power, '_spectrum.mat'])
     
-    size(All_WT_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :)), size(WT_sec(:, :, :, :, channels(s)))
+    % size(All_WT_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :)), size(WT_sec(:, :, :, :, channels(s)))
     
     All_WT_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :) = WT_sec(:, :, :, :, channels(s));
     
