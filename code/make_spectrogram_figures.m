@@ -1,13 +1,17 @@
-function make_spectrogram_figures(group_prefix, subject_no, subject_name, basetime, striatum_channel)
+function make_spectrogram_figures(group_prefix, subject_no, folder, prefix, basetime, striatum_channel)
     
 load([group_prefix, '_pct_BP_high_2.5_min_secs.mat'])
     
-load([subject_name, '/', subject_name([1 2 4:end]), '_all_channel_data_dec.mat'])
+load([folder, '/', prefix, '_all_channel_data_dec.mat'])
     
-data = load([subject_name, '/', subject_name([1 2 4:end]), '_wt.mat']);
+data = load([folder, '/', prefix, '_wt.mat']);
 Spec = data.Spec;
 
-load([subject_name, '/', subject_name([1 2 4:end]), '_peaks.mat'])
+load([folder, '/', prefix, '_peaks.mat'])
+
+s_rate = 500;
+
+t = ((1:length(Spec))/s_rate - basetime)/60;
 
 for ch = 1:2
     
@@ -16,10 +20,6 @@ for ch = 1:2
     %% Plotting spectrogram for whole data recording.
     
     Ch_spec = abs(Spec(:, :, ch));
-    
-    s_rate = 500;
-    
-    t = ((1:length(Ch_spec))/s_rate - basetime)/60;
     
     dims = size(Ch_spec);
     
@@ -37,7 +37,7 @@ for ch = 1:2
     
     imagesc(t_dec, 1:80, Spec_dec(1:80, :))
     
-    title([subject_name, ', Channel ', num2str(ch)])
+    title([folder, ', Channel ', num2str(ch)])
     
     ylabel('Frequency (Hz)')
     
@@ -86,11 +86,11 @@ for ch = 1:2
     
     try
         
-        save_as_eps(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch)])
+        save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch)])
         
     catch
         
-        save(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch), '.fig'])
+        save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '.fig'])
         
     end
     
@@ -99,6 +99,8 @@ end
 for ch = 1:2
     
     %% Plotting spectrogram & LFP for 10 seconds.
+    
+    Ch_spec = abs(Spec(:, :, ch));
     
     pd_labels = {'Pre-Infusion', 'Post-Infusion'};
     
@@ -116,7 +118,7 @@ for ch = 1:2
         
         imagesc(t_interval, 1:80, Ch_spec(t_index, 1:80)')
         
-        title(pd_labels{pd})
+        title([folder, ', ', pd_labels{pd}])
         
         ylabel('Frequency (Hz)')
         
@@ -168,11 +170,11 @@ for ch = 1:2
         
         try
             
-            save_as_eps(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd}])
+            save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd}])
             
         catch
             
-            save(gcf, [subject_name, '/', subject_name, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd} '.fig'])
+            save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd} '.fig'])
             
         end
         
