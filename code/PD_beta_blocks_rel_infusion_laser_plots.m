@@ -78,7 +78,7 @@ end
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(no_trials), 'trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
 

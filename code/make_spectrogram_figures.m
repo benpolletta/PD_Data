@@ -1,6 +1,13 @@
-function make_spectrogram_figures(group_prefix, subject_no, folder, prefix, basetime, striatum_channel)
+function make_spectrogram_figures(group_prefix, subject_no)
+
+load([group_prefix, '_subjects.mat'])
+
+folder = folders{subject_no}; 
+prefix = prefixes{subject_no}; 
+basetime = basetimes(subject_no); 
+striatum_channel = find(strcmp(chan_labels, 'Striatum'));
     
-load([group_prefix, '_pct_BP_high_2.5_min_secs.mat'])
+load([group_prefix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
     
 load([folder, '/', prefix, '_all_channel_data_dec.mat'])
     
@@ -12,6 +19,14 @@ load([folder, '/', prefix, '_peaks.mat'])
 s_rate = 500;
 
 t = ((1:length(Spec))/s_rate - basetime)/60;
+
+starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
+starts = starts(striatum_channel, :);
+starts = (starts/s_rate - basetime)/60;
+
+ends = reshape(All_bp_max_end(subject_no, :, 3, :), 2, 2);
+ends = ends(striatum_channel, :);
+ends = (ends/s_rate - basetime)/60;
 
 for ch = 1:2
     
@@ -52,14 +67,6 @@ for ch = 1:2
     plot([t_dec(1) t_dec(end)], [30 30], ':w', 'LineWidth', 2)
     
     plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
-    
-    starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
-    starts = starts(striatum_channel, :);
-    starts = (starts/s_rate - basetime)/60;
-    
-    ends = reshape(All_bp_max_end(subject_no, :, 3, :), 2, 2);
-    ends = ends(striatum_channel, :);
-    ends = (ends/s_rate - basetime)/60;
     
     colors = {'g', 'r'};
     

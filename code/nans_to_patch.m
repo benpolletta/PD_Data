@@ -40,9 +40,17 @@ for p = 1:no_patches
     % 
     % I_vals = IJ_vals(:, 1); J_vals = IJ_vals(:, 2);
     
-    X_vals{p} = times(I_vals);
+    X_vals{p} = times(I_vals + left_border_indices{1}(p) - 1);
     
     Y_vals{p} = freqs(J_vals);
+    
+    diff_indices = find(diff(Y_vals{p}) < -1);
+    
+    if Y_vals{p}(diff_indices(end) + 1) == 1
+        
+        Y_vals{p}((diff_indices(end) + 1):end) = fliplr(Y_vals{p}((diff_indices(end) + 1):end));
+        
+    end
     
 end
     
