@@ -64,7 +64,7 @@ for fo = 1:no_folders
         
         trials{fo, pd} = index_to_blocks(laser_periods(:, pd));
         
-        no_trials(fo, pd) = size(trials, 1);
+        no_trials(fo, pd) = size(trials{fo, pd}, 1);
         
     end
     
@@ -138,15 +138,31 @@ for fo = 1:no_folders
                 
                 handle(pd) = plot(t(pd_indices{fo}(1:length_plotted, pd))/60, beta_blocks_plot(pd_indices{fo}(1:length_plotted, pd)), [pd_colors{pd}, '.']);
                 
+                BP_trials = nan(min(max_no_trials, no_trials(fo, pd))*5*sampling_freq, 1);
+                
                 for tr = 1:min(max_no_trials, no_trials(fo, pd))
                     
-                    BP_trial = BP_high_cum(trials{fo, pd}(tr, 1):trials{fo, pd}(tr, 2), b, ch);
-                    
-                    BP_trial = reshape(BP_trial(1:5*sampling_freq), sampling_freq, 5);
-                    
-                    pct_bp_high((tr - 1)*5 + (1:5), fo, pd, b, ch) = nansum(BP_trial)'/sampling_freq;
+                    BP_trials((tr - 1)*5*sampling_freq + (1:5*sampling_freq)) = BP_high_cum(trials{fo, pd}(tr, 1):(trials{fo, pd}(tr, 1) + 5*sampling_freq - 1), b, ch);
                     
                 end
+                
+                BP_trials(isnan(BP_trials)) = [];
+                
+                no_secs = floor(length(BP_trials)/sampling_freq); % ceil(length(BP_trials)/sampling_freq); BP_trials((end + 1):no_secs*sampling_freq) = nan;
+                
+                BP_trials = reshape(BP_trials(1:no_secs*sampling_freq), sampling_freq, no_secs);
+                
+                pct_bp_high(1:no_secs, fo, pd, b, ch) = nanmean(BP_trials)';
+                
+                % for tr = 1:min(max_no_trials, no_trials(fo, pd))
+                % 
+                %     BP_trial = BP_high_cum(trials{fo, pd}(tr, 1):trials{fo, pd}(tr, 2), b, ch);
+                % 
+                %     BP_trial = reshape(BP_trial(1:5*sampling_freq), sampling_freq, 5);
+                % 
+                %     pct_bp_high((tr - 1)*5 + (1:5), fo, pd, b, ch) = nanmean(BP_trial)';
+                % 
+                % end
                 
             end
             

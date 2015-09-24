@@ -60,7 +60,7 @@ for fo = 1:length(folders)
     
     clear Spec Spec_pct BP BP_pct
     
-    [~, Spec] = get_BP(subj_name, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
+    [BP, Spec] = get_BP(subj_name, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
 
     % Spec = load([subj_name, BP_suffix, '_wt.mat'], 'Spec');
     % 
@@ -87,6 +87,8 @@ for fo = 1:length(folders)
             BP_pct(:, b, ch) = nansum(Spec_pct(:, band_indices, ch), 2);
             
         end
+        
+        BP_pct(isnan(BP)) = nan;
         
         BP_pct_baseline_mean = nanmean(BP_pct(base_index, :, ch));
         

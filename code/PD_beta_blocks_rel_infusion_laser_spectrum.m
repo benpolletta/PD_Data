@@ -66,7 +66,7 @@ for fo = 1:no_folders
         
         trials{fo, pd} = index_to_blocks(laser_periods(:, pd));
         
-        no_trials(fo, pd) = size(trials, 1);
+        no_trials(fo, pd) = size(trials{fo, pd}, 1);
         
     end
     
@@ -118,19 +118,37 @@ for fo = 1:no_folders
         
         for pd = 1:no_pds
             
+            WT_trials = nan(min(max_no_trials, no_trials(fo, pd))*5*sampling_freq, length(band_indices{band_index}));
+            
             for tr = 1:min(max_no_trials, no_trials(fo, pd))
                 
                 trial_start = trials{fo, pd}(tr, 1);
                 
-                for sec = 1:5
-                    
-                    sec_start = trial_start + (sec - 1)*sampling_freq + 1;
-                    
-                    sec_end = trial_start + sec*sampling_freq;
-                    
-                    WT_sec(:, (tr - 1)*5 + sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, band_indices{band_index}, ch))';
-                    
-                end
+                % for sec = 1:5
+                % 
+                %     sec_start = trial_start + (sec - 1)*sampling_freq;
+                % 
+                %     sec_end = trial_start + sec*sampling_freq - 1;
+                % 
+                %     WT_sec(:, (tr - 1)*5 + sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, band_indices{band_index}, ch))';
+                % 
+                % end
+                
+                trial_end = trial_start + 5*sampling_freq - 1;
+                
+                WT_trials((tr - 1)*5*sampling_freq + (1:5*sampling_freq), :) = Spec_data(trial_start:trial_end, band_indices{band_index}, ch);
+                
+            end
+                
+            WT_trials = nans_to_end(WT_trials);
+            
+            for sec = 1:min(max_no_trials, no_trials(fo, pd))*5
+               
+                sec_start = (sec - 1)*sampling_freq + 1;
+                
+                sec_end = sec*sampling_freq;
+                
+                WT_sec(:, sec, fo, pd, ch) = nanmean(WT_trials(sec_start:sec_end, :))';
                 
             end
             
@@ -140,7 +158,25 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', short_band_labels{band_index},...
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index},...
     '_', num2str(no_trials_analyzed), 'trials', norm, '_spectrum.mat'], 'WT_sec')
+
+end
+
+function A_new = nans_to_end(A)
+
+[rows, columns] = size(A);
+
+A_new = nan(rows, columns);
+
+for col = 1:columns
+    
+    A_col = A(:, col);
+    
+    A_col(isnan(A_col)) = [];
+    
+    A_new(1:length(A_col), col) = A_col;
+    
+end
 
 end

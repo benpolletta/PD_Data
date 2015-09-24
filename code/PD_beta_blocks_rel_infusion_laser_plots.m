@@ -78,7 +78,7 @@ end
 
 no_secs = max_no_trials*5;
     
-load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(no_trials), 'trials', measure, '.mat'])
+load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, '.mat'])
 
 no_comparisons = nchoosek(no_pds, 2);
 
@@ -102,9 +102,13 @@ for b = 1:no_bands
         
         for comp = 1:no_comparisons
         
-            p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
-        
-            p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+            if ~any(sum(~isnan(pct_bp_high_for_test(:, comparisons(comp, :)))) == 0)
+                
+                p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                
+                p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                
+            end
             
         end
         
@@ -114,7 +118,7 @@ for b = 1:no_bands
         
         pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
         
-        if strcmp(measure, '_power')
+        if strcmp(measure(1:6), '_power') || strcmp(measure((end - 5):end), '_power')
             
             h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
             

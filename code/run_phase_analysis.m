@@ -1,4 +1,4 @@
-function run_phase_analysis(subject_mat, time_window, percent, f_tol, freqs, no_cycles, bands, band_index, plot_opt, epoch_secs)
+function run_phase_analysis(subject_mat, time_window, percent, f_tol, freqs, no_cycles, bands, band_index, plot_opt, epoch_secs_for_plot)
 
 % time_window is the length of the window in which you look for at minimum 
 %   percent of data to be over 2 s.d. for beta power (in samples).
@@ -9,7 +9,7 @@ beta_blocks_consolidate(subject_mat, time_window, percent, freqs, no_cycles, ban
 
 if plot_opt == 1
 
-    beta_blocks_consolidated_plot(subject_mat, epoch_secs, time_window, percent, band_index, freqs, no_cycles, bands)
+    beta_blocks_consolidated_plot(subject_mat, epoch_secs_for_plot, time_window, percent, band_index, freqs, no_cycles, bands)
 
 end
     

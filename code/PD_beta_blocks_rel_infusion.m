@@ -79,11 +79,19 @@ for fo = 1:length(folders)
         
         laser_nans = repmat(laser_nans, [1 1 2]); % Same matrix for each channel.
         
-        pd_indices = laser_periods; % Matrix containing periods for analysis.
+        pd_indices = laser_periods;
         
-        base_index = true(size(BP, 1), 1); % pd_indices(:, 1);
+        pre_trials = index_to_blocks(laser_periods(:, 1));
+        
+        base_end = pre_trials(10, 2);
+        
+        pre_index = laser_periods(:, 1);
+        
+        pre_index((base_end + 1):end) = 0;
+        
+        base_index = pre_index; % true(size(BP, 1), 1); %
         % Index of timepoints to use when calculating high power cutoff;
-        % for optogenetics data, use entire data span.
+        % for optogenetics data, use first 10 pre-trial thingies.
     
     else
         

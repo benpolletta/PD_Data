@@ -3,6 +3,8 @@ function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, epoch_s
 % Leave epoch_secs empty when using for optogenetics data, and enter
 % '_ntrials' for the argument pd_handle.
 
+load('bonferroni_count.mat')
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
@@ -81,7 +83,7 @@ for ch = 1:no_chans
         
         WT_mean(:, pd) = nanmean(WT_for_stats, 2); % .*freq_multiplier, 2);
         
-        WT_ci(:, pd) = norminv(1 - .25/(no_freqs*7*2*3), 0, 1)*nanstd(WT_for_stats, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
+        WT_ci(:, pd) = norminv(1 - .25/bonferroni_count, 0, 1)*nanstd(WT_for_stats, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
         
         % WT_median(:, pd) = nanmedian(WT_for_stats, 2);
         % 
@@ -96,6 +98,8 @@ for ch = 1:no_chans
         % WT_median_high(:, pd) = quantile(WT_for_mean, .75, 2);
         
     end
+    
+    save([spectrum_name, '_ch', num2str(ch), '_data_for_plot.mat'], 'WT_mean', 'WT_ci')
     
     % WT_median_low = WT_median - WT_median_low;
     % 

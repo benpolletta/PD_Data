@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_plot(subject_mat, epoch_secs, pd_handle, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_plot(subject_mat, epoch_secs, pd_handle, test_handle, freqs, no_cycles, bands)
 
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
 
@@ -20,15 +20,15 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-if exist([folders{1}, '/', prefixes{1}, '_wt.mat'], 'file')
-    
-    load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
-    
-else
-    
-    sampling_freq = 500;
-    
-end
+% if exist([folders{1}, '/', prefixes{1}, '_wt.mat'], 'file')
+%     
+%     load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+%     
+% else
+%     
+%     sampling_freq = 500;
+%     
+% end
 
 no_bands = size(bands, 1);
 
@@ -88,17 +88,7 @@ format = ['%s\t', format];
     
 load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', epoch_secs_label, pd_handle, '.mat'])
 
-if length(pd_handle > 5)
-    
-    pd_handle_end = pd_handle((end - 5):end);
-    
-else
-    
-    pd_handle_end = pd_handle;
-    
-end
-
-power_flag = exist('BP_sec', 'var') | strcmp(pd_handle_end, '_power');
+power_flag = exist('BP_sec', 'var') | strcmp(pd_handle, '_power') | strcmp(pd_handle((end - 5):end), '_power') | strcmp(pd_handle(1:6), '_power');
 
 if exist('BP_sec', 'var')
     
@@ -124,7 +114,7 @@ fid = nan(no_chans, 1);
 
 for ch = 1:no_chans
     
-    fid(ch) = fopen([subj_mat_name, BP_suffix, epochs_label, '_mins_ranksum',...
+    fid(ch) = fopen([subj_mat_name, BP_suffix, epochs_label, '_mins_', test_handle,...
         pd_handle, '_', chan_labels{ch}, '_stats.txt'], 'w');
     
     fprintf(fid(ch), make_format(1 + 5*no_pds + 2*no_comparisons, 's'), stat_labels{:}, p_val_labels{:});
@@ -149,8 +139,16 @@ for b = 1:no_bands
         end
         
         if no_pds == 2 %for comp = 1:no_comparisons
-        
-            p_vals(:, b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
+            
+            if strcmp(test_handle, 't-test')
+                
+                [~, p_vals(:, b, ch)] = ttest(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), [], 'left'); % 'tail', 'left');
+                
+            elseif strcmp(test_handle, 'ranksum')
+                
+                p_vals(:, b, ch) = ranksum(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left');
+                
+            end
                 
         elseif no_pds > 1
             
@@ -158,9 +156,21 @@ for b = 1:no_bands
                 
                 if any(~isnan(pct_bp_high_for_test(:, comparisons(comp, 1)))) && any(~isnan(pct_bp_high_for_test(:, comparisons(comp, 2))))
                     
-                    p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
-                    
-                    p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                    if strcmp(test_handle, 't-test')
+                        
+                        [~, p_vals(comp, b, ch, 1)] = ttest(pct_bp_high_for_test(:, comparisons(comp, 1)),...
+                            pct_bp_high_for_test(:, comparisons(comp, 2)), [], 'left');
+                        
+                        [~, p_vals(comp, b, ch, 2)] = ttest(pct_bp_high_for_test(:, comparisons(comp, 1)),...
+                            pct_bp_high_for_test(:, comparisons(comp, 2)), [], 'right');
+                        
+                    elseif strcmp(test_handle, 'ranksum')
+                        
+                        p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                        
+                        p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                        
+                    end
                     
                 end
                 
@@ -174,7 +184,7 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
-        if power_flag
+        % if power_flag
             
             [md, q1, q3] = deal(nan(1, no_pds));
             
@@ -210,25 +220,25 @@ for b = 1:no_bands
             
             ylabel('Beta Power')
             
-        else
-        
-            pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
-            
-            mn = nanmean(log(pct_bp_high_for_test));
-            
-            sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
-            
-            if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
-                
-                mn = [mn mn - 5]; sd = [sd nan];
-                
-            end
-           
-            h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
-        
-            ylabel('Beta Density')
-            
-        end
+        % else
+        % 
+        %     pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
+        % 
+        %     mn = nanmean(log(pct_bp_high_for_test));
+        % 
+        %     sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
+        % 
+        %     if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+        % 
+        %         mn = [mn mn - 5]; sd = [sd nan];
+        % 
+        %     end
+        % 
+        %     h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+        % 
+        %     ylabel('Beta Density')
+        % 
+        % end
         
         box off
         
@@ -272,13 +282,13 @@ for b = 1:no_bands
     end
 
     save_as_pdf(gcf, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high', ...
-        epoch_secs_label, '_mins_', short_band_labels{b}, '_barplot', pd_handle])
+        epoch_secs_label, '_mins_', short_band_labels{b}, '_', test_handle, '_barplot', pd_handle])
     
 end
 
 fclose('all');
         
-save([subj_mat_name, BP_suffix, epochs_label, '_ranksum', pd_handle, '_pvals.mat'], 'p_vals')
+save([subj_mat_name, BP_suffix, epochs_label, '_', test_handle, pd_handle, '_pvals.mat'], 'p_vals')
 
 %% Group boxplots.
 %

@@ -22,6 +22,16 @@ PD_struct.pd_labels = pd_labels;
 
 PD_struct.chan_labels = chan_labels; PD_struct.no_chans = length(chan_labels);
 
+if exist('striatal_id','var')
+    
+    PD_struct.striatal_id = striatal_id;
+
+else
+    
+    PD_struct.striatal_id = [];
+    
+end
+
 PD_struct.subj_prefix = subject_mat(1:(end - length('_subjects.mat')));
 
 PD_struct.no_folders = length(folders);
@@ -60,9 +70,7 @@ PD_struct.short_band_labels = short_band_labels;
 
 PD_struct.band_labels = band_labels;
 
-PD_struct.long_pd_labels = {'Pre-Infusion', 'Post-Infusion'};
-
-PD_struct.norms = {'', '_pct', '_norm', '_norm_pct'}; 
+PD_struct.norms = norms; 
 
 PD_struct.no_norms = length(norms);
 
@@ -73,3 +81,13 @@ PD_struct.high_type = {'', '_cum'};
 PD_struct.no_types = length(PD_struct.high_type);
 
 PD_struct.pd_labels = pd_labels; PD_struct.no_pds = length(pd_labels);
+
+if PD_struct.no_pds == 2
+    
+    PD_struct.long_pd_labels = {'Pre-Infusion', 'Post-Infusion'};
+    
+elseif PD_struct.no_pds == 4
+   
+    PD_struct.long_pd_labels = {'Pre-Laser', 'Laser On', '0-5s Post-Laser', '5-10s Post-Laser'};
+    
+end

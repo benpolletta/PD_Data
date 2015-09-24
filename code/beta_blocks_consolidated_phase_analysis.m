@@ -1,19 +1,35 @@
 function beta_blocks_consolidated_phase_analysis(subject_mat, time_window, percent, norm, band_index, f_tol, freqs, no_cycles, bands)
 
+% Needs either striatal_id, a vector as long as the number of folders, with
+% a number indicating the correct striatal channel for each folder; or
+% chan_labels, with chan_labels indicating identity of each channel.
+
 PD_struct = PD_initialize(subject_mat);
 
-if strcmp(PD_struct.chan_labels{2}, 'Striatum'), 
-    
-    dphi_multiplier = 1; 
-    
-    chan_label = [PD_struct.chan_labels{2}, ' - ', PD_struct.chan_labels{1}];
+load('bonferroni_count')
 
+if isempty(PD_struct.striatal_id)
+    
+    if strcmp(PD_struct.chan_labels{2}, 'Striatum'),
+        
+        dphi_multiplier = 1;
+        
+        chan_label = [PD_struct.chan_labels{2}, ' - ', PD_struct.chan_labels{1}];
+        
+    else
+        
+        dphi_multiplier = -1;
+        
+        chan_label = [PD_struct.chan_labels{1}, ' - ', PD_struct.chan_labels{2}];
+        
+    end
+    
 else
     
-    dphi_multiplier = -1;
+    dphi_multiplier = [];
     
     chan_label = [PD_struct.chan_labels{1}, ' - ', PD_struct.chan_labels{2}];
-
+    
 end
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
@@ -59,6 +75,16 @@ for fo = 1:PD_struct.no_folders
     prefix = PD_struct.prefixes{fo};
     
     subj_name = [folder,'/',prefix];
+   
+    if isempty(dphi_multiplier)
+        
+        subj_dphi_multiplier = (-1)^PD_struct.striatal_id(fo);
+        
+    else
+        
+        subj_dphi_multiplier = dphi_multiplier;
+        
+    end
     
     cons_name = [subj_name, BP_suffix, '_2sd_BP_high_',...
         num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated'];
@@ -69,7 +95,7 @@ for fo = 1:PD_struct.no_folders
     
     load([subj_name, '_all_channel_data_dec.mat'])
     
-    figure(1)
+    figure(1), figure(2)
     
     no_phase_bins = 18;
     
@@ -87,11 +113,11 @@ for fo = 1:PD_struct.no_folders
         
         mean_f = sum(Freqs_high_beta, 2)/2;
         
-        d_phi = dphi_multiplier*diff(Phases_high_beta, [], 2);
+        d_phi = subj_dphi_multiplier*diff(Phases_high_beta, [], 2);
         
         figure
         
-        [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index), no_phase_bins, f_bins);
+        [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index), no_phase_bins, f_bins, bonferroni_count);
         
         freq_cats{pd} = categorize_freq(mean_f(f_overlap_index), f_bins);
         
@@ -99,11 +125,13 @@ for fo = 1:PD_struct.no_folders
         
     end
 
-    [~, ~, zero_test, ~, angle_pval] = circular_stats(f_bins, phases, freq_cats);
+    [~, ~, zero_test, ~, angle_pval] = circular_stats(f_bins, phases, freq_cats, bonferroni_count);
     
     conf_mat = reshape(conf_mat, size(conf_mat, 1), 1, size(conf_mat, 2));
     
     conf_mat = repmat(conf_mat, [1 2 1]);
+    
+    %% Plotting phase angle.
     
     figure(1)
     
@@ -127,7 +155,67 @@ for fo = 1:PD_struct.no_folders
     
     plot(freq_bin_centers', zeros(length(freq_bin_centers), 1), '--k')
     
-    title(['Phase Lag (', chan_label, ')'])
+    if fo == 1
+        
+        title({folder; 'Phase Lag'; ['(', chan_label, ')']})
+        
+    else
+        
+        title(folder)
+        
+    end
+    
+    if mod(fo, c) == 1
+    
+        ylabel('Degrees')
+    
+        if floor(fo/r) == 0
+           
+            legend(PD_struct.pd_labels)
+            
+        end
+        
+    end
+    
+    if floor(fo/r) == c
+        
+        xlabel('Frequency (Hz)')
+        
+    end
+    
+    %% Plotting phase concentration.
+    
+    figure(2)
+    
+    subplot(r, c, fo)
+    
+    h = plot(freq_bin_centers', abs(MR_mat));
+    
+    set(h, 'Marker', 's')
+    
+    zero_test(isnan(MR_mat)) = nan;
+    
+    logical = [(angle_pval < .05/length(angle_pval)) zero_test];
+    
+    logical(logical == 0) = nan;
+
+    add_stars(gca, freq_bin_centers', logical, [1 zeros(1, PD_struct.no_pds)], [1 0 0; 0 0 1; 0 .5 0])
+   
+    axis tight
+    
+    hold on
+    
+    plot(freq_bin_centers', zeros(length(freq_bin_centers), 1), '--k')
+    
+    if fo == 1
+        
+        title({folder; 'Phase Lag'; ['(', chan_label, ')']})
+        
+    else
+        
+        title(folder)
+        
+    end
     
     if mod(fo, c) == 1
     
@@ -188,11 +276,19 @@ for pd = 1:PD_struct.no_pds
     
     mean_f = sum(Freqs, 2)/2;
     
-    d_phi = dphi_multiplier*diff(Phases, [], 2);
+    if ~isempty(dphi_multiplier)
+    
+        d_phi = dphi_multiplier*diff(Phases, [], 2);
+        
+    else
+        
+        d_phi = -diff(Phases, [], 2);
+        
+    end
     
     figure
     
-    [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index), no_phase_bins, f_bins);
+    [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index), no_phase_bins, f_bins, bonferroni_count);
     
     freq_cats{pd} = categorize_freq(mean_f(f_overlap_index), f_bins);
     
@@ -200,7 +296,11 @@ for pd = 1:PD_struct.no_pds
     
 end
 
-[~, ~, zero_test, ~, angle_pval] = circular_stats(f_bins, phases, freq_cats);
+conf_mat = reshape(conf_mat, size(conf_mat, 1), 1, size(conf_mat, 2));
+
+conf_mat = repmat(conf_mat, [1 2 1]);
+
+[~, ~, zero_test, ~, angle_pval] = circular_stats(f_bins, phases, freq_cats, bonferroni_count);
 
 figure(1)
 
@@ -222,7 +322,7 @@ hold on
 
 plot(freq_bin_centers', zeros(length(freq_bin_centers), 1), '--k')
 
-title(['Phase Lag (', chan_label, ')'])
+title({'Phase Lag'; ['(', chan_label, ')']})
 
 ylabel('Degrees')
 
@@ -257,7 +357,7 @@ function F_c = categorize_freq(F, f_bins)
     
 end
 
-function [rao_test, rayleigh_test, zero_test, conc_pval, angle_pval] = circular_stats(f_bins, phases, freq_cats)
+function [rao_test, rayleigh_test, zero_test, conc_pval, angle_pval] = circular_stats(f_bins, phases, freq_cats, bonferroni_count)
 
 no_pds = length(phases);
 
@@ -288,9 +388,9 @@ for f = 1:no_f_bins
 end
 
 % Bonferroni correcting p-values.
-rao_test = min(rao_test*2*no_f_bins, 1);
+rao_test = min(rao_test*(bonferroni_count + 2*no_f_bins), 1);
 
-rayleigh_test = min(rayleigh_test*2*no_f_bins, 1);
+rayleigh_test = min(rayleigh_test*(bonferroni_count + 2*no_f_bins), 1);
         
 %% Testing phases against zero.
 
@@ -313,7 +413,7 @@ for f = 1:no_f_bins
 end
 
 % Bonferroni correcting p-values.
-zero_test = min(zero_test*2*no_f_bins, 1);
+zero_test = min(zero_test*(bonferroni_count + 2*no_f_bins), 1);
 
 %% Testing phases pre- vs. post-infusion.
     
@@ -352,7 +452,7 @@ if no_pds > 1
     end
     
     % Bonferroni correcting p-values.
-    conc_pval = min(conc_pval*no_f_bins, 1); angle_pval = min(angle_pval*no_f_bins, 1);
+    conc_pval = min(conc_pval*(bonferroni_count + no_f_bins), 1); angle_pval = min(angle_pval*(bonferroni_count + no_f_bins), 1);
     
 end
 

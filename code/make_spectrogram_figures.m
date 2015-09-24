@@ -17,6 +17,8 @@ Spec = data.Spec;
 load([folder, '/', prefix, '_peaks.mat'])
 
 s_rate = 500;
+    
+dec_factor = 100; s_rate_dec = s_rate/dec_factor;
 
 t = ((1:length(Spec))/s_rate - basetime)/60;
 
@@ -30,25 +32,31 @@ ends = (ends/s_rate - basetime)/60;
 
 for ch = 1:2
     
-    % figure
-    
     %% Plotting spectrogram for whole data recording.
+    
+    figure(ch)
     
     Ch_spec = abs(Spec(:, :, ch));
     
     dims = size(Ch_spec);
     
-    dec_factor = 50; s_rate_dec = s_rate/dec_factor;
-    
     Spec_dec = nanmean(reshape(Ch_spec', dims(2), dec_factor, dims(1)/dec_factor), 2);
     Spec_dec = permute(Spec_dec, [1 3 2]);
     
     t_dec = ((1:length(Spec_dec))/s_rate_dec - basetime)/60;
+        
+    if strcmp(folder, '130328')
+        
+        Spec_dec = Spec_dec(1:80, :);
+        
+    else
+        
+        Spec_dec = Spec_dec(1:80, t_dec <= 30);
+        t_dec(t_dec > 30) = [];
+        
+    end
     
-    Spec_dec = Spec_dec(1:80, t_dec <= 30);
-    t_dec(t_dec > 30) = [];
-    
-    figure, subplot(2, 1, 1) % subplot(4, 1, 1)
+    subplot(3, 1, 1) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
     imagesc(t_dec, 1:80, Spec_dec(1:80, :))
     
@@ -77,35 +85,37 @@ for ch = 1:2
         
     end
     
-    %% Plotting LFP for whole data recording.
-    
-    subplot(2, 1, 2) % subplot(4, 1, 2)
-    
-    plot(t(t <= 30), PD_dec(t <= 30, ch), 'k')
-    
-    box off
-    
-    axis tight
-    
-    xlabel('Time (min.) Rel. Infusion')
-    
-    ylabel('LFP (mV)')
-    
-    try
-        
-        save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch)])
-        
-    catch
-        
-        save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '.fig'])
-        
-    end
+%     %% Plotting LFP for whole data recording.
+%     
+%     subplot(2, 1, 2) % subplot(4, 1, 2)
+%     
+%     plot(t(t <= 30), PD_dec(t <= 30, ch), 'k')
+%     
+%     box off
+%     
+%     axis tight
+%     
+%     xlabel('Time (min.) Rel. Infusion')
+%     
+%     ylabel('LFP (mV)')
+%     
+%     try
+%         
+%         save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch)])
+%         
+%     catch
+%         
+%         save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '.fig'])
+%         
+%     end
     
 end
 
 for ch = 1:2
     
     %% Plotting spectrogram & LFP for 10 seconds.
+    
+    figure(ch)
     
     Ch_spec = abs(Spec(:, :, ch));
     
@@ -121,7 +131,7 @@ for ch = 1:2
         
         t_interval = t(t_index)*60;
         
-        figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
+        subplot(3, 2, 2 + pd) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
         
         imagesc(t_interval, 1:80, Ch_spec(t_index, 1:80)')
         
@@ -155,7 +165,7 @@ for ch = 1:2
         
         plot([t_interval(1) t_interval(end)], [8 8], ':w', 'LineWidth', 2)
         
-        subplot(2, 1, 2) % subplot(4, 2, 6 + pd)
+        subplot(6, 2, 8 + pd) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
         
         plot(t_interval, PD_dec(t_index, ch), 'k')
         
@@ -175,15 +185,25 @@ for ch = 1:2
         
         ylabel('LFP (mV)')
         
-        try
-            
-            save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd}])
-            
-        catch
-            
-            save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd} '.fig'])
-            
-        end
+%         try
+%             
+%             save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd}])
+%             
+%         catch
+%             
+%             save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_', pd_labels{pd} '.fig'])
+%             
+%         end
+        
+    end
+    
+    try
+        
+        save_as_pdf(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), 'altogether'])
+        
+    catch
+        
+        save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), 'altogether.fig'])
         
     end
     
