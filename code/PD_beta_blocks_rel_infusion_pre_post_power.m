@@ -136,13 +136,21 @@ for fo = 1:no_folders
                 
                 handle(pd) = plot(t(bp_max_start:bp_max_end)/60, BP_plot(bp_max_start:bp_max_end), pd_colors{pd}, 'LineWidth', 2);
                 
+                BP_selected = BP(bp_max_start:bp_max_end, b, ch);
+                
+                BP_selected = nans_to_end(BP_selected);
+                
                 for sec = 1:epoch_secs
-                   
-                    sec_start = max(bp_max_start + (sec - 1)*sampling_freq + 1, 1);
                     
-                    sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
+                    sec_start = (sec - 1)*sampling_freq + 1;
                     
-                    BP_sec(sec, fo, pd, b, ch) = nanmean(BP(sec_start:sec_end, b, ch));
+                    sec_end = min(sec*sampling_freq, size(BP_selected, 1));
+                    
+                    % sec_start = max(bp_max_start + (sec - 1)*sampling_freq + 1, 1);
+                    % 
+                    % sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
+                    
+                    BP_sec(sec, fo, pd, b, ch) = nanmean(BP_selected(sec_start:sec_end));
                     
                 end
                 

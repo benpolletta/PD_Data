@@ -89,14 +89,24 @@ for fo = 1:no_folders
         for pd = 1:no_pds
             
             bp_max_start = All_bp_max_start(fo, ch, band_index, pd);
+            
+            bp_max_end = All_bp_max_end(fo, ch, band_index, pd);
+            
+            Spec_selected = Spec_data(bp_max_start:bp_max_end, :, ch);
+            
+            Spec_selected = nans_to_end(Spec_selected);
            
             for sec = 1:epoch_secs
                 
-                sec_start = max(bp_max_start + (sec - 1)*sampling_freq + 1, 1);
+                sec_start = (sec - 1)*sampling_freq + 1;
                 
-                sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
+                sec_end = min(sec*sampling_freq, size(Spec_selected, 1));
                 
-                WT_sec(:, sec, fo, pd, ch) = nanmean(Spec_data(sec_start:sec_end, :, ch))';
+                % sec_start = max(bp_max_start + (sec - 1)*sampling_freq + 1, 1);
+                % 
+                % sec_end = min(max(bp_max_start + sec*sampling_freq, 1), find(pd_indices(:, pd) == 1, 1, 'last'));
+                
+                WT_sec(:, sec, fo, pd, ch) = nanmean(Spec_selected(sec_start:sec_end, :))';
                 
             end
             

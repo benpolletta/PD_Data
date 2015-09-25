@@ -162,21 +162,3 @@ save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_
     '_', num2str(no_trials_analyzed), 'trials', norm, '_spectrum.mat'], 'WT_sec')
 
 end
-
-function A_new = nans_to_end(A)
-
-[rows, columns] = size(A);
-
-A_new = nan(rows, columns);
-
-for col = 1:columns
-    
-    A_col = A(:, col);
-    
-    A_col(isnan(A_col)) = [];
-    
-    A_new(1:length(A_col), col) = A_col;
-    
-end
-
-end
