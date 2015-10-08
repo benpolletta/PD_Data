@@ -335,6 +335,7 @@ save_as_pdf(1, [PD_struct.subj_prefix, BP_suffix, '_2sd_BP_high_', short_band_la
     
 end
 
+%% CATEGORIZE_FREQ
 function F_c = categorize_freq(F, f_bins)
     
     [r, c] = size(F);
@@ -357,6 +358,7 @@ function F_c = categorize_freq(F, f_bins)
     
 end
 
+%% CIRCULAR_STATS
 function [rao_test, rayleigh_test, zero_test, conc_pval, angle_pval] = circular_stats(f_bins, phases, freq_cats, bonferroni_count)
 
 no_pds = length(phases);

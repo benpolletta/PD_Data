@@ -32,7 +32,7 @@ end
 
 if ~isempty(epoch_secs)
     
-    epoch_label = sprintf('_%ddensest', epoch_secs);
+    epoch_label = sprintf('_%ddensest', short_band_labels{band_index}, epoch_secs);
     
 else
     
@@ -123,9 +123,9 @@ for fo = 1:PD_struct.no_folders
                     
                 end
                 
-                save([cons_name, '_', short_band_labels{band_index}, '_', epoch_label, '_', PD_struct.pd_labels{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
+                save([cons_name, epoch_label, '_', PD_struct.pd_labels{pd} '_plot_data.mat'], 't_hc_plot', 'Spec_hc_plot', 'BP_hc_plot', 'LFP_hc_plot')
                 
-                chunk_plot([cons_name, '_', short_band_labels{band_index}, '_', epoch_label, '_', PD_struct.pd_labels{pd}], [cons_title, PD_struct.pd_labels{pd}], 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
+                chunk_plot([cons_name, epoch_label, '_', PD_struct.pd_labels{pd}], [cons_title, PD_struct.pd_labels{pd}], 10, PD_struct, t_hc_plot, Spec_hc_plot, BP_hc_plot, LFP_hc_plot)
                 
             end
             
