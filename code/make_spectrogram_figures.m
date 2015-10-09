@@ -64,6 +64,8 @@ for ch = 1:2
     
     ylabel('Frequency (Hz)')
     
+    xlabel('Time (min.) Rel. Infusion')
+    
     % caxis([0 10])
     
     axis xy
@@ -181,6 +183,34 @@ for ch = 1:2
         
         axis tight
         
+        % xlabel('Time (sec.) Rel. Infusion')
+        
+        ylabel('LFP (mV)')
+        
+        %% Plotting LFP for 2 seconds.
+        
+        sub_start_time = midpoint - 1/60; sub_end_time = midpoint + 1/60;
+        
+        t_sub_index = t >= sub_start_time & t <= sub_end_time;
+        
+        t_sub_interval = t(t_sub_index)*60;
+        
+        subplot(6, 2, 10 + pd)
+        
+        plot(t_sub_interval, PD_dec(t_sub_index, ch), 'k')
+        
+        hold on
+        
+        sub_spikes_w_nans = Spike_indicator(t_sub_index, ch);
+        
+        sub_spikes_w_nans(sub_spikes_w_nans == 0) = nan;
+        
+        plot(t_sub_interval, PD_dec(t_sub_index, ch).*sub_spikes_w_nans, 'vk')
+        
+        box off
+        
+        axis tight
+        
         xlabel('Time (sec.) Rel. Infusion')
         
         ylabel('LFP (mV)')
@@ -199,11 +229,11 @@ for ch = 1:2
     
     try
         
-        save_as_pdf(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), 'altogether'])
+        save_as_pdf(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_altogether'])
         
     catch
         
-        save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), 'altogether.fig'])
+        save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_altogether.fig'])
         
     end
     
