@@ -390,9 +390,9 @@ for f = 1:no_f_bins
 end
 
 % Bonferroni correcting p-values.
-rao_test = min(rao_test*(bonferroni_count + 2*no_f_bins), 1);
+rao_test = min(rao_test*bonferroni_count, 1);
 
-rayleigh_test = min(rayleigh_test*(bonferroni_count + 2*no_f_bins), 1);
+rayleigh_test = min(rayleigh_test*bonferroni_count, 1);
         
 %% Testing phases against zero.
 
@@ -415,7 +415,7 @@ for f = 1:no_f_bins
 end
 
 % Bonferroni correcting p-values.
-zero_test = min(zero_test*(bonferroni_count + 2*no_f_bins), 1);
+zero_test = min(zero_test*bonferroni_count, 1);
 
 %% Testing phases pre- vs. post-infusion.
     
@@ -454,7 +454,7 @@ if no_pds > 1
     end
     
     % Bonferroni correcting p-values.
-    conc_pval = min(conc_pval*(bonferroni_count + no_f_bins), 1); angle_pval = min(angle_pval*(bonferroni_count + no_f_bins), 1);
+    conc_pval = min(conc_pval*bonferroni_count, 1); angle_pval = min(angle_pval*bonferroni_count, 1);
     
 end
 
