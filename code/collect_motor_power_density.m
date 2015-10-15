@@ -1,4 +1,6 @@
-function collect_motor_power_density(epoch_secs, measure, norm_for_power, freqs, no_cycles, bands)
+function collect_motor_power_density(measure, norm_for_power, freqs, no_cycles, bands)
+
+epoch_secs = 150;
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     

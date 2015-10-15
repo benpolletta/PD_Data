@@ -1,6 +1,6 @@
-function collect_opto_power_density(measure, norm_for_power, freqs, no_cycles, bands)
+function collect_striatal_subthalamic_power_density(measure, norm_for_power, freqs, no_cycles, bands)
 
-no_secs = 5; no_trials = 10;
+epoch_secs = 150;
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -16,9 +16,9 @@ else
     
 end
 
-subject_matnames = {'st_m1_emxarch', 'st_m1_ali_post_carb_opto'};
+subject_matnames = {'st_stn', 'st_stn_kk_chosen'};
 
-channels = [1 2; 2 1];
+channels = [2 1; 1 2];
 
 no_folders = nan(1, 2);
 
@@ -36,15 +36,15 @@ subj_mat_limits = [0 cumsum(no_folders)];
 
 total_folders = subj_mat_limits(end);
 
-All_pct_bp_high = nan(no_secs*no_trials, total_folders, no_pds, no_bands, no_chans);
+All_pct_bp_high = nan(epoch_secs, total_folders, no_pds, no_bands, no_chans);
 
 for s = 1:2
    
     clear pct_bp_high
     
-    load([subject_matnames{s}, BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', measure, norm_for_power, '.mat'])
+    load([subject_matnames{s}, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR', norm_for_power, measure, '.mat'])
     
-    if exist('BP_sec')
+    if exist('BP_sec', 'var')
         
         pct_bp_high = BP_sec;
         
@@ -62,4 +62,4 @@ clear pct_bp_high
 
 pct_bp_high = All_pct_bp_high;
 
-save(['OPTO', BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', norm_for_power, measure, '.mat'], 'pct_bp_high')
+save(['STR_STN', BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', norm_for_power, measure, '.mat'], 'pct_bp_high')
