@@ -1,4 +1,10 @@
-function make_spectrogram_figures(group_prefix, subject_no)
+function make_spectrogram_figures(group_prefix, subject_no, color_lims, zoom_locs)
+
+if size(color_lims, 1) == 1
+    
+    color_lims = repmat(color_lims, 2, 1);
+    
+end
 
 load([group_prefix, '_subjects.mat'])
 
@@ -60,11 +66,15 @@ for ch = 1:2
     
     imagesc(t_dec, 1:80, Spec_dec(1:80, :))
     
-    title([folder, ', Channel ', num2str(ch)])
+    set(gca, 'FontSize', 16)
     
-    ylabel('Frequency (Hz)')
+    caxis(color_lims(ch, :))
     
-    xlabel('Time (min.) Rel. Infusion')
+    title(chan_labels{ch}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
+    
+    ylabel('Frequency (Hz)', 'FontSize', 16)
+    
+    xlabel('Time (min.) Rel. Infusion', 'FontSize', 16)
     
     % caxis([0 10])
     
@@ -127,6 +137,12 @@ for ch = 1:2
         
         midpoint = (starts(pd) + ends(pd))/2;
         
+        if isempty(zoom_locs) || length(zoom_locs) == 1
+            
+            zoom_locs(pd) = midpoint;
+            
+        end
+        
         start_time = midpoint - 5/60; end_time = midpoint + 5/60;
         
         t_index = t >= start_time & t <= end_time;
@@ -137,11 +153,13 @@ for ch = 1:2
         
         imagesc(t_interval, 1:80, Ch_spec(t_index, 1:80)')
         
-        title([folder, ', ', pd_labels{pd}])
+        set(gca, 'FontSize', 16)
         
-        ylabel('Frequency (Hz)')
+        % title(pd_labels{pd}, 'FontSize', 16)
         
-        % caxis([0 10])
+        ylabel('Frequency (Hz)', 'FontSize', 16)
+        
+        caxis(color_lims(ch, :)) % caxis([0 10])
         
         axis xy
         
@@ -179,17 +197,19 @@ for ch = 1:2
         
         plot(t_interval, PD_dec(t_index, ch).*spikes_w_nans, 'vk')
         
+        set(gca, 'FontSize', 16)
+        
         box off
         
         axis tight
         
         % xlabel('Time (sec.) Rel. Infusion')
         
-        ylabel('LFP (mV)')
+        ylabel('LFP (mV)', 'FontSize', 16)
         
         %% Plotting LFP for 2 seconds.
         
-        sub_start_time = midpoint - 1/60; sub_end_time = midpoint + 1/60;
+        sub_start_time = zoom_locs(pd) - 1/60; sub_end_time = zoom_locs(pd) + 1/60;
         
         t_sub_index = t >= sub_start_time & t <= sub_end_time;
         
@@ -199,6 +219,8 @@ for ch = 1:2
         
         plot(t_sub_interval, PD_dec(t_sub_index, ch), 'k')
         
+        set(gca, 'FontSize', 16)
+        
         hold on
         
         sub_spikes_w_nans = Spike_indicator(t_sub_index, ch);
@@ -207,13 +229,15 @@ for ch = 1:2
         
         plot(t_sub_interval, PD_dec(t_sub_index, ch).*sub_spikes_w_nans, 'vk')
         
+        set(gca, 'FontSize', 16)
+        
         box off
         
         axis tight
         
-        xlabel('Time (sec.) Rel. Infusion')
+        xlabel('Time (sec.) Rel. Infusion', 'FontSize', 16)
         
-        ylabel('LFP (mV)')
+        ylabel('LFP (mV)', 'FontSize', 16)
         
 %         try
 %             
