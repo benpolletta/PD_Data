@@ -203,8 +203,16 @@ conf_mat = repmat(conf_mat, [1 2 1]);
 figure(2) % figure(1)
 
 % subplot(2, 1, 2)
+   
+MR_mat_for_plot = (180/pi)*angle(MR_mat);
 
-h = boundedline(freq_bin_centers', (180/pi)*angle(MR_mat), (180/pi)*conf_mat);
+if strcmp(group_prefix, 'OPTO')
+    
+    MR_mat_for_plot(freq_bin_centers == 24, 2) = MR_mat_for_plot(freq_bin_centers == 24, 2) - 360;
+    
+end
+
+h = boundedline(freq_bin_centers', MR_mat_for_plot, (180/pi)*conf_mat);
 
 set(h, 'Marker', 's')
 
@@ -222,7 +230,7 @@ add_stars(gca, freq_bin_centers', logical, [1 zeros(1, no_pds_plotted)], [1 0 0;
 
 set(gca, 'NextPlot', 'add', 'ColorOrder', [0 0 1; 0 .5 0])
 
-h_prime = plot(freq_bin_centers', (180/pi)*angle(MR_mat));
+h_prime = plot(freq_bin_centers', MR_mat_for_plot);
 
 set(h_prime, 'Marker', 's')
 
