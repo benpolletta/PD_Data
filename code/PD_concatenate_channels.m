@@ -71,7 +71,7 @@ for f=1:no_files
         
     end
     
-    PD_data(last_index+(1:length(data)),:) = data;
+    PD_data(last_index + (1:length(data)), :) = data;
     
     clear data
     
@@ -85,7 +85,7 @@ if plot_opt > 0
    
     figure;
     
-    plot((1:length(PD_data))'/(60*sampling_rate),PD_data)
+    plot((1:length(PD_data))'/(60*sampling_rate), PD_data)
     
     title([prefix,', All Data'])
     
