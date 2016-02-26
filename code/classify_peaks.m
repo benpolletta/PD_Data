@@ -423,7 +423,7 @@ for c = 1:no_clusters
         
     end
     
-    avg_wt_power(:, :, c) = nanzscore(nanmean(wt_power, 3)')';
+    avg_wt_power(:, :, c) = nanmean(wt_power, 3);
     
     avg_wt_phase(:, :, c) = nanmean(wt_phase, 3);
     
@@ -442,7 +442,7 @@ for c = 1:no_clusters
     
     subplot(rows, cols, c)
     
-    imagesc(t, freqs, avg_wt_power(:, :, c))
+    imagesc(t, freqs, nanzscore(avg_wt_power(:, :, c)')')
     
     axis xy
     
@@ -460,7 +460,33 @@ for c = 1:no_clusters
     
 end
 
-save_as_pdf(gcf, [fig_name, '_wt_pow'])
+save_as_pdf(gcf, [fig_name, '_wt_pow_zs'])
+
+figure
+
+for c = 1:no_clusters
+    
+    subplot(rows, cols, c)
+    
+    for_plot = avg_wt_power(:, :, c);
+    
+    for_plot(logical(Spec_nans)) = nan;
+    
+    imagesc(t, freqs, nanzscore(for_plot')')
+    
+    axis xy
+    
+    % caxis([-pi, pi])
+    
+    title(['Cluster # ', num2str(c), ', WT Power'])
+    
+    xlabel('Time (ms)')
+    
+    ylabel('Freq. (Hz)')
+    
+end
+
+save_as_pdf(gcf, [fig_name, '_wt_power_nopeak_zs'])
 
 figure
 

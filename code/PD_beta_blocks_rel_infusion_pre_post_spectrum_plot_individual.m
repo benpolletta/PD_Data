@@ -101,7 +101,7 @@ for fo = 1:no_folders
             
         end
         
-        subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
+        subplot(no_folders, no_chans, (fo - 1)*no_chans + ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
         if strcmp(norm, '_pct')
             
@@ -121,15 +121,15 @@ for fo = 1:no_folders
         
         if fo == 1
             
-            title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];[folder, ', ', band_labels{b}]})
+            title({chan_labels{ch};[num2str(epoch_secs/60), ' Minutes of Densest High Power'];[folder, ', ', band_labels{b}]})
             
-            ylabel(chan_labels{ch})
+            % ylabel(chan_labels{ch})
             
             legend(pd_labels)
             
         else
             
-            title(folder)
+            ylabel(folder)
             
         end
         

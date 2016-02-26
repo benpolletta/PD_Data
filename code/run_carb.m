@@ -26,13 +26,11 @@ for i = 1:length(pd_handles)
    
 end
 
-pd_handles = {'_by_STR', '_by_STR_pct'};
-
-for i = 1:length(pd_handles)
+for i = 1:length(power_handles)
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, 150, pd_handles{i}, 3, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, 3, 6, freqs, no_cycles, bands);
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, pd_handles{i}, 3, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, 3, 6, freqs, no_cycles, bands);
     
 end
 
