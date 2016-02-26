@@ -32,7 +32,7 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands) % Defaults.
     
     freqs = 1:200;
     
-    no_cycles = linspace(3, 7, length(freqs));
+    no_cycles = linspace(3, 21, length(freqs));
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
@@ -181,7 +181,7 @@ for fo = 1:length(folders)
                 
             end
             
-            [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
             
             BP(logical(spike_nans)) = nan;
             
@@ -198,6 +198,10 @@ for fo = 1:length(folders)
             spike_nans = [];
             
         end
+        
+    else
+        
+        spike_nans = [];
         
     end
     

@@ -4,7 +4,7 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
     
-    no_cycles = linspace(3, 7, 200);
+    no_cycles = linspace(3, 21, 200);
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     

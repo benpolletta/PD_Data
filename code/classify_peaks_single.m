@@ -96,8 +96,8 @@ artifact_ids = input('Which cluster number(s) is/are artifacts?');
 
 if ~isempty(artifact_ids)
     
-    peak_indicator = scarlet_letter(X, Peak_data, artifact_ids, rad);
-    save([prefix '_chan' num2str(channel) '_artifacts.mat'],'peak_indicator','Peak_data');
+    peak_indicator = scarlet_letter(X, Peak_data, artifact_ids);
+    save([prefix '_chan' num2str(channel) '_artifacts.mat'], 'artifact_ids', 'peak_indicator', 'Peak_data');
     
 else
     
@@ -111,20 +111,29 @@ end
 
 % takes these Peak data and ids to remove as arguments. Returns a single
 % binary array with 1s at each of these peaks
-function outputarray = scarlet_letter(X, Peak_data, artifact_ids, rad)
+function outputarray = scarlet_letter(X, Peak_data, artifact_ids)
+
     outputarray = zeros(size(X));
-    offset = [];
+    
+    artifact_locs = [];
+    
     for i=1:length(artifact_ids)
-        curr = Peak_data(Peak_data(:,6) == artifact_ids(i), 2);
-        offset = [offset; curr];
+        
+        curr_locs = Peak_data(Peak_data(:,6) == artifact_ids(i), 2);
+        artifact_locs = [artifact_locs; curr_locs];
+        
     end
-    artifact_matrix = repmat(-rad:1:(rad-1)',length(offset),1);
-    offset_matrix = repmat(offset,1,size(artifact_matrix,2));
-    artifact_matrix = artifact_matrix + offset_matrix;
-    artifact_matrix = sort(unique(artifact_matrix(:)));
-    artifact_matrix(artifact_matrix <= 0) = [];
-    artifact_matrix(artifact_matrix > length(outputarray)) = [];
-    outputarray(artifact_matrix) = 1;
+    
+    % artifact_matrix = repmat(-rad:1:(rad-1)',length(offset),1);
+    % offset_matrix = repmat(offset,1,size(artifact_matrix,2));
+    % artifact_matrix = artifact_matrix + offset_matrix;
+    % artifact_matrix = sort(unique(artifact_matrix(:)));
+    % artifact_matrix(artifact_matrix <= 0) = [];
+    % artifact_matrix(artifact_matrix > length(outputarray)) = [];
+    % outputarray(artifact_matrix) = 1;
+    
+    outputarray(artifact_locs) = 1;
+    
 end
 
 function plot_clust_v_time(IDX, locs, sampling_freq, binlength)
