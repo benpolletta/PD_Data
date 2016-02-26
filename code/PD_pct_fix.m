@@ -44,6 +44,8 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, freqs, no_cycles, ba
     
     subj_name = [folders{fo}, '/', prefixes{fo}];
     
+    basetime = basetimes(fo);
+    
     load([subj_name,'_all_channel_data_dec.mat'])
     
     % no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
@@ -66,7 +68,7 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, freqs, no_cycles, ba
         
     else
         
-        base_index = t <= basetimes(fo);
+        base_index = t <= basetime;
         
     end
     
