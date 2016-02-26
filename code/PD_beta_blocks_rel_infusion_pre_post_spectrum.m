@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, epoch_secs, pd_handle, norm, band_index, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, band_index, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -8,13 +8,15 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
-    BP_suffix = '';
+    BP_suffix = ['', peak_suffix];
     
 else
 
     in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
 
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+    BP_suffix = [BP_suffix, peak_suffix];
     
 end
     
@@ -60,7 +62,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    [~, Spec_data] = get_BP(subj_name, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
+    [~, Spec_data] = get_BP(subj_name, peak_suffix, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
     
     if strcmp(norm, '')
         

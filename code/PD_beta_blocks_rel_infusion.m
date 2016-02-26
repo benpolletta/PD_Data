@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, peak_suffix, freqs, no_cycles, bands)
 
 % Computes zero-one vectors indicating time points at which band power is
 % above sd_lim standard deviations from the (pre-infusion) mean.
@@ -22,11 +22,17 @@ function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, freqs, no_cycles, band
 %  containing the end frequency of each band; default is [1 4;4 8;8 30;30
 %  100;120 180;0 200].
 
+if isempty(sd_lim)  % Default.
+    
+    sd_lim = 2;
+    
+end
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands) % Defaults.
     
     freqs = 1:200;
     
-    no_cycles = linspace(3, 21, length(freqs));
+    no_cycles = linspace(3, 7, length(freqs));
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
@@ -133,15 +139,65 @@ for fo = 1:length(folders)
         
     end
     
-    if ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
+    if isempty(peak_suffix)
         
-        load([subj_name, '_peaks.mat'])
+        if ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
+            
+            load([subj_name, '_peaks.mat'])
+            
+            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+            
+        elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
+            
+            for ch = 1:2
+                
+                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
+                
+                Spike_indicator(:, ch) = peak_indicator;
+                
+            end
+            
+            [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+            
+            BP(logical(spike_nans)) = nan;
+            
+            Spec(logical(spike_nans_wt)) = nan;
+            
+        else
+            
+            spike_nans = [];
+            
+        end
         
-        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+    elseif strcmp(peak_suffix, '_kmeans')
         
-    else
-        
-        spike_nans = [];
+        if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
+            
+            for ch = 1:2
+                
+                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
+                
+                Spike_indicator(:, ch) = peak_indicator;
+                
+            end
+            
+            [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+            
+            BP(logical(spike_nans)) = nan;
+            
+            Spec(logical(spike_nans_wt)) = nan;
+            
+        elseif ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
+            
+            load([subj_name, '_peaks.mat'])
+            
+            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+            
+        else
+            
+            spike_nans = [];
+            
+        end
         
     end
     
@@ -189,7 +245,7 @@ for fo = 1:length(folders)
         
         BP_high_cum(cumsum(BP_high, 2) > 1) = 0;
         
-        save([subj_name, BP_suffix, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
+        save([subj_name, BP_suffix, peak_suffix, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
         
         for pd = 1:no_pds
         
@@ -207,6 +263,6 @@ for fo = 1:length(folders)
           
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, peak_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
 
 end

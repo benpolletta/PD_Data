@@ -1,4 +1,4 @@
-function PD_pct_fix(subjects_mat, freqs, no_cycles, bands)
+function PD_pct_fix(subjects_mat, peak_suffix, freqs, no_cycles, bands)
 
 % Fix percent normalization, especially for laser data (7/15/15).
 
@@ -12,7 +12,7 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
-    BP_suffix = '';
+    BP_suffix = ['', peak_suffix];
     
 else
 
@@ -20,6 +20,8 @@ else
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
 
+    BP_suffix = [BP_suffix, peak_suffix];
+    
 end
 
 for fo = 1:length(folders)
@@ -60,7 +62,7 @@ for fo = 1:length(folders)
     
     clear Spec Spec_pct BP BP_pct
     
-    [BP, Spec] = get_BP(subj_name, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
+    [BP, Spec] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
 
     % Spec = load([subj_name, BP_suffix, '_wt.mat'], 'Spec');
     % 

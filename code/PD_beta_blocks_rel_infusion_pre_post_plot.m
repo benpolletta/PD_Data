@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_plot(subject_mat, epoch_secs, pd_handle, test_handle, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_plot(subject_mat, peak_suffix, epoch_secs, pd_handle, test_handle, freqs, no_cycles, bands)
 
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
 
@@ -6,11 +6,13 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
-    BP_suffix = '';
+    BP_suffix = ['', peak_suffix];
     
 else
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+    BP_suffix = [BP_suffix, peak_suffix];
     
 end
 

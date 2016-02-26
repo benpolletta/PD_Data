@@ -20,7 +20,9 @@ function PD_all_data_wav(subjects_mat, freqs, no_cycles, bands)
 
 load(subjects_mat)
 
-for fo = 1:length(folders)
+folders, prefixes, basetimes
+
+parfor fo = 1:length(folders)
     
     folder = folders{fo};
     

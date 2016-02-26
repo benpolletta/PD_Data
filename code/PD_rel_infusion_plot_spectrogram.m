@@ -1,10 +1,14 @@
-function PD_rel_infusion_plot_spectrogram(subject_mat, sd_lim, chunk_size) % , outlier_lims)
+function PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, sd_lim, chunk_size) % , outlier_lims)
 
 % INPUTS:
 % subject_mat - .mat file containing info about recordings to be processed.
 % sd_lim - standard deviation cutoff above which power in a given frequency
 % band is considered "high".
 % chunk_size - length of data plotted in each figure (20 sec. is standard).
+
+if isempty(sd_lim), sd_lim = 2; end
+
+if isempty(chunk_size), chunk_size = 20; end
 
 load(subject_mat)
 
@@ -48,15 +52,15 @@ for fo = 1:length(folders)
     
     no_chunks = no_mins*60/chunk_size;
     
-    [BP_no_spikes, Spec] = get_BP(subj_name, outlier_lims(fo), '', [], [], []); % load([subj_name, '_wt.mat'], 'Spec') % 
+    [BP_no_spikes, Spec] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '', [], [], []); % load([subj_name, '_wt.mat'], 'Spec') % 
     
-    [BP_norm_no_spikes, ~] = get_BP(subj_name, outlier_lims(fo), '_norm', [], [], []); % 
+    [BP_norm_no_spikes, ~] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '_norm', [], [], []); % 
     
     load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm') % 
     
-    load([subj_name, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
+    load([subj_name, peak_suffix, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
     
-    load([subj_name, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high_cum')
+    load([subj_name, peak_suffix, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high_cum')
     
     BP_high(BP_high == 0) = nan; BP_high_cum(BP_high_cum == 0) = nan;
     
@@ -82,19 +86,55 @@ for fo = 1:length(folders)
         
     end
     
-    if ~isempty(dir([subj_name, '_peaks.mat']))
+    if isempty(peak_suffix)
+    
+        if ~isempty(dir([subj_name, '_peaks.mat']))
+            
+            load([subj_name, '_peaks.mat'])
+            
+        elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
+            
+            for ch = 1:2
+                
+                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
+                
+                Spike_indicator(:, ch) = peak_indicator;
+                
+            end 
+            
+        else
+            
+            Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
+            
+        end
         
-        load([subj_name, '_peaks.mat'])
+    elseif strcmp(peak_suffix, '_kmeans')
         
-    else
-        
-        Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
+        if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
+            
+            for ch = 1:2
+                
+                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
+                
+                Spike_indicator(:, ch) = peak_indicator;
+                
+            end
+            
+        elseif ~isempty(dir([subj_name, '_peaks.mat']))
+            
+            load([subj_name, '_peaks.mat'])
+            
+        else
+            
+            Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
+            
+        end
         
     end
         
     for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
-        chunk_name = [subj_name, '_chunk', num2str(c, '%03d'), '_wt'];
+        chunk_name = [subj_name, peak_suffix, '_chunk', num2str(c, '%03d'), '_wt'];
     
         chunk_start = max(1, (c - 1)*chunk_size*sampling_freq + 1);
         

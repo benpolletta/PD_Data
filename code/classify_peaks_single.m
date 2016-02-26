@@ -3,29 +3,17 @@
 % peaks) and basetime, which is the time in seconds at which the carbachol
 % infusion begins. Clusters is the number of clusters to be used. This
 % function returns peak data, which is a matrix
-function [peak_indicator, Peak_data] = classify_peaks(folder, prefix, channel_multipliers, sampling_freq, min_prominences, min_secs_apart, basetime, clusters, normalized)
+function [peak_indicator, Peak_data] = classify_peaks_single(folder, prefix, channel, channel_multiplier, sampling_freq, min_prominence, min_secs_apart, basetime, clusters, normalized)
     
 load([folder, '/', prefix, '_all_channel_data_dec.mat'])
 
-if isscalar(min_secs_apart)
-    min_secs_apart = min_secs_apart*[1 1];
-end
-
-if isscalar(clusters)
-    clusters = clusters*[1 1];
-end
-
-if isscalar(min_prominences)
-    min_prominences = min_prominences*[1 1];
-end
-
 if isempty(clusters)
-    clusters = [2 2];
+    clusters = 2;
 end
 
 % specify the minimum prominence
-if isempty(min_prominences)
-    min_prominences = 0;
+if isempty(min_prominence)
+    min_prominence = 0;
 end
 
 % specify minimum separation in time between the spikes
@@ -43,95 +31,91 @@ end
 
 rad = floor(min_secs_apart*sampling_freq/2); % 50;
 
-for ch = 1:size(PD_dec, 2)
+X = channel_multiplier*PD_dec(:, channel);
+
+% initialize time array
+t = (1:length(X))/sampling_freq - basetime;
+
+min_samples_apart = min_secs_apart*sampling_freq;
+
+fig_name = sprintf('%s/%s_chan%d_%dclusters_%.1fHz_spikes_%dprom', folder,...
+    prefix, channel, clusters, sampling_freq/min_samples_apart, min_prominence);
+
+if normalized == 1
+    fig_name = [fig_name '_normalized'];
+else
+    fig_name = [fig_name '_unnormalized'];
+end
+%         find the peaks and their locations within the data
+[peaks, locs] = findpeaks(X, 'MinPeakDistance', min_samples_apart);
+
+%         get peak_details. This function was modified from Ben's original version.
+[peak_widths, peak_prominences, peak_forms] = peak_details(X, locs, min_samples_apart, sampling_freq, normalized, rad);
+
+peak_prom_std = zscore(peak_prominences);
+
+peak_forms(peak_prom_std < min_prominence, :) = [];
+
+peak_forms = peak_forms - repmat(mean(peak_forms, 2), 1, size(peak_forms, 2));
+
+opts = statset('Display','final');
+%
+%     [coeff, X] = pca(peak_forms);
+%
+%     peak_forms_simplified = X*(coeff(:,1:4));
+
+[IDX, C] = kmeans(peak_forms, clusters, 'Replicates', 10, 'Options', opts);
+
+plot_centroids(C, fig_name);
+save_as_pdf(gcf, sprintf('%s_%03d_centroids', fig_name, 0));
+% close
+
+plot_clust_v_time(IDX, locs(peak_prom_std >= min_prominence), sampling_freq, 20);
+save_as_pdf(gcf, sprintf('%s_%03d_time_histogram', fig_name, 0));
+% close
+
+if rad < sampling_freq
     
-    X = channel_multipliers(ch)*PD_dec(:, ch);
+    [~, ~, long_peak_forms] = peak_details(X, locs, sampling_freq, sampling_freq, normalized, sampling_freq);
     
-    % initialize time array
-    t = (1:length(X))/sampling_freq - basetime;
+    plot_peak_triggered_wt(fig_name, IDX, long_peak_forms, 1:200, linspace(3, 21, length(1:200)), sampling_freq)
     
-    min_samples_apart = min_secs_apart(ch)*sampling_freq;
+else
     
-    fig_name = sprintf('%s/%s_chan%d_%dclusters_%.1fHz_spikes_%dprom', folder,...
-        prefix, ch, clusters(ch), sampling_freq/min_samples_apart, min_prominences(ch));
-    
-    if normalized == 1
-        fig_name = [fig_name '_normalized'];
-    else
-        fig_name = [fig_name '_unnormalized'];
-    end
-    %         find the peaks and their locations within the data
-    [peaks, locs] = findpeaks(X, 'MinPeakDistance', min_samples_apart);
-    
-    %         get peak_details. This function was modified from Ben's original version.
-    [peak_widths, peak_prominences, peak_forms] = peak_details(X, locs, min_samples_apart, sampling_freq, normalized, rad);
-    
-    peak_prom_std = zscore(peak_prominences);
-    
-    peak_forms(peak_prom_std < min_prominences(ch), :) = [];
-    
-    peak_forms = peak_forms - repmat(mean(peak_forms, 2), 1, size(peak_forms, 2));
-    
-    opts = statset('Display','final');
-    %
-    %     [coeff, X] = pca(peak_forms);
-    %
-    %     peak_forms_simplified = X*(coeff(:,1:4));
-    
-    [IDX, C] = kmeans(peak_forms, clusters(ch), 'Replicates', 10, 'Options', opts);
-    
-    plot_centroids(C, fig_name);
-    save_as_pdf(gcf, sprintf('%s_%03d_centroids', fig_name, 0));
-    % close
-    
-    plot_clust_v_time(IDX, locs(peak_prom_std >= min_prominences(ch)), sampling_freq, 20);
-    save_as_pdf(gcf, sprintf('%s_%03d_time_histogram', fig_name, 0));
-    % close
-    
-    if rad < sampling_freq
-        
-        [~, ~, long_peak_forms] = peak_details(X, locs, sampling_freq, sampling_freq, normalized, sampling_freq);
-        
-        plot_peak_triggered_wt(fig_name, IDX, long_peak_forms, 1:200, linspace(3, 21, length(1:200)), sampling_freq)
-        
-    else
-        
-        plot_peak_triggered_wt(fig_name, IDX, peak_forms, 1:200, linspace(3, 21, length(1:200)), sampling_freq)
-        
-    end
-    
-    Peak_data = [peaks locs peak_widths peak_prom_std peak_prominences]; %IDX];
-    
-    Peak_data(peak_prom_std < min_prominences(ch), :) = []; Peak_data = [Peak_data IDX];
-    
-    plot_peaks_2(fig_name, t, sampling_freq, X, Peak_data, [1 length(X)] + [-min_samples_apart min_samples_apart])
-    
-    artifact_ids = input('Which cluster number(s) is/are artifacts?');
-    
-    if ~isempty(artifact_ids)
-        
-        peak_indicator = scarlet_letter(X, Peak_data, artifact_ids, rad);
-        save([prefix '_chan' num2str(ch) '_artifacts.mat'],'peak_indicator','Peak_data');
-        
-    end
-    
-    close('all')
+    plot_peak_triggered_wt(fig_name, IDX, peak_forms, 1:200, linspace(3, 21, length(1:200)), sampling_freq)
     
 end
+
+Peak_data = [peaks locs peak_widths peak_prom_std peak_prominences]; %IDX];
+
+Peak_data(peak_prom_std < min_prominence, :) = []; Peak_data = [Peak_data IDX];
+
+plot_peaks_2(fig_name, t, sampling_freq, X, Peak_data, [1 length(X)] + [-min_samples_apart min_samples_apart])
+
+artifact_ids = input('Which cluster number(s) is/are artifacts?');
+
+if ~isempty(artifact_ids)
+    
+    peak_indicator = scarlet_letter(X, Peak_data, artifact_ids, rad);
+    save([prefix '_chan' num2str(channel) '_artifacts.mat'],'peak_indicator','Peak_data');
+    
+else
+    
+    peak_indicator = zeros(size(X));
+    
+end
+
+close('all')
 
 end
 
 % takes these Peak data and ids to remove as arguments. Returns a single
 % binary array with 1s at each of these peaks
 function outputarray = scarlet_letter(X, Peak_data, artifact_ids, rad)
-    
-outputarray = zeros(size(X));
-    
-if ~isempty(artifact_ids)
-    
+    outputarray = zeros(size(X));
     offset = [];
     for i=1:length(artifact_ids)
-        curr = Peak_data(find(Peak_data(:,6) == artifact_ids(i)),2);
+        curr = Peak_data(Peak_data(:,6) == artifact_ids(i), 2);
         offset = [offset; curr];
     end
     artifact_matrix = repmat(-rad:1:(rad-1)',length(offset),1);
@@ -141,9 +125,6 @@ if ~isempty(artifact_ids)
     artifact_matrix(artifact_matrix <= 0) = [];
     artifact_matrix(artifact_matrix > length(outputarray)) = [];
     outputarray(artifact_matrix) = 1;
-    
-end
-
 end
 
 function plot_clust_v_time(IDX, locs, sampling_freq, binlength)
@@ -427,8 +408,8 @@ for c = 1:no_clusters
     
 end
 
-pow_cmax = all_dimensions(@nanmax, avg_wt_power);
-pow_cmin = all_dimensions(@nanmin, avg_wt_power);
+% pow_cmax = all_dimensions(@nanmax, avg_wt_power);
+% pow_cmin = all_dimensions(@nanmin, avg_wt_power);
 
 t = 1000*(((1:data_size) - round(data_size/2))/sampling_freq);
 
