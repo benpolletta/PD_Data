@@ -35,3 +35,5 @@ for i = 1:length(pd_handles)
     PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, pd_handles{i}, power_handles{j}, 3, 6, freqs, no_cycles, bands);
     
 end
+
+PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20)
