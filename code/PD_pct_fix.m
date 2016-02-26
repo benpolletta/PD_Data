@@ -2,37 +2,47 @@ function PD_pct_fix(subjects_mat, peak_suffix, freqs, no_cycles, bands)
 
 % Fix percent normalization, especially for laser data (7/15/15).
 
-load(subjects_mat)
+subjects_struct = load(subjects_mat);
 
-if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+parfor fo = 1:length(subjects_struct.folders)
     
-    freqs = 1:200; in_freqs = [];
+    PD_pct_fix_inner(fo, subjects_struct, peak_suffix, freqs, no_cycles, bands)
     
-    no_cycles = linspace(3, 21, 200); in_no_cycles = [];
-    
-    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
-    
-    BP_suffix = ['', peak_suffix];
-    
-else
-
-    in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
-    
-    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
-
-    BP_suffix = [BP_suffix, peak_suffix];
+end
     
 end
 
-for fo = 1:length(folders)
+function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, freqs, no_cycles, bands)
+
+    if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+
+        freqs = 1:200; in_freqs = [];
+
+        no_cycles = linspace(3, 21, 200); in_no_cycles = [];
+
+        bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
+
+        BP_suffix = ['', peak_suffix];
+
+    else
+
+        in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
+
+        BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+
+        BP_suffix = [BP_suffix, peak_suffix];
+
+    end
+
+    fields = fieldnames(subjects_struct);
+
+    for f = 1:length(fields)
+
+        eval([fields{f}, ' = subjects_struct.', fields{f}, ';'])
+
+    end
     
-    folder = folders{fo};
-    
-    prefix = prefixes{fo};
-    
-    basetime = basetimes(fo);
-    
-    subj_name = [folder,'/',prefix];
+    subj_name = [folders{fo}, '/', prefixes{fo}];
     
     load([subj_name,'_all_channel_data_dec.mat'])
     
@@ -56,7 +66,7 @@ for fo = 1:length(folders)
         
     else
         
-        base_index = t <= basetime;
+        base_index = t <= basetimes(fo);
         
     end
     
