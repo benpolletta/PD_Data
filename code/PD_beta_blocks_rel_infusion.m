@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion(subject_mat, sd_lim, peak_suffix, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, sd_lim, freqs, no_cycles, bands)
 
 % Computes zero-one vectors indicating time points at which band power is
 % above sd_lim standard deviations from the (pre-infusion) mean.
@@ -139,6 +139,8 @@ for fo = 1:length(folders)
         
     end
     
+    Spike_indicator = nan(size(BP, 1), 2);
+    
     if isempty(peak_suffix)
         
         if ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
@@ -157,11 +159,7 @@ for fo = 1:length(folders)
                 
             end
             
-            [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-            BP(logical(spike_nans)) = nan;
-            
-            Spec(logical(spike_nans_wt)) = nan;
+            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
             
         else
             
@@ -182,10 +180,6 @@ for fo = 1:length(folders)
             end
             
             [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-            BP(logical(spike_nans)) = nan;
-            
-            Spec(logical(spike_nans_wt)) = nan;
             
         elseif ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
             

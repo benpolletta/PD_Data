@@ -32,13 +32,13 @@ for b = 1:no_bands
     
 end
 
-subject_matnames = {'st_m1', 'st_m1_ali'};
+subject_matnames = {'st_m1', 'st_m1_ali', 'st_m1_ali2'};
 
-channels = [2 1];
+channels = [2 1 1];
 
-no_folders = nan(1, 2);
+no_folders = nan(1, 3);
 
-for s = 1:2
+for s = 1:length(subject_matnames)
     
     load([subject_matnames{s}, '_subjects.mat'])
     
@@ -54,7 +54,7 @@ total_folders = subj_mat_limits(end);
 
 All_WT_sec = nan(no_freqs, epoch_secs, total_folders, no_pds);
 
-for s = 1:2
+for s = 1:length(subject_matnames)
    
     clear WT_sec
     

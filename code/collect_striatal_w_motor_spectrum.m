@@ -32,9 +32,9 @@ for b = 1:no_bands
     
 end
 
-subject_matnames = {'st_m1', 'st_m1_ali'};
+subject_matnames = {'st_m1', 'st_m1_ali', 'st_m1_ali2'};
 
-channels = [1 2];
+channels = [1 2 2];
 
 no_groups = length(subject_matnames);
 

@@ -110,7 +110,8 @@ for fo = 1:no_folders
         
         figure(b)
         
-        beta_blocks_find = conv(BP_high_cum(:, b, strcmp(chan_labels, 'Striatum')), ones(epoch_secs*sampling_freq, 1)/(epoch_secs*sampling_freq), 'same');
+        beta_blocks_find = conv(BP_high_cum(:, b, strcmp(chan_labels, 'Striatum')),...
+            ones(epoch_secs*sampling_freq, 1)/(epoch_secs*sampling_freq), 'same');
             
         for ch = 1:no_chans
             

@@ -85,7 +85,7 @@ for ch = 1:no_chans
         
         WT_mean(:, pd) = nanmean(WT_for_stats, 2); % .*freq_multiplier, 2);
         
-        WT_ci(:, pd) = norminv(1 - .25/bonferroni_count, 0, 1)*nanstd(WT_for_stats, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
+        WT_ci(:, pd) = norminv(1 - .05/bonferroni_count, 0, 1)*nanstd(WT_for_stats, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
         
         % WT_median(:, pd) = nanmedian(WT_for_stats, 2);
         % 

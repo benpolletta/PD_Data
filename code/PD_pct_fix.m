@@ -112,6 +112,14 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, freqs, no_cycles, ba
     
     save([subj_name, BP_suffix, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'no_cycles', 'bands', 'Spec_pct', '-v7.3')
     
-    save([subj_name, BP_suffix, '_wt_BP.mat'], '-v7.3', '-append', 'BP_pct')
+    if ~isempty(dir([subj_name, BP_suffix, '_wt_BP.mat']))
+    
+        save([subj_name, BP_suffix, '_wt_BP.mat'], '-v7.3', '-append', 'BP_pct')
+    
+    else
+       
+        save([subj_name, BP_suffix, '_wt_BP.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'no_cycles', 'bands', 'BP', 'BP_pct', '-v7.3')
+        
+    end
     
 end

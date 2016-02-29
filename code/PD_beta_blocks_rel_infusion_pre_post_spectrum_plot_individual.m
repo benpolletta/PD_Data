@@ -101,11 +101,12 @@ for fo = 1:no_folders
             
         end
         
-        subplot(no_folders, no_chans, (fo - 1)*no_chans + ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
+        subplot(no_chans, no_folders, (ch - 1)*no_folders + fo)
+        % subplot(no_folders, no_chans, (fo - 1)*no_chans + ch) % subplot(no_bands, 2, (b - 1)*2 + ch)
         
         if strcmp(norm, '_pct')
             
-            boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(WT_se))
+            boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(norminv(1 - .05, 0, 1)*WT_se))
             
         else
             
@@ -117,19 +118,23 @@ for fo = 1:no_folders
         
         axis tight
         
+        xlim([8 30])
+        
         All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
         
         if fo == 1
             
-            title({chan_labels{ch};[num2str(epoch_secs/60), ' Minutes of Densest High Power'];[folder, ', ', band_labels{b}]})
+            title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];[folder, ', ', band_labels{b}]})
+            % title({chan_labels{ch};[num2str(epoch_secs/60), ' Minutes of Densest High Power'];[folder, ', ', band_labels{b}]})
             
-            % ylabel(chan_labels{ch})
+            ylabel(chan_labels{ch})
             
             legend(pd_labels)
             
         else
             
-            ylabel(folder)
+            title(folder)
+            % ylabel(folder)
             
         end
         
@@ -157,7 +162,7 @@ for ch = 1:no_chans
     
     if strcmp(norm, '_pct')
     
-        boundedline(freqs(display_indices), All_mean_mean, prep_for_boundedline(All_mean_se))
+        boundedline(freqs(display_indices), All_mean_mean, prep_for_boundedline(norminv(1 - .05, 0, 1)*All_mean_se))
         
     else
             

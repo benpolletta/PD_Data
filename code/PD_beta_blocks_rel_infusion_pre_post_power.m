@@ -84,7 +84,7 @@ for fo = 1:no_folders
     
     pd_indices = logical(pd_indices);
     
-    if ~strcmp(norm, '_spikes')
+    if ~strcmp(norm, '_peaks')
         
         if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
             
