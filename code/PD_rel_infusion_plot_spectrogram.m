@@ -86,6 +86,8 @@ for fo = 1:length(folders)
         
     end
     
+    Spike_indicator = nan(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
+    
     if isempty(peak_suffix)
     
         if ~isempty(dir([subj_name, '_peaks.mat']))
