@@ -18,9 +18,13 @@ function PD_all_data_wav(subjects_mat, freqs, no_cycles, bands)
 %  containing the end frequency of each band; default is [1 4;4 8;8 30;30
 %  100;120 180;0 200].
 
-load(subjects_mat)
+subjects_struct = load(subjects_mat);
 
-folders, prefixes, basetimes
+folders = subjects_struct.folders;
+
+prefixes = subjects_struct.prefixes;
+
+basetimes = subjects_struct.basetimes;
 
 parfor fo = 1:length(folders)
     
