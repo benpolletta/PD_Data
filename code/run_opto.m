@@ -28,11 +28,11 @@ end
 
 for i = 1:2
    
-    PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, peak_suffix, norm_handles{i + 1}, 10, 3, freqs, no_cycles, bands)
+    PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, peak_suffix, norm_handles{i + 1}, 10, 6, freqs, no_cycles, bands)
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, 3, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, 6, 6, freqs, no_cycles, bands);
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, 3, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, 6, 6, freqs, no_cycles, bands);
     
 end
 
