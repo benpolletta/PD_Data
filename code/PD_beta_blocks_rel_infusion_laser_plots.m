@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_plots(subject_mat, measure, no_trials, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_laser_plots(subject_mat, peak_suffix, measure, no_trials, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -6,11 +6,13 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
-    BP_suffix = '';
+    BP_suffix = peak_suffix;
     
 else
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+    BP_suffix = [BP_suffix, peak_suffix];
     
 end
     
@@ -118,13 +120,17 @@ for b = 1:no_bands
         
         pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
         
-        if strcmp(measure(1:6), '_power') || strcmp(measure((end - 5):end), '_power')
+        if length(measure) > 6
             
-            h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
-            
-            ylabel([chan_labels{ch}, 'Beta Power'])
-            
-            title([chan_labels{ch}, ', High ', band_labels{b}, ' Power (Per Trial)'])
+            if strcmp(measure(1:6), '_power') || strcmp(measure((end - 5):end), '_power')
+                
+                h = barwitherr(nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test)))), nanmean(pct_bp_high_for_test), 0.6);
+                
+                ylabel([chan_labels{ch}, 'Beta Power'])
+                
+                title([chan_labels{ch}, ', High ', band_labels{b}, ' Power (Per Trial)'])
+                
+            end
             
         else
             

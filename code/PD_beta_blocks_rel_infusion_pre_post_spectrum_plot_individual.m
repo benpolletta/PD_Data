@@ -54,7 +54,7 @@ if ~isempty(epoch_secs)
     
 else
     
-    spectrum_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_',...
+    spectrum_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_',...
         short_band_labels{band_index_for_time}, pd_handle, norm, '_spectrum'];
     
     epoch_secs = str2double(pd_handle(2:(end - length('trials'))));
