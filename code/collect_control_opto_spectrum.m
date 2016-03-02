@@ -1,4 +1,4 @@
-function collect_opto_spectrum(norm_for_power, band_index, freqs, no_cycles, bands)
+function collect_control_opto_spectrum(norm_for_power, band_index, freqs, no_cycles, bands)
 
 no_secs = 5; no_trials = 10;
 
@@ -36,13 +36,15 @@ for b = 1:no_bands
     
 end
 
-subject_matnames = {'st_m1_emxarch', 'st_m1_ali_post_carb_opto'};
+subject_matnames = {'st_m1_ali_control_opto', 'st_m1_ali2_control_opto', 'st_m1_ali3_control_opto'};
 
-channels = [1 2; 2 1];
+no_mats = length(subject_matnames);
 
-no_folders = nan(1, 2);
+channels = repmat([2 1], 3, 1);
 
-for s = 1:2
+no_folders = nan(1, no_mats);
+
+for s = 1:no_mats
     
     load([subject_matnames{s}, '_subjects.mat'])
     
@@ -58,7 +60,7 @@ total_folders = subj_mat_limits(end);
 
 All_WT_sec = nan(length(band_indices{band_index}), no_secs*no_trials, total_folders, no_pds, 2);
 
-for s = 1:2
+for s = 1:no_mats
    
     clear WT_sec
     
@@ -77,5 +79,5 @@ clear WT_sec
 
 WT_sec = All_WT_sec;
 
-save(['OPTO', BP_suffix, '_', short_band_labels{band_index}, '_',...
+save(['CONTROL_OPTO', BP_suffix, '_', short_band_labels{band_index}, '_',...
     num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec')
