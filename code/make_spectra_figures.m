@@ -1,4 +1,4 @@
-function make_spectra_figures(group_prefix)
+function make_spectra_figures(group_prefix, peak_suffix)
 
 load([group_prefix, '_subjects.mat'], 'chan_labels')
 
@@ -6,7 +6,7 @@ figure
 
 %% Plotting broadband spectrum.
 
-load([group_prefix, '_pct_8-30Hz_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
+load([group_prefix, peak_suffix, '_pct_8-30Hz_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
 
 subplot(2, 1, 1)
 
@@ -68,8 +68,8 @@ ylabel({'Mean \pm 95% CI'; 'Power (% \Delta Baseline)'}, 'FontSize', 16)
 %     
 % end
 
-save_as_eps(gcf, [group_prefix, '_spectra'])
+save_as_eps(gcf, [group_prefix, peak_suffix, '_spectra'])
 
-save_as_pdf(gcf, [group_prefix, '_spectra'])
+save_as_pdf(gcf, [group_prefix, peak_suffix, '_spectra'])
 
 end

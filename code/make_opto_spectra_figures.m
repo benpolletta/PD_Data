@@ -10,7 +10,7 @@ figure
 
 for ch = 1:no_chans
     
-    load([group_prefix, '_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
+    load([group_prefix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
     
     %% Plotting broadband spectrum.
     

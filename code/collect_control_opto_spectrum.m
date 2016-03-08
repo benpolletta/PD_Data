@@ -1,4 +1,4 @@
-function collect_control_opto_spectrum(norm_for_power, band_index, freqs, no_cycles, bands)
+function collect_control_opto_spectrum(peak_suffix, norm_for_power, band_index, freqs, no_cycles, bands)
 
 no_secs = 5; no_trials = 10;
 
@@ -64,7 +64,7 @@ for s = 1:no_mats
    
     clear WT_sec
     
-    load([subject_matnames{s}, BP_suffix, '_', short_band_labels{band_index}, '_',...
+    load([subject_matnames{s}, BP_suffix, '_pct_', short_band_labels{band_index}, '_',...
         num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'])
     
     for ch = 1:2
@@ -79,5 +79,5 @@ clear WT_sec
 
 WT_sec = All_WT_sec;
 
-save(['CONTROL_OPTO', BP_suffix, '_', short_band_labels{band_index}, '_',...
+save(['CONTROL_OPTO', BP_suffix, '_pct_', short_band_labels{band_index}, '_',...
     num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec')
