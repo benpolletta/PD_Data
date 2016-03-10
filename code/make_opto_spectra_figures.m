@@ -1,4 +1,4 @@
-function make_opto_spectra_figures(group_prefix)
+function make_opto_spectra_figures(group_prefix, peak_suffix)
 
 load([group_prefix, '_subjects.mat'], 'chan_labels', 'pd_labels')
 
@@ -10,7 +10,7 @@ figure
 
 for ch = 1:no_chans
     
-    load([group_prefix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
+    load([group_prefix, peak_suffix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
     
     %% Plotting broadband spectrum.
     
