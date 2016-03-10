@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, peak_suffix, epoch_secs, test_handle, pd_handle, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, test_handle, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -161,7 +161,7 @@ for b = 1:no_bands
             
             subplot(no_chans, no_folders, (ch - 1)*no_folders + fo), % subplot(no_bands, 2, (b - 1)*2 + ch)
             
-            plot_data(pct_bp_high_for_test, fo, power_flag, subj_p_vals)
+            plot_data(pct_bp_high_for_test, fo, power_flag, subj_p_vals, [chan_labels{ch}, ', ', short_band_labels{b}])
             
             fprintf(fid(ch), format, folder, nanmean(pct_bp_high_for_test), nanstd(pct_bp_high_for_test)/sqrt(epoch_secs),...
                 nanmedian(pct_bp_high_for_test), quantile(pct_bp_high_for_test, .25), quantile(pct_bp_high_for_test, .75),...
@@ -173,12 +173,12 @@ for b = 1:no_bands
                 
                 if fo == 1
                     
-                    title({[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-                        [folder, ', ', band_labels{b}];['p-value = ', num2str(p_vals(:, fo, b, ch)), ' (', test_handle, ')']})
+                    title({[num2str(epoch_secs/60), ' Mins Densest High Power'];...
+                        [folder, ', ', test_handle];['p=', num2str(p_vals(:, fo, b, ch))]})
                     
                 else
                     
-                    title({[folder, ','];['p-value = ', num2str(p_vals(:, fo, b, ch)), ' (', test_handle, ')']})
+                    title({[folder, ','];['p=', num2str(p_vals(:, fo, b, ch))]})
                     
                 end
                 
@@ -219,7 +219,7 @@ for b = 1:no_bands
         
         subplot(1, no_chans, ch)
         
-        plot_data(All_mean(:, :, ch), 1, power_flag, across_p_vals)
+        plot_data(All_mean(:, :, ch), 1, power_flag, across_p_vals, [chan_labels{ch}, ', ', short_band_labels{b}])
             
         fprintf(fid(ch), format, 'Mean', nanmean(All_mean(:, :, ch)), nanstd(All_mean(:, :, ch))/sqrt(no_folders),...
             nanmedian(All_mean(:, :, ch)), quantile(All_mean(:, :, ch), .25), quantile(All_mean(:, :, ch), .75),...
@@ -227,12 +227,12 @@ for b = 1:no_bands
         
         if no_pds == 2
             
-            title({[chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{b}];...
-                ['p-value = ', num2str(across_p_vals(1)), ' (', test_handle, ')']})
+            title({[chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Mins Densest High Power, ', test_handle];...
+                ['p = ', num2str(across_p_vals(1))]})
             
         else
             
-            title([chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Minutes of Densest High Power, ', band_labels{b}])
+            title([chan_labels{ch}, ', ', num2str(epoch_secs/60), ' Mins Densest High Power'])
             
         end
         
@@ -331,7 +331,7 @@ end
 
 end
 
-function plot_data(data, fo, power_flag, p_vals)
+function plot_data(data, fo, power_flag, p_vals, y_label)
 
 no_pds = size(data, 2);
 
@@ -351,8 +351,8 @@ if power_flag
     
     if fo == 1
         
-        ylabel('Beta Power')
-        
+        ylabel({y_label; 'Power'})
+            
     end
     
 else
@@ -373,7 +373,7 @@ else
     
     if fo == 1
         
-        ylabel('Beta Density')
+        ylabel({y_label; 'Density'})
     
     end
         

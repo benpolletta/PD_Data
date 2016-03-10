@@ -134,8 +134,6 @@ end
 
 for b = 1:no_bands
     
-    figure
-    
     for ch = 1:no_chans
         
         pct_bp_high_for_test = nan(no_folders*epoch_secs, no_pds);
@@ -174,9 +172,11 @@ for b = 1:no_bands
                         
                     elseif strcmp(test_handle, 'ranksum')
                         
-                        p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                        p_vals(comp, b, ch, 1) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)),...
+                            pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
                         
-                        p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)), pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                        p_vals(comp, b, ch, 2) = ranksum(pct_bp_high_for_test(:, comparisons(comp, 1)),...
+                            pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
                         
                     end
                     
@@ -190,9 +190,35 @@ for b = 1:no_bands
             nanmedian(pct_bp_high_for_test), quantile(pct_bp_high_for_test, .25), quantile(pct_bp_high_for_test, .75),...
             reshape(p_vals(:, b, ch, :), 1, 2*no_comparisons));
         
+    end
+    
+end
+
+no_comps = all_dimensions(@sum, ~isnan(p_vals));
+
+save([subj_mat_name, BP_suffix, epochs_label, '_', test_handle, pd_handle, '_pvals.mat'], 'p_vals', 'no_comps')
+
+load('bonferroni_count.mat')
+
+p_vals = min(p_vals*bonferroni_count, 1);
+        
+for b = 1:no_bands
+    
+    figure
+    
+    for ch = 1:no_chans
+        
+        pct_bp_high_for_test = nan(no_folders*epoch_secs, no_pds);
+        
+        for pd = 1:no_pds
+            
+            pct_bp_high_for_test(:, pd) = reshape(pct_bp_high(:, :, pd, b, ch), no_folders*epoch_secs, 1);
+            
+        end
+        
         subplot(1, no_chans, ch), % subplot(no_bands, 2, (b - 1)*2 + ch)
         
-        % if power_flag
+        if power_flag
             
             [md, q1, q3] = deal(nan(1, no_pds));
             
@@ -226,27 +252,27 @@ for b = 1:no_bands
             % 
             % h = barwitherr(sd, mn, 0.6);
             
-            ylabel('Beta Power')
+            ylabel([band_labels{b}, ' Power'])
             
-        % else
-        % 
-        %     pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
-        % 
-        %     mn = nanmean(log(pct_bp_high_for_test));
-        % 
-        %     sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
-        % 
-        %     if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
-        % 
-        %         mn = [mn mn - 5]; sd = [sd nan];
-        % 
-        %     end
-        % 
-        %     h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
-        % 
-        %     ylabel('Beta Density')
-        % 
-        % end
+        else
+        
+            pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
+        
+            mn = nanmean(log(pct_bp_high_for_test));
+        
+            sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
+        
+            if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+        
+                mn = [mn mn - 5]; sd = [sd nan];
+        
+            end
+        
+            h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+        
+            ylabel([band_labels{b}, ' Density'])
+        
+        end
         
         box off
         
@@ -268,18 +294,18 @@ for b = 1:no_bands
                 
             end
             
-            sigstar(bar_pairs, p_vals(p_vals(:, b, ch, comp_type) < .05, b, ch, comp_type))
+            sigstar(bar_pairs, p_vals(p_vals(:, b, ch, comp_type) < .05/bonferroni_count, b, ch, comp_type))
             
         end
         
         if no_pds == 2
             
-            title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Minutes of Densest High Power'];...
-                [band_labels{b}, ', p-value = ', num2str(p_vals(:, b, ch)), ' (ranksum test)']})
+            title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Mins Densest High Power'];...
+                ['p-value = ', num2str(p_vals(:, b, ch)), ' (', test_handle, ')']})
             
         else
             
-            title({[chan_labels{ch}, ', ' band_labels{b}];[num2str(epoch_secs/60), ' Minutes of Densest High Power']})
+            title({[chan_labels{ch}, ','];[num2str(epoch_secs/60), ' Mins Densest High Power']})
             
         end
             
@@ -295,8 +321,6 @@ for b = 1:no_bands
 end
 
 fclose('all');
-        
-save([subj_mat_name, BP_suffix, epochs_label, '_', test_handle, pd_handle, '_pvals.mat'], 'p_vals')
 
 %% Group boxplots.
 %

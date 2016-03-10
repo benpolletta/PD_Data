@@ -12,7 +12,7 @@ figure
 
 for ch = 1:no_chans
     
-    load([group_prefix, '_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
+    load([group_prefix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
     
     subplot(3, no_chans, ch)
     
@@ -36,11 +36,11 @@ for ch = 1:no_chans
     
 end
 
-%% Plotting narrowand spectrum.
+%% Plotting narrowband spectrum.
     
 for ch = 1:no_chans
 
-    load([group_prefix, '_8-30Hz_3-7cycles_6bands_8-30Hz_10trials_pct_spectrum_ch1_data_for_plot.mat'])
+    load([group_prefix, '_8-30Hz_3-7cycles_6bands_8-30Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
     
     subplot(3, no_chans, no_chans + ch)
     

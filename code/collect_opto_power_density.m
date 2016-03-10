@@ -18,13 +18,15 @@ else
     
 end
 
-subject_matnames = {'st_m1_emxarch', 'st_m1_ali_post_carb_opto'};
+subject_matnames = {'st_m1_emxarch', 'st_m1_ali_post_carb_opto', 'st_m1_ali2_post_carb_opto'};
 
-channels = [1 2; 2 1];
+no_mats = length(subject_matnames);
+
+channels = [1 2; 2 1; 2 1];
 
 no_folders = nan(1, 2);
 
-for s = 1:2
+for s = 1:no_mats
     
     load([subject_matnames{s}, '_subjects.mat'])
     
@@ -40,7 +42,7 @@ total_folders = subj_mat_limits(end);
 
 All_pct_bp_high = nan(no_secs*no_trials, total_folders, no_pds, no_bands, no_chans);
 
-for s = 1:2
+for s = 1:no_mats
    
     clear pct_bp_high
     
