@@ -32,9 +32,11 @@ for b = 1:no_bands
     
 end
 
-subject_matnames = {'st_m1_emxarch', 'st_m1_ali_post_carb_opto'};
+subject_matnames = {'st_m1_emxarch', 'st_m1_ali_post_carb_opto', 'st_m1_ali2_post_carb_opto'};
 
-channels = [1 2; 2 1]; no_chans = size(channels, 2);
+no_mats = length(subject_matnames);
+
+channels = [1 2; 2 1; 2 1]; no_chans = size(channels, 2);
 
 load([subject_matnames{1}, '_subjects.mat'], 'pd_labels')
 
@@ -56,7 +58,7 @@ for pd = 1:no_pds
     
 end
 
-for s = 1:2
+for s = 1:no_mats
     
     for pd = 1:no_pds
         

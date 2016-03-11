@@ -1,4 +1,4 @@
-function collect_striatal_motor_freqs(time_window, percent, norm, band_index, freqs, no_cycles, bands)
+function collect_control_opto_freqs(time_window, percent, norm, band_index, freqs, no_cycles, bands)
 
 sampling_freq = 500;
 
@@ -32,7 +32,7 @@ for b = 1:no_bands
     
 end
 
-subject_matnames = {'st_m1', 'st_m1_ali', 'st_m1_ali2'};
+subject_matnames = {'st_m1_ali_control_opto', 'st_m1_ali2_control_opto', 'st_m1_ali3_control_opto'};
 
 no_mats = length(subject_matnames);
 
@@ -50,7 +50,7 @@ for pd = 1:no_pds
     
     for ch = 1:no_chans
     
-        fid(pd, ch) = fopen(['STR_M1', BP_suffix, '_2sd_', short_band_labels{band_index}, '_high_',...
+        fid(pd, ch) = fopen(['CONTROL_OPTO', BP_suffix, '_2sd_', short_band_labels{band_index}, '_high_',...
         num2str(time_window/sampling_freq), 's_', num2str(percent), 'pct_consolidated_freqs',...
         norm, '_ch', num2str(ch), '_', pd_labels{pd}, '.txt'], 'w');
         
