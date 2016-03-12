@@ -34,7 +34,7 @@ end
 
 if ~isempty(epoch_secs)
     
-    epoch_label = sprintf('_%ddensest', short_band_labels{band_index}, epoch_secs);
+    epoch_label = sprintf('%s_%ddensest', short_band_labels{band_index}, epoch_secs);
     
 else
     
