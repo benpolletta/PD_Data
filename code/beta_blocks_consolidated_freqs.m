@@ -60,7 +60,7 @@ for fo = 1:PD_struct.no_folders
     
     subj_name = [folder,'/',prefix];
     
-    cons_name = [subj_name, BP_suffix, '_2sd_BP_high_', num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated'];
+    cons_name = [subj_name, BP_suffix, '_2sd_BP_high_', num2str(time_window/PD_struct.sampling_freq), 's_', num2str(percent), 'pct_consolidated']
     
     % cons_title = [folder, ', High Power, ', num2str(percent), ' Percent of ', num2str(time_window/PD_struct.sampling_freq), ' s'];
     

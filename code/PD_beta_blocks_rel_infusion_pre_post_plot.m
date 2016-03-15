@@ -220,37 +220,37 @@ for b = 1:no_bands
         
         if power_flag
             
-            [md, q1, q3] = deal(nan(1, no_pds));
-            
-            % h = boxplot(pct_bp_high_for_test);
-            
-            md = nanmedian(pct_bp_high_for_test);
-            
-            for p = 1:no_pds
-                
-                q1(p) = nanmedian(pct_bp_high_for_test(pct_bp_high_for_test(:, p) <= md(p), p));
-                
-                q3(p) = nanmedian(pct_bp_high_for_test(pct_bp_high_for_test(:, p) >= md(p), p));
-                
-            end
-            
-            if length(md) == 1, md = [md nan]; q1 = [q1 nan]; q3 = [q3 nan]; end
-            
-            err(:, :, 1) = q1 - md; err(:, :, 2) = q3 - md;
-            
-            h = barwitherr(err, md, 0.6);
-            
-            % mn = nanmean(pct_bp_high_for_test);
+            % [md, q1, q3] = deal(nan(1, no_pds));
             % 
-            % sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
+            % % h = boxplot(pct_bp_high_for_test);
             % 
-            % if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+            % md = nanmedian(pct_bp_high_for_test);
             % 
-            %     mn = [mn nan]; sd = [sd nan];
+            % for p = 1:no_pds
+            % 
+            %     q1(p) = nanmedian(pct_bp_high_for_test(pct_bp_high_for_test(:, p) <= md(p), p));
+            % 
+            %     q3(p) = nanmedian(pct_bp_high_for_test(pct_bp_high_for_test(:, p) >= md(p), p));
             % 
             % end
             % 
-            % h = barwitherr(sd, mn, 0.6);
+            % if length(md) == 1, md = [md nan]; q1 = [q1 nan]; q3 = [q3 nan]; end
+            % 
+            % err(:, :, 1) = q1 - md; err(:, :, 2) = q3 - md;
+            % 
+            % h = barwitherr(err, md, 0.6);
+            
+            mn = nanmean(pct_bp_high_for_test);
+            
+            sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
+            
+            if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
+            
+                mn = [mn nan]; sd = [sd nan];
+            
+            end
+            
+            h = barwitherr(sd, mn, 0.6);
             
             ylabel([band_labels{b}, ' Power'])
             
@@ -258,9 +258,9 @@ for b = 1:no_bands
         
             pct_bp_high_for_test = max(pct_bp_high_for_test, eps);
         
-            mn = nanmean(log(pct_bp_high_for_test));
+            mn = nanmean(pct_bp_high_for_test);
         
-            sd = nanstd(log(pct_bp_high_for_test))*diag(1./sqrt(sum(~isnan(log(pct_bp_high_for_test)))));
+            sd = nanstd(pct_bp_high_for_test)*diag(1./sqrt(sum(~isnan(pct_bp_high_for_test))));
         
             if length(mn) == 1 % Stupid Matlab can't tell the difference between x & y and y & width.
         
@@ -268,7 +268,7 @@ for b = 1:no_bands
         
             end
         
-            h = barwitherr(sd, mn, 0.6, 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
+            h = barwitherr(sd, mn, 0.6); % , 'BaseValue', min(nanmean(log(pct_bp_high_for_test))) - 5);
         
             ylabel([band_labels{b}, ' Density'])
         

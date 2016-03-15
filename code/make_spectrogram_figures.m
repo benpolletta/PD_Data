@@ -1,4 +1,6 @@
-function make_spectrogram_figures(group_prefix, subject_no, color_lims, zoom_locs)
+function make_spectrogram_figures(group_prefix, peak_suffix, subject_no, color_lims, zoom_locs)
+
+close('all')
 
 if size(color_lims, 1) == 1
     
@@ -9,7 +11,8 @@ end
 load([group_prefix, '_subjects.mat'])
 
 folder = folders{subject_no}; 
-prefix = prefixes{subject_no}; 
+prefix = prefixes{subject_no};
+subj_name = [folder, '/', prefix];
 basetime = basetimes(subject_no); 
 striatum_channel = find(strcmp(chan_labels, 'Striatum'));
     
@@ -17,11 +20,49 @@ load([group_prefix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
     
 load([folder, '/', prefix, '_all_channel_data_dec.mat'])
     
-data = load([folder, '/', prefix, '_wt.mat']);
+data = load([subj_name, '_wt.mat']);
 Spec = data.Spec;
 
-load([folder, '/', prefix, '_peaks.mat'])
+Spike_indicator = nan(size(Spec, 1), 2);
 
+if strcmp(peak_suffix, '_threshold') || isempty(peak_suffix)
+    
+    if ~isempty(dir([subj_name, '_peaks.mat']))
+        
+        load([subj_name, '_peaks.mat'])
+        
+    elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
+        
+        for ch = 1:2
+            
+            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
+            
+            Spike_indicator(:, ch) = peak_indicator;
+            
+        end
+        
+    end
+
+elseif strcmp(peak_suffix, '_kmeans')
+    
+    if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
+        
+        for ch = 1:2
+            
+            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
+            
+            Spike_indicator(:, ch) = peak_indicator;
+            
+        end
+        
+    elseif ~isempty(dir([subj_name, '_peaks.mat']))
+        
+        load([subj_name, '_peaks.mat'])
+        
+    end
+    
+end
+    
 s_rate = 500;
     
 dec_factor = 100; s_rate_dec = s_rate/dec_factor;
