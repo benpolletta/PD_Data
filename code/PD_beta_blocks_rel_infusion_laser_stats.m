@@ -8,15 +8,13 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
 
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
-    BP_suffix = peak_suffix;
+    BP_suffix = '';
     
 else
 
     in_freqs =  freqs; in_no_cycles = no_cycles; in_bands = bands;    
 
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
-    
-    BP_suffix = [BP_suffix, peak_suffix];
     
 end
     
@@ -104,11 +102,11 @@ for fo = 1:no_folders
         
     elseif isempty(freqs) && isempty(no_cycles) && isempty(bands)
         
-        load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high_cum')
+        load([subj_name, BP_suffix, peak_suffix, '_2sd_BP_high.mat'], 'BP_high_cum')
         
     else
         
-        load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high')
+        load([subj_name, BP_suffix, peak_suffix, '_2sd_BP_high.mat'], 'BP_high')
         
         BP_high_cum = BP_high;
         
@@ -200,10 +198,10 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure, norm_for_power])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, peak_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials_', short_band_labels{b}, measure, norm_for_power])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, norm_for_power, '.mat'], 'pct_bp_high')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, peak_suffix, '_pct_BP_high_laser_', num2str(no_trials_analyzed), 'trials', measure, norm_for_power, '.mat'], 'pct_bp_high')
 
 end
