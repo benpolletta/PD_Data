@@ -11,12 +11,16 @@ figure
 for ch = 1:no_chans
     
     load([group_prefix, peak_suffix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
+
+    [sig_higher, sig_lower] = find_sig(WT_mean(:, 1:2), WT_ci(:, 1:2));
     
     %% Plotting broadband spectrum.
     
     subplot(2, no_chans, ch)
     
     boundedline((1:200)', WT_mean(:, 1:no_pds_plotted), prep_for_boundedline(WT_ci(:, 1:no_pds_plotted)))
+
+    add_stars(gca, (1:200)', logical(sig_higher + sig_lower), 1, [1 0 0])
     
     axis tight
     
@@ -39,6 +43,8 @@ for ch = 1:no_chans
     subplot(2, no_chans, 2 + ch)
     
     boundedline((1:50)', WT_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(WT_ci(1:50, 1:no_pds_plotted)))
+
+    add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
     
     hold on
     

@@ -8,9 +8,13 @@ figure
 
 load([group_prefix, peak_suffix, '_pct_8-30Hz_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
 
+[sig_higher, sig_lower] = find_sig(WT_mean, WT_ci);
+
 subplot(2, 1, 1)
 
 boundedline((1:200)', WT_mean, prep_for_boundedline(WT_ci))
+
+add_stars(gca, (1:200)', logical(sig_higher + sig_lower), 1, [1 0 0])
 
 axis tight
 
@@ -27,6 +31,8 @@ ylabel({'Mean \pm 95% CI'; 'Power (% \Delta Baseline)'}, 'FontSize', 16)
 subplot(2, 1, 2)
 
 boundedline((1:50)', WT_mean(1:50, :), prep_for_boundedline(WT_ci(1:50, :)))
+
+add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
 
 hold on
 
