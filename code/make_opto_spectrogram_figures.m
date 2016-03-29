@@ -37,7 +37,13 @@ first_ten_endtime = t(find(no_laser_ons > 10, 1));
 
 trial_five_borders = t(find(no_laser_ons > 4, 1)) + [-5 5]/60;
 
-transition_times = t(logical(laser_transitions));
+laseron_times = t(logical(laser_transitions)) + .005/60;
+
+laseron_times(laseron_times > first_ten_endtime) = [];
+    
+prelaser_times = laseron_times + (laseron_times(1) < 5/60)*triallength(subject_no)/60 - 5.005/60;
+
+prelaser_times(prelaser_times > first_ten_endtime) = [];
 
 figure()
 
@@ -78,7 +84,9 @@ for ch = 1:2
     
     plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
     
-    plot(repmat(transition_times, 2, 1), repmat([0; 80], 1, size(transition_times, 2)), 'w', 'LineWidth', 2)
+    plot(repmat(prelaser_times, 2, 1), repmat([0; 80], 1, size(prelaser_times, 2)), 'c', 'LineWidth', 1.5)
+    
+    plot(repmat(laseron_times, 2, 1), repmat([0; 80], 1, size(laseron_times, 2)), 'g', 'LineWidth', 1.5)
     
 end
 
@@ -94,7 +102,9 @@ for ch = 1:2
     
     t_index = t >= start_time & t <= end_time;
     
-    transition_subtimes = transition_times(transition_times >= start_time & transition_times <= end_time);
+    prelaser_t5_times = laseron_times(prelaser_times >= start_time & prelaser_times <= end_time)*60;
+    
+    laseron_t5_times = laseron_times(laseron_times >= start_time & laseron_times <= end_time)*60;
     
     t_interval = t(t_index)*60;
     
@@ -134,7 +144,9 @@ for ch = 1:2
     
     plot([t_interval(1) t_interval(end)], [8 8], ':w', 'LineWidth', 2)
     
-    plot(repmat(transition_subtimes*60, 2, 1), repmat([0; 80], 1, size(transition_subtimes, 2)), 'w', 'LineWidth', 2)
+    plot(repmat(prelaser_t5_times, 2, 1), repmat([0; 80], 1, size(prelaser_t5_times, 2)), 'c', 'LineWidth', 1.5)
+    
+    plot(repmat(laseron_t5_times, 2, 1), repmat([0; 80], 1, size(laseron_t5_times, 2)), 'g', 'LineWidth', 1.5)
     
     subplot(6, 2, 8 + ch) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
     
@@ -154,6 +166,12 @@ for ch = 1:2
     
     axis tight
     
+    % trial_five_lims(ch, :) = ylim;
+    
+    plot(repmat(prelaser_t5_times, 2, 1), repmat(ylim', 1, size(prelaser_t5_times, 2)), 'c', 'LineWidth', 1)
+    
+    plot(repmat(laseron_t5_times, 2, 1), repmat(ylim', 1, size(laseron_t5_times, 2)), 'g', 'LineWidth', 1)
+    
     ylabel('LFP (mV)', 'FontSize', 16)
     
     %% Plotting LFP for 2 seconds.
@@ -163,6 +181,10 @@ for ch = 1:2
     sub_start_time = zoom_locs - 1/60; sub_end_time = zoom_locs + 1/60;
     
     t_sub_index = t >= sub_start_time & t <= sub_end_time;
+    
+    prelaser_subtimes = laseron_times(prelaser_times >= sub_start_time & prelaser_times <= sub_end_time);
+    
+    laseron_subtimes = laseron_times(laseron_times >= sub_start_time & laseron_times <= sub_end_time);
     
     t_sub_interval = t(t_sub_index)*60;
     
@@ -185,6 +207,12 @@ for ch = 1:2
     box off
     
     axis tight
+    
+    % zoom_lims(ch, :) = ylim;
+    
+    plot(repmat(prelaser_subtimes, 2, 1), repmat(ylim', 1, size(prelaser_subtimes, 2)), 'c', 'LineWidth', 1)
+    
+    plot(repmat(laseron_subtimes, 2, 1), repmat(ylim', 1, size(laseron_subtimes, 2)), 'g', 'LineWidth', 1)
     
     xlabel('Time (sec.) Rel. Infusion', 'FontSize', 16)
     
