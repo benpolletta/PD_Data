@@ -1,5 +1,7 @@
 function Spike_indicator = peak_loader(subj_name, peak_suffix, data_length)
 
+Spike_indicator = zeros(data_length, 2);
+
 if isempty(peak_suffix)
     
     if ~isempty(dir([subj_name, '_peaks.mat']))
@@ -15,13 +17,10 @@ if isempty(peak_suffix)
                 load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
                 
                 Spike_indicator(:, ch) = peak_indicator;
-                
-            else
-                
-                Spike_indicator(:, ch) = nan(data_length, 1);
-                
-            end
             
+        
+            end
+        
         end
         
     end
@@ -45,10 +44,6 @@ elseif strcmp(peak_suffix, '_kmeans')
                 peaks_Si = peaks.Spike_indicator;
                 
                 Spike_indicator(:, ch) = peaks_Si(:, ch);
-                
-            else
-                
-                Spike_indicator(:, ch) = nan(data_length, 1);
                 
             end
             

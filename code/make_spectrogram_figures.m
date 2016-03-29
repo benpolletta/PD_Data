@@ -23,45 +23,7 @@ load([folder, '/', prefix, '_all_channel_data_dec.mat'])
 data = load([subj_name, '_wt.mat']);
 Spec = data.Spec;
 
-Spike_indicator = nan(size(Spec, 1), 2);
-
-if strcmp(peak_suffix, '_threshold') || isempty(peak_suffix)
-    
-    if ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-    elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-        
-        for ch = 1:2
-            
-            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-            
-            Spike_indicator(:, ch) = peak_indicator;
-            
-        end
-        
-    end
-
-elseif strcmp(peak_suffix, '_kmeans')
-    
-    if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-        
-        for ch = 1:2
-            
-            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-            
-            Spike_indicator(:, ch) = peak_indicator;
-            
-        end
-        
-    elseif ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-    end
-    
-end
+Spike_indicator = peak_loader([folder, '/', prefix], peak_suffix, size(Spec, 1));
     
 s_rate = 500;
     

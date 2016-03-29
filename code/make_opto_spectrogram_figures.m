@@ -1,4 +1,4 @@
-function make_spectrogram_figures(group_prefix, peak_suffix, subject_no, color_lims, zoom_locs)
+function make_opto_spectrogram_figures(group_prefix, peak_suffix, subject_no, color_lims, zoom_locs)
 
 close('all')
 
@@ -16,52 +16,16 @@ subj_name = [folder, '/', prefix];
 basetime = basetimes(subject_no); 
 striatum_channel = find(strcmp(chan_labels, 'Striatum'));
     
-load([group_prefix, '_pct_BP_high_2.5_min_secs_by_STR.mat'])
-    
 load([folder, '/', prefix, '_all_channel_data_dec.mat'])
     
 data = load([subj_name, '_wt.mat']);
 Spec = data.Spec;
 
-Spike_indicator = nan(size(Spec, 1), 2);
+load([subj_name, '_wav_laser_artifacts.mat'])
 
-if strcmp(peak_suffix, '_threshold') || isempty(peak_suffix)
-    
-    if ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-    elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-        
-        for ch = 1:2
-            
-            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-            
-            Spike_indicator(:, ch) = peak_indicator;
-            
-        end
-        
-    end
+no_laser_ons = ceil(cumsum(laser_transitions)/2);
 
-elseif strcmp(peak_suffix, '_kmeans')
-    
-    if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-        
-        for ch = 1:2
-            
-            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-            
-            Spike_indicator(:, ch) = peak_indicator;
-            
-        end
-        
-    elseif ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-    end
-    
-end
+Spike_indicator = peak_loader([folder, '/', prefix], peak_suffix, size(Spec, 1));
     
 s_rate = 500;
     
@@ -69,19 +33,15 @@ dec_factor = 100; s_rate_dec = s_rate/dec_factor;
 
 t = ((1:length(Spec))/s_rate - basetime)/60;
 
-starts = reshape(All_bp_max_start(subject_no, :, 3, :), 2, 2);
-starts = starts(striatum_channel, :);
-starts = (starts/s_rate - basetime)/60;
+first_ten_endtime = t(find(no_laser_ons > 10, 1));
 
-ends = reshape(All_bp_max_end(subject_no, :, 3, :), 2, 2);
-ends = ends(striatum_channel, :);
-ends = (ends/s_rate - basetime)/60;
+transition_times = t(logical(laser_transitions));
+
+figure()
 
 for ch = 1:2
     
-    %% Plotting spectrogram for whole data recording.
-    
-    figure(ch)
+    %% Plotting spectrogram for first 10 trials.
     
     Ch_spec = abs(Spec(:, :, ch));
     
@@ -91,21 +51,10 @@ for ch = 1:2
     Spec_dec = permute(Spec_dec, [1 3 2]);
     
     t_dec = ((1:length(Spec_dec))/s_rate_dec - basetime)/60;
-        
-    if strcmp(folder, '130328')
-        
-        Spec_dec = Spec_dec(1:80, :);
-        
-    else
-        
-        Spec_dec = Spec_dec(1:80, t_dec <= 30);
-        t_dec(t_dec > 30) = [];
-        
-    end
     
     subplot(3, 1, 1) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
-    imagesc(t_dec, 1:80, Spec_dec(1:80, :))
+    imagesc(t_dec(t_dec < first_ten_endtime), 1:80, Spec_dec(1:80, t_dec < first_ten_endtime))
     
     set(gca, 'FontSize', 16)
     
@@ -129,38 +78,7 @@ for ch = 1:2
     
     plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
     
-    colors = {'g', 'r'};
-    
-    for pd = 1:2
-        
-        plot([1 1]*starts(pd), [0 80], colors{pd})
-        plot([1 1]*ends(pd), [0 80], colors{pd})
-        
-    end
-    
-%     %% Plotting LFP for whole data recording.
-%     
-%     subplot(2, 1, 2) % subplot(4, 1, 2)
-%     
-%     plot(t(t <= 30), PD_dec(t <= 30, ch), 'k')
-%     
-%     box off
-%     
-%     axis tight
-%     
-%     xlabel('Time (min.) Rel. Infusion')
-%     
-%     ylabel('LFP (mV)')
-%     
-%     try
-%         
-%         save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch)])
-%         
-%     catch
-%         
-%         save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '.fig'])
-%         
-%     end
+    plot(repmat(transition_times, 2, 1), repmat([0; 80], 1, size(transition_times, 2)), 'w', 'LineWidth', 2)
     
 end
 
