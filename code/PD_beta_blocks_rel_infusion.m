@@ -125,73 +125,11 @@ for fo = 1:length(folders)
     
     pd_indices = logical(pd_indices); base_index = logical(base_index);
     
-    if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])) % Removing outliers.
+    Spike_indicator = peak_loader(subj_name, peak_suffix, size(BP, 1));
     
-        load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+    if any(Spike_indicator ~= 0)
         
-        [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, no_cycles, bands);
-        
-        outlier_nans = repmat(outlier_nans, [1 1 2]);
-        
-    else
-        
-        outlier_nans = [];
-        
-    end
-    
-    Spike_indicator = nan(size(BP, 1), 2);
-    
-    if isempty(peak_suffix)
-        
-        if ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
-            
-            load([subj_name, '_peaks.mat'])
-            
-            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-        elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-            
-            for ch = 1:2
-                
-                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-                
-                Spike_indicator(:, ch) = peak_indicator;
-                
-            end
-            
-            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-        else
-            
-            spike_nans = [];
-            
-        end
-        
-    elseif strcmp(peak_suffix, '_kmeans')
-        
-        if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-            
-            for ch = 1:2
-                
-                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-                
-                Spike_indicator(:, ch) = peak_indicator;
-                
-            end
-            
-            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-        elseif ~isempty(dir([subj_name, '_peaks.mat'])) % Removing peaks.
-            
-            load([subj_name, '_peaks.mat'])
-            
-            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-        else
-            
-            spike_nans = [];
-            
-        end
+        [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
         
     else
         

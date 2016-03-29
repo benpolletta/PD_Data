@@ -60,64 +60,14 @@ if ~isempty(outlier_lim) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier
     
 end
 
-if isempty(peak_suffix)
-    
-    if ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-        [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-        
-        BP(logical(spike_nans)) = nan;
-        
-        Spec(logical(spike_nans_wt)) = nan;
-        
-    elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-        
-        for ch = 1:2
-            
-            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-            
-            Spike_indicator(:, ch) = peak_indicator;
-            
-        end
-        
-        [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-        
-        BP(logical(spike_nans)) = nan;
-        
-        Spec(logical(spike_nans_wt)) = nan;
-        
-    end
+Spike_indicator = peak_loader(subj_name, peak_suffix, size(BP, 1));
 
-elseif strcmp(peak_suffix, '_kmeans')
-        
-    if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-        
-        for ch = 1:2
-            
-            load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-            
-            Spike_indicator(:, ch) = peak_indicator;
-            
-        end
-        
-        [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-        
-        BP(logical(spike_nans)) = nan;
-        
-        Spec(logical(spike_nans_wt)) = nan;
-        
-    elseif ~isempty(dir([subj_name, '_peaks.mat']))
-        
-        load([subj_name, '_peaks.mat'])
-        
-        [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-        
-        BP(logical(spike_nans)) = nan;
-        
-        Spec(logical(spike_nans_wt)) = nan;
-        
-    end
+if any(Spike_indicator ~= 0)
+    
+    [spike_nans_wt, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+    
+    BP(logical(spike_nans)) = nan;
+    
+    Spec(logical(spike_nans_wt)) = nan;
     
 end

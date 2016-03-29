@@ -2,11 +2,11 @@ function PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, peak_suffix, ep
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
-    freqs = 1:200;
+    freqs = 1:200; in_freqs = [];
     
-    no_cycles = linspace(3, 21, length(freqs));
+    no_cycles = linspace(3, 21, length(freqs)); in_no_cycles = [];
     
-    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
     
     BP_suffix = ['', peak_suffix];
     
@@ -52,19 +52,25 @@ for fo = 1:no_folders
     
     prefix = prefixes{fo};
     
+    outlier_lim = outlier_lims(fo);
+    
     subj_name = [folder,'/',prefix];
     
     if strcmp(norm, '_peaks')
         
-        load([subj_name, '_peaks.mat'])
+        data = load([subj_name, BP_suffix, '_wt_BP.mat']);
+        
+        Spike_indicator = peak_loader(subj_name, peak_suffix, size(data.BP, 1));
         
         BP = repmat(permute(Spike_indicator, [1 2 3]), [1 no_bands 1]);
         
     else
-    
-        load([subj_name, BP_suffix, '_wt_BP.mat'])
         
-        eval(['BP = BP', norm, ';'])
+        BP = get_BP(subj_name, peak_suffix, outlier_lim, norm, in_freqs, in_no_cycles, in_bands);
+    
+        % load([subj_name, BP_suffix, '_wt_BP.mat'])
+        % 
+        % eval(['BP = BP', norm, ';'])
         
     end
     
@@ -84,31 +90,27 @@ for fo = 1:no_folders
     
     pd_indices = logical(pd_indices);
     
-    if ~strcmp(norm, '_peaks')
-        
-        if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
-            
-            load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
-            
-            [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, no_cycles, bands);
-            
-            outlier_nans = repmat(outlier_nans, [1 1 2]);
-            
-            BP(logical(outlier_nans)) = nan;
-            
-        end
-        
-        if ~isempty(dir([subj_name, '_peaks.mat']))
-            
-            load([subj_name, '_peaks.mat'])
-            
-            [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
-            
-            BP(logical(spike_nans)) = nan;
-            
-        end
-        
-    end
+    % if ~strcmp(norm, '_peaks')
+    % 
+    %     if ~isempty(outlier_lims) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat']))
+    % 
+    %         load([subj_name, '_wav_BP_', num2str(outlier_lims(fo)), 'sd_outliers.mat'])
+    % 
+    %         [~, outlier_nans] = indicator_to_nans(double(artifact_indicator), sampling_freq, freqs, no_cycles, bands);
+    % 
+    %         outlier_nans = repmat(outlier_nans, [1 1 2]);
+    % 
+    %         BP(logical(outlier_nans)) = nan;
+    % 
+    %     end
+    % 
+    %     Spike_indicator = peak_loader(subj_name, peak_suffix, size(BP, 1));
+    % 
+    %     [~, spike_nans] = indicator_to_nans(Spike_indicator, sampling_freq, freqs, no_cycles, bands);
+    % 
+    %     BP(logical(spike_nans)) = nan;
+    % 
+    % end
     
     % beta_blocks_find = nan(size(BP_high_cum));
     
