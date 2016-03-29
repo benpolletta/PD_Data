@@ -200,7 +200,7 @@ save([subj_mat_name, BP_suffix, epochs_label, '_', test_handle, pd_handle, '_pva
 
 load('bonferroni_count.mat')
 
-p_vals = min(p_vals*no_comps, 1); % min(p_vals*bonferroni_count, 1);
+p_vals = min(p_vals*bonferroni_count, 1); % min(p_vals*no_comps, 1); 
         
 for b = 1:no_bands
     
