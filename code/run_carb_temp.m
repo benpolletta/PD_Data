@@ -12,9 +12,9 @@ end
 
 % PD_pct_fix(subject_mat, peak_suffix, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
+% PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
 
-PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
+% PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
 
 power_handles = {'', '_pct'};
 
