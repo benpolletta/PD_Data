@@ -1,5 +1,25 @@
 function PD_fix_wav_BP(subjects_mat, freqs, no_cycles, bands, new_bands)
 
+subjects_info = load(subjects_mat);
+
+folders = subjects_info.folders; prefixes = subjects_info.prefixes; basetimes = subjects_info.basetimes;
+
+parfor fo = 1:length(folders)
+    
+    folder = folders{fo};
+    
+    prefix = prefixes{fo};
+    
+    basetime = basetimes(fo);
+    
+    PD_fix_wav_BP_inner(folder, prefix, basetime, freqs, no_cycles, bands, new_bands)
+        
+end
+
+end
+
+function PD_fix_wav_BP_inner(folder, prefix, basetime, freqs, no_cycles, bands, new_bands)
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
@@ -30,29 +50,9 @@ clear bands
 
 bands = new_bands;
 
-subjects_info = load(subjects_mat);
-
-folders = subjects_info.folders; prefixes = subjects_info.prefixes; basetimes = subjects_info.basetimes;
-
-parfor fo = 1:length(folders)
-    
-    folder = folders{fo};
-    
-    prefix = prefixes{fo};
-    
-    basetime = basetimes(fo);
-    
-    PD_fix_wav_BP_inner(folder, prefix, basetime, suffix, new_suffix, bands)
-        
-end
-
-end
-
-function PD_fix_wav_BP_inner(folder, prefix, basetime, suffix, new_suffix, bands)
-
 no_bands = size(bands, 1);
 
-norms = {'', '_norm', '_pct', '_norm_pct'}; no_norms = length(norms);
+norms = {'', '_norm', '_pct'}; no_norms = length(norms); % , '_norm_pct'}; 
 
 subj_name = [folder,'/',prefix];
 
@@ -60,9 +60,9 @@ load([subj_name,'_all_channel_data_dec.mat'])
 
 t = (1:length(PD_dec))/sampling_freq - basetime;
 
-clear BP BP_norm BP_pct BP_norm_pct
+clear BP BP_norm BP_pct
 
-[BP, BP_norm, BP_pct, BP_norm_pct] = deal(nan(length(PD_dec), no_bands, 2));
+[BP, BP_norm, BP_pct] = deal(nan(length(PD_dec), no_bands, 2));
 
 for n = 1:no_norms
     
@@ -92,7 +92,7 @@ for n = 1:no_norms
         
     end
     
-    save([subj_name, new_suffix, '_wt_BP.mat'], '-v7.3', 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct')
+    save([subj_name, new_suffix, '_wt_BP.mat'], '-v7.3', 'sampling_freq', 't', 'basetime', 'bands', 'BP', 'BP_norm', 'BP_pct') % , 'BP_norm_pct')
     
 end
     

@@ -27,6 +27,12 @@ no_laser_ons = ceil(cumsum(laser_transitions)/2);
 
 Spike_indicator = peak_loader([folder, '/', prefix], peak_suffix, size(Spec, 1));
 
+for ch = 1:2,
+   
+    Spike_laser_indicator(:, ch) = double(logical(Spike_indicator(:, ch)) | logical(laser_transitions));
+    
+end
+
 s_rate = 500;
 
 dec_factor = 100; s_rate_dec = s_rate/dec_factor;
@@ -37,13 +43,23 @@ first_ten_endtime = t(find(no_laser_ons > 10, 1));
 
 trial_five_borders = t(find(no_laser_ons > 4, 1)) + [-5 5]/60;
 
-laseron_times = t(logical(laser_transitions)) + .005/60;
+prelaser_transitions = circshift(laser_transitions, -5*sampling_freq);
 
-laseron_times(laseron_times > first_ten_endtime) = [];
+laseron_times = t(logical(laser_transitions & prelaser_transitions));
+
+laseroff_times = t(xor(laser_transitions, prelaser_transitions) & laser_transitions);
+
+prelaseron_times = t(xor(laser_transitions, prelaser_transitions) & prelaser_transitions);
+
+times = {prelaseron_times, laseron_times, laseroff_times};
+
+time_colors = {'g', 'w', 'c'}; time_LFP_colors = {'g', 'k', 'c'};
+
+for c = 1:3
+
+    times{c}(times{c} > first_ten_endtime) = [];
     
-prelaser_times = laseron_times + (laseron_times(1) < 5/60)*triallength(subject_no)/60 - 5.005/60;
-
-prelaser_times(prelaser_times > first_ten_endtime) = [];
+end
 
 figure()
 
@@ -51,7 +67,9 @@ figure()
 
 for ch = 1:2
     
-    Ch_spec = abs(Spec(:, :, ch));
+    chan_index = abs(3*mod(3 - striatal_id(subject_no), 2) - ch);
+    
+    Ch_spec = abs(Spec(:, :, chan_index));
     
     dims = size(Ch_spec);
     
@@ -60,15 +78,15 @@ for ch = 1:2
     
     t_dec = ((1:length(Spec_dec))/s_rate_dec)/60;
     
-    subplot(3, 2, ch) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
+    subplot(3, 2, chan_index) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
     imagesc(t_dec(t_dec < first_ten_endtime), 1:80, Spec_dec(1:80, t_dec < first_ten_endtime))
     
     set(gca, 'FontSize', 16)
     
-    caxis(color_lims(ch, :))
+    caxis(color_lims(chan_index, :))
     
-    title(chan_labels{ch}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
+    title(chan_labels{chan_index}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
     
     ylabel('Frequency (Hz)', 'FontSize', 16)
     
@@ -84,9 +102,11 @@ for ch = 1:2
     
     plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
     
-    plot(repmat(prelaser_times, 2, 1), repmat([0; 80], 1, size(prelaser_times, 2)), 'c', 'LineWidth', 1.5)
-    
-    plot(repmat(laseron_times, 2, 1), repmat([0; 80], 1, size(laseron_times, 2)), 'g', 'LineWidth', 1.5)
+    for c = 1:3
+        
+        plot(repmat(times{c}, 2, 1), repmat([0; 80], 1, size(times{c}, 2)), time_colors{c}, 'LineWidth', 1.5)
+        
+    end
     
 end
 
@@ -94,7 +114,9 @@ end
 
 for ch = 1:2
     
-    Ch_spec = abs(Spec(:, :, ch));
+    chan_index = abs(3*mod(3 - striatal_id(subject_no), 2) - ch);
+    
+    Ch_spec = abs(Spec(:, :, chan_index));
     
     pd_labels = {'Pre-Infusion', 'Post-Infusion'};
     
@@ -102,13 +124,15 @@ for ch = 1:2
     
     t_index = t >= start_time & t <= end_time;
     
-    prelaser_t5_times = laseron_times(prelaser_times >= start_time & prelaser_times <= end_time)*60;
+    for c = 1:3
     
-    laseron_t5_times = laseron_times(laseron_times >= start_time & laseron_times <= end_time)*60;
+        t5_times{c} = times{c}(times{c} >= start_time & times{c} <= end_time)*60;
+        
+    end
     
     t_interval = t(t_index)*60;
     
-    subplot(3, 2, 2 + ch) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
+    subplot(3, 2, 2 + chan_index) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
     
     imagesc(t_interval, 1:80, Ch_spec(t_index, 1:80)')
     
@@ -118,15 +142,15 @@ for ch = 1:2
     
     ylabel('Frequency (Hz)', 'FontSize', 16)
     
-    caxis(color_lims(ch, :)) % caxis([0 10])
+    caxis(color_lims(chan_index, :)) % caxis([0 10])
     
     axis xy
     
     hold on
     
-    if sum(Spike_indicator(t_index, ch)) > 0
+    if sum(Spike_laser_indicator(t_index, chan_index)) > 0
         
-        [spike_wav_nans, ~] = indicator_to_nans(Spike_indicator(t_index, ch), 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
+        [spike_wav_nans, ~] = indicator_to_nans(Spike_laser_indicator(t_index, chan_index), 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
         
         [patch_X, patch_Y] = nans_to_patch(t_interval, 1:90, spike_wav_nans(:, 1:90));
         
@@ -144,21 +168,23 @@ for ch = 1:2
     
     plot([t_interval(1) t_interval(end)], [8 8], ':w', 'LineWidth', 2)
     
-    plot(repmat(prelaser_t5_times, 2, 1), repmat([0; 80], 1, size(prelaser_t5_times, 2)), 'c', 'LineWidth', 1.5)
+    for c = 1:3
     
-    plot(repmat(laseron_t5_times, 2, 1), repmat([0; 80], 1, size(laseron_t5_times, 2)), 'g', 'LineWidth', 1.5)
+        plot(repmat(t5_times{c}, 2, 1), repmat([0; 80], 1, size(t5_times{c}, 2)), time_colors{c}, 'LineWidth', 1.5)
+        
+    end
     
-    subplot(6, 2, 8 + ch) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
+    subplot(6, 2, 8 + chan_index) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
     
-    plot(t_interval, PD_dec(t_index, ch), 'k')
+    plot(t_interval, PD_dec(t_index, chan_index), 'k')
     
     hold on
     
-    spikes_w_nans = Spike_indicator(t_index, ch);
+    spikes_w_nans = Spike_indicator(t_index, chan_index);
     
     spikes_w_nans(spikes_w_nans == 0) = nan;
     
-    plot(t_interval, PD_dec(t_index, ch).*spikes_w_nans, 'vk')
+    plot(t_interval, PD_dec(t_index, chan_index).*spikes_w_nans, 'vk')
     
     set(gca, 'FontSize', 16)
     
@@ -168,9 +194,11 @@ for ch = 1:2
     
     % trial_five_lims(ch, :) = ylim;
     
-    plot(repmat(prelaser_t5_times, 2, 1), repmat(ylim', 1, size(prelaser_t5_times, 2)), 'c', 'LineWidth', 1)
+    for c = 1:3
     
-    plot(repmat(laseron_t5_times, 2, 1), repmat(ylim', 1, size(laseron_t5_times, 2)), 'g', 'LineWidth', 1)
+        plot(repmat(t5_times{c}, 2, 1), repmat(ylim', 1, size(t5_times{c}, 2)), time_LFP_colors{c}, 'LineWidth', 1.5)
+        
+    end
     
     ylabel('LFP (mV)', 'FontSize', 16)
     
@@ -182,25 +210,27 @@ for ch = 1:2
     
     t_sub_index = t >= sub_start_time & t <= sub_end_time;
     
-    prelaser_subtimes = laseron_times(prelaser_times >= sub_start_time & prelaser_times <= sub_end_time);
-    
-    laseron_subtimes = laseron_times(laseron_times >= sub_start_time & laseron_times <= sub_end_time);
-    
     t_sub_interval = t(t_sub_index)*60;
     
-    subplot(6, 2, 10 + ch)
+    for c = 1:3
     
-    plot(t_sub_interval, PD_dec(t_sub_index, ch), 'k')
+        subtimes{c} = times{c}(times{c} >= sub_start_time & times{c} <= sub_end_time)*60;
+        
+    end
+    
+    subplot(6, 2, 10 + chan_index)
+    
+    plot(t_sub_interval, PD_dec(t_sub_index, chan_index), 'k')
     
     set(gca, 'FontSize', 16)
     
     hold on
     
-    sub_spikes_w_nans = Spike_indicator(t_sub_index, ch);
+    sub_spikes_w_nans = Spike_indicator(t_sub_index, chan_index);
     
     sub_spikes_w_nans(sub_spikes_w_nans == 0) = nan;
     
-    plot(t_sub_interval, PD_dec(t_sub_index, ch).*sub_spikes_w_nans, 'vk')
+    plot(t_sub_interval, PD_dec(t_sub_index, chan_index).*sub_spikes_w_nans, 'vk')
     
     set(gca, 'FontSize', 16)
     
@@ -210,9 +240,11 @@ for ch = 1:2
     
     % zoom_lims(ch, :) = ylim;
     
-    plot(repmat(prelaser_subtimes, 2, 1), repmat(ylim', 1, size(prelaser_subtimes, 2)), 'c', 'LineWidth', 1)
+    for c = 1:3
     
-    plot(repmat(laseron_subtimes, 2, 1), repmat(ylim', 1, size(laseron_subtimes, 2)), 'g', 'LineWidth', 1)
+        plot(repmat(subtimes{c}, 2, 1), repmat(ylim', 1, size(subtimes{c}, 2)), time_LFP_colors{c}, 'LineWidth', 1.5)
+    
+    end
     
     xlabel('Time (sec.) Rel. Infusion', 'FontSize', 16)
     
@@ -222,11 +254,11 @@ end
 
 try
     
-    save_as_pdf(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_altogether'])
+    save_as_pdf(gcf, [folder, '/', folder, '_spec_for_paper_altogether'])
     
 catch
     
-    save(gcf, [folder, '/', folder, '_spec_for_paper_ch', num2str(ch), '_altogether.fig'])
+    save(gcf, [folder, '/', folder, '_spec_for_paper_altogether.fig'])
     
 end
 

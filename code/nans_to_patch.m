@@ -46,7 +46,7 @@ for p = 1:no_patches
     
     diff_indices = find(diff(Y_vals{p}) < -1);
     
-    if Y_vals{p}(diff_indices(end) + 1) == 1
+    if ~isempty(diff_indices) && Y_vals{p}(diff_indices(end) + 1) == 1
         
         Y_vals{p}((diff_indices(end) + 1):end) = fliplr(Y_vals{p}((diff_indices(end) + 1):end));
         

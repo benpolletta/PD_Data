@@ -86,53 +86,7 @@ for fo = 1:length(folders)
         
     end
     
-    Spike_indicator = nan(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
-    
-    if isempty(peak_suffix)
-    
-        if ~isempty(dir([subj_name, '_peaks.mat']))
-            
-            load([subj_name, '_peaks.mat'])
-            
-        elseif ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-            
-            for ch = 1:2
-                
-                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-                
-                Spike_indicator(:, ch) = peak_indicator;
-                
-            end 
-            
-        else
-            
-            Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
-            
-        end
-        
-    elseif strcmp(peak_suffix, '_kmeans')
-        
-        if ~isempty(dir([subj_name, '_chan1_artifacts.mat'])) || ~isempty(dir([subj_name, '_chan2_artifacts.mat']))
-            
-            for ch = 1:2
-                
-                load([subj_name, '_chan', num2str(ch), '_artifacts.mat'])
-                
-                Spike_indicator(:, ch) = peak_indicator;
-                
-            end
-            
-        elseif ~isempty(dir([subj_name, '_peaks.mat']))
-            
-            load([subj_name, '_peaks.mat'])
-            
-        else
-            
-            Spike_indicator = zeros(size(BP_no_spikes, 1), size(BP_no_spikes, 3));
-            
-        end
-        
-    end
+    Spike_indicator = peak_loader(subj_name, peak_suffix, size(BP, 1));
         
     for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
