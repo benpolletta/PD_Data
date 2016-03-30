@@ -1,4 +1,4 @@
-function make_opto_spectrogram_figures(group_prefix, peak_suffix, subject_no, color_lims, zoom_locs)
+function make_opto_spectrogram_figures(group_prefix, peak_suffix, subject_no, trial_to_zoom, color_lims, zoom_loc)
 
 close('all')
 
@@ -7,6 +7,8 @@ if size(color_lims, 1) == 1
     color_lims = repmat(color_lims, 2, 1);
     
 end
+
+if isempty(trial_to_zoom), trial_to_zoom = 5; end
 
 load([group_prefix, '_subjects.mat'])
 
@@ -41,7 +43,7 @@ t = ((1:length(Spec))/s_rate)/60;
 
 first_ten_endtime = t(find(no_laser_ons > 10, 1));
 
-trial_five_borders = t(find(no_laser_ons > 4, 1)) + [-5 5]/60;
+trial_borders = t(find(no_laser_ons > trial_to_zoom - 1, 1)) + [-5 5]/60;
 
 prelaser_transitions = circshift(laser_transitions, -5*sampling_freq);
 
@@ -78,7 +80,7 @@ for ch = 1:2
     
     t_dec = ((1:length(Spec_dec))/s_rate_dec)/60;
     
-    subplot(3, 2, chan_index) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
+    subplot(3, 2, ch) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
     imagesc(t_dec(t_dec < first_ten_endtime), 1:80, Spec_dec(1:80, t_dec < first_ten_endtime))
     
@@ -86,7 +88,7 @@ for ch = 1:2
     
     caxis(color_lims(chan_index, :))
     
-    title(chan_labels{chan_index}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
+    title(chan_labels{ch}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
     
     ylabel('Frequency (Hz)', 'FontSize', 16)
     
@@ -120,19 +122,19 @@ for ch = 1:2
     
     pd_labels = {'Pre-Infusion', 'Post-Infusion'};
     
-    start_time = trial_five_borders(1); end_time = trial_five_borders(2);
+    start_time = trial_borders(1); end_time = trial_borders(2);
     
     t_index = t >= start_time & t <= end_time;
     
     for c = 1:3
     
-        t5_times{c} = times{c}(times{c} >= start_time & times{c} <= end_time)*60;
+        trial_times{c} = times{c}(times{c} >= start_time & times{c} <= end_time)*60;
         
     end
     
     t_interval = t(t_index)*60;
     
-    subplot(3, 2, 2 + chan_index) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
+    subplot(3, 2, 2 + ch) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
     
     imagesc(t_interval, 1:80, Ch_spec(t_index, 1:80)')
     
@@ -170,11 +172,11 @@ for ch = 1:2
     
     for c = 1:3
     
-        plot(repmat(t5_times{c}, 2, 1), repmat([0; 80], 1, size(t5_times{c}, 2)), time_colors{c}, 'LineWidth', 1.5)
+        plot(repmat(trial_times{c}, 2, 1), repmat([0; 80], 1, size(trial_times{c}, 2)), time_colors{c}, 'LineWidth', 1.5)
         
     end
     
-    subplot(6, 2, 8 + chan_index) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
+    subplot(6, 2, 8 + ch) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
     
     plot(t_interval, PD_dec(t_index, chan_index), 'k')
     
@@ -196,7 +198,7 @@ for ch = 1:2
     
     for c = 1:3
     
-        plot(repmat(t5_times{c}, 2, 1), repmat(ylim', 1, size(t5_times{c}, 2)), time_LFP_colors{c}, 'LineWidth', 1.5)
+        plot(repmat(trial_times{c}, 2, 1), repmat(ylim', 1, size(trial_times{c}, 2)), time_LFP_colors{c}, 'LineWidth', 1.5)
         
     end
     
@@ -204,9 +206,9 @@ for ch = 1:2
     
     %% Plotting LFP for 2 seconds.
     
-    if isempty(zoom_locs), zoom_locs = mean(trial_five_borders); end
+    if isempty(zoom_loc), zoom_loc = mean(trial_borders); end
     
-    sub_start_time = zoom_locs - 1/60; sub_end_time = zoom_locs + 1/60;
+    sub_start_time = zoom_loc - 1/60; sub_end_time = zoom_loc + 1/60;
     
     t_sub_index = t >= sub_start_time & t <= sub_end_time;
     
@@ -218,7 +220,7 @@ for ch = 1:2
         
     end
     
-    subplot(6, 2, 10 + chan_index)
+    subplot(6, 2, 10 + ch)
     
     plot(t_sub_interval, PD_dec(t_sub_index, chan_index), 'k')
     
@@ -246,7 +248,7 @@ for ch = 1:2
     
     end
     
-    xlabel('Time (sec.) Rel. Infusion', 'FontSize', 16)
+    xlabel('Time (sec.)', 'FontSize', 16)
     
     ylabel('LFP (mV)', 'FontSize', 16)
     

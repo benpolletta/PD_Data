@@ -286,7 +286,7 @@ for b = 1:no_bands
             
             for comp = 1:no_comparisons
                 
-                if p_vals(comp, b, ch, comp_type) < .05
+                if p_vals(comp, b, ch, comp_type) < .05/bonferroni_count
                     
                     bar_pairs = {bar_pairs{:}, [bar_pos(comparisons(comp, 1)), bar_pos(comparisons(comp, 2))]};
                     

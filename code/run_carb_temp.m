@@ -1,10 +1,20 @@
-function run_carb(subject_mat, peak_suffix, freqs, no_cycles, bands)
+function run_carb(subject_mat, peak_suffix, freqs, no_cycles, bands, band_index)
 
-% PD_pct_fix(subject_mat, peak_suffix, freqs, no_cycles, bands)
-% 
-% PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
-% 
-% PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    no_bands = 6;
+    
+else
+    
+    no_bands = size(bands, 1);
+    
+end
+
+PD_pct_fix(subject_mat, peak_suffix, freqs, no_cycles, bands)
+
+PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
+
+PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
 
 power_handles = {'', '_pct'};
 
@@ -12,7 +22,7 @@ for i = 1:length(power_handles)
     
     PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, freqs, no_cycles, bands);
    
-    % PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, 3, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, freqs, no_cycles, bands);
 
 end
 
@@ -28,10 +38,10 @@ end
 
 for i = 1:length(power_handles)
     
-    % PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, 3, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands);
     
-    % PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, 3, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands);
     
 end
 
-% PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20)
+PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20)

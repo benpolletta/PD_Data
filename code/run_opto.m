@@ -1,5 +1,15 @@
 function run_opto(directory, subject_mat, peak_suffix, freqs, no_cycles, bands)
 
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    no_bands = 6;
+    
+else
+    
+    no_bands = size(bands, 1);
+    
+end
+
 present_dir = pwd;
 
 if ~strcmp(present_dir((end - length(directory) + 1):end), directory)
@@ -28,11 +38,11 @@ end
 
 for i = 1:2
    
-    PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, peak_suffix, norm_handles{i + 1}, 10, 6, freqs, no_cycles, bands)
+    PD_beta_blocks_rel_infusion_laser_spectrum(subject_mat, peak_suffix, norm_handles{i + 1}, 10, no_bands, freqs, no_cycles, bands)
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, 6, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, no_bands, no_bands, freqs, no_cycles, bands);
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, 6, 6, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, [], '_10trials', norm_handles{i + 1}, no_bands, no_bands, freqs, no_cycles, bands);
     
 end
 
