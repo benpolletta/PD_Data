@@ -32,13 +32,13 @@ end
    
 collect_striatal_w_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('STR_w_M1_subjects.mat', peak_suffix, 150, '_power', '_pct', band_index, no_bands, freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('STR_w_M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands)
 
 make_spectra_figures('STR_w_M1', peak_suffix)
 
-collect_motor_spectrum(peak_suffix, 150, '_pct', 3, freqs, no_cycles, bands)
+collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('M1_subjects.mat', peak_suffix, 150, '_power', '_pct', band_index, no_bands, freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands)
 
 make_spectra_figures('M1', peak_suffix)
 
