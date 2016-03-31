@@ -37,39 +37,45 @@ for f = 1:no_f_bins
     
     freq_legend{f} = sprintf('%g Hz',freqs(f));
     
-    f_phases = p_vec(f_bins(f) <= f_vec & f_vec < f_bins(f+1)); % Finding phases falling within a given frequency bin. 
+    f_phases = p_vec(f_bins(f) <= f_vec & f_vec < f_bins(f+1)); % Finding phases falling within a given frequency bin.
     
-    R = nansum(exp(sqrt(-1)*f_phases));
-    
-    n = sum(~isnan(f_phases));
-    
-    MR_pval = exp(sqrt(1+4*n+4*(n^2-abs(R)^2))-(1+2*n));
-    
-    if MR_pval <= 0.01/no_f_bins && length(f_phases) >= no_p_bins*min_p_bin_multiplier
+    if ~isempty(f_phases)
         
-        MR_vec(f) = R/n;
+        R = nansum(exp(sqrt(-1)*f_phases));
         
-        conf_vec(f) = circ_confmean(f_phases, 0.05/no_comps);
+        n = sum(~isnan(f_phases));
         
-        % p_hist(1,f) = sum(p_bins(1) <= f_phases | f_phases < p_bins(2))/length(f_phases); % Normalized (i.e., as a fraction of total phases).
+        MR_pval = exp(sqrt(1+4*n+4*(n^2-abs(R)^2))-(1+2*n));
         
-        p_hist(1,f) = sum(p_bins(1) <= f_phases | f_phases < p_bins(2)); % Non-normalized.
-        
-        p_hist(end,f) = p_hist(1,f);
-        
-        for p = 2:no_p_bins
+        if MR_pval <= 0.01/no_f_bins && length(f_phases) >= no_p_bins*min_p_bin_multiplier
             
-            % p_hist(p,f) = sum(p_bins(p) <= f_phases & f_phases < p_bins(p+1))/length(f_phases); % Normalized (i.e., as a fraction of total phases).
+            MR_vec(f) = R/n;
             
-            p_hist(p,f) = sum(p_bins(p) <= f_phases & f_phases < p_bins(p+1)); % Non-normalized.
+            conf_vec(f) = circ_confmean(f_phases, 0.05/no_comps);
+            
+            % p_hist(1,f) = sum(p_bins(1) <= f_phases | f_phases < p_bins(2))/length(f_phases); % Normalized (i.e., as a fraction of total phases).
+            
+            p_hist(1,f) = sum(p_bins(1) <= f_phases | f_phases < p_bins(2)); % Non-normalized.
+            
+            p_hist(end,f) = p_hist(1,f);
+            
+            for p = 2:no_p_bins
+                
+                % p_hist(p,f) = sum(p_bins(p) <= f_phases & f_phases < p_bins(p+1))/length(f_phases); % Normalized (i.e., as a fraction of total phases).
+                
+                p_hist(p,f) = sum(p_bins(p) <= f_phases & f_phases < p_bins(p+1)); % Non-normalized.
+                
+            end
+            
+        else
+            
+            p_hist(:,f) = nan;
             
         end
         
     else
         
-        MR_vec(f) = nan;
-        
-        p_hist(:,f) = nan;
+        p_hist(:, f) = nan;
         
     end
     

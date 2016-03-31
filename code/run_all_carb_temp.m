@@ -36,13 +36,13 @@ no_mats = length(subject_mat_prefixes);
 % 
 % make_spectra_figures('STR_w_M1', peak_suffix)
 
-collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+% collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+% 
+% PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands)
+% 
+% make_spectra_figures('M1', peak_suffix)
 
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands)
-
-make_spectra_figures('M1', peak_suffix)
-
-for m = 1:no_mats
+for m = 3:no_mats
         
     run_phase_analysis([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, 200, .5, 2, freqs, no_cycles, bands, band_index, 1, 150)
 
