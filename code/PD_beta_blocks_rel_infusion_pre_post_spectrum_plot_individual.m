@@ -118,8 +118,6 @@ for fo = 1:no_folders
         
         axis tight
         
-        xlim([8 30])
-        
         All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
         
         if fo == 1
