@@ -16,7 +16,7 @@ no_mats = length(subject_mat_prefixes);
 
 for m = 1:no_mats
 
-    run_carb([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands)
+    run_carb([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands, band_index)
 
 end
 

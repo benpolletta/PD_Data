@@ -48,7 +48,7 @@ for ch = 1:no_chans
     
     hold on
     
-    plot([15 30; 15 30], repmat([all_dimensions(@min, WT_mean(1:50, :) - WT_ci(1:50, :)); all_dimensions(@max, WT_mean(1:50, :) + WT_ci(1:50, :))], 1, 2), '--r')
+    plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
     
     axis tight
     

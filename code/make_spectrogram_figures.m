@@ -91,7 +91,7 @@ for ch = 1:2
     
     plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
     
-    colors = {'g', 'r'};
+    colors = {'c', 'g'};
     
     for pd = 1:2
         

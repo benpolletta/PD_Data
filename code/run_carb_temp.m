@@ -18,7 +18,7 @@ end
 
 power_handles = {'', '_pct'};
 
-for i = 1:length(power_handles)
+for i = 2:length(power_handles)
     
     PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, freqs, no_cycles, bands);
    

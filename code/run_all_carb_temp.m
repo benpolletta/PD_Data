@@ -14,37 +14,31 @@ subject_mat_prefixes = {'st_m1', 'st_m1_ali', 'st_m1_ali2'};
 
 no_mats = length(subject_mat_prefixes);
 
-for m = 1
-   
-    run_carb_temp([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands)   
-    
-end
+% for m = 1:no_mats
+% 
+%     run_carb([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands, band_index)
+% 
+% end
+% 
+% measures = {'', '_power'}; norms = {'', '_pct'};
+% 
+% for m = 1:length(measures)
+%     
+%     collect_striatal_motor_power_density(peak_suffix, measures{m}, norms{m}, freqs, no_cycles, bands)
+%     
+%     PD_beta_blocks_rel_infusion_pre_post_plot('STR_M1_subjects.mat', peak_suffix, 150, [norms{m}, measures{m}], 't-test', freqs, no_cycles, bands)
+% 
+% end
+%    
+% collect_striatal_w_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+% 
+% PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('STR_w_M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands)
+% 
+% make_spectra_figures('STR_w_M1', peak_suffix)
 
-for m = 2:no_mats
+collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
 
-    run_carb([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands)
-
-end
-
-measures = {'', '_power'}; norms = {'', '_pct'};
-
-for m = 1:length(measures)
-    
-    collect_striatal_motor_power_density(peak_suffix, measures{m}, norms{m}, freqs, no_cycles, bands)
-    
-    PD_beta_blocks_rel_infusion_pre_post_plot('STR_M1_subjects.mat', peak_suffix, 150, [norms{m}, measures{m}], 't-test', freqs, no_cycles, bands)
-
-end
-   
-collect_striatal_w_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
-
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('STR_w_M1_subjects.mat', peak_suffix, 150, '_power', '_pct', band_index, no_bands, freqs, no_cycles, bands)
-
-make_spectra_figures('STR_w_M1', peak_suffix)
-
-collect_motor_spectrum(peak_suffix, 150, '_pct', 3, freqs, no_cycles, bands)
-
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('M1_subjects.mat', peak_suffix, 150, '_power', '_pct', band_index, no_bands, freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands)
 
 make_spectra_figures('M1', peak_suffix)
 

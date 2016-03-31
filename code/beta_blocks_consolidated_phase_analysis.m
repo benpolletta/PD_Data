@@ -67,8 +67,12 @@ end
 no_f_bins = ceil((diff(bands(band_index, :)) + 1)/f_tol);
 
 f_bins = (mean(bands(band_index, :)) - f_tol*no_f_bins/2):f_tol:(mean(bands(band_index, :)) + f_tol*no_f_bins/2);
+    
+no_phase_bins = 18;
 
 [r, c] = subplot_size(PD_struct.no_folders);
+
+freqs_by_folder = zeros(PD_struct.no_folders, no_f_bins, PD_struct.no_pds);
 
 for fo = 1:PD_struct.no_folders
     
@@ -99,8 +103,6 @@ for fo = 1:PD_struct.no_folders
     
     figure(1), figure(2)
     
-    no_phase_bins = 18;
-    
     [MR_mat, conf_mat] = deal(nan(length(f_bins) - 1, PD_struct.no_pds));
     
     [freq_cats, phases] = deal(cell(PD_struct.no_pds, 1));
@@ -119,13 +121,17 @@ for fo = 1:PD_struct.no_folders
         
         figure
         
-        [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index), no_phase_bins, f_bins, bonferroni_count);
+        [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = ...
+            rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index),...
+            no_phase_bins, f_bins, bonferroni_count, 1);
         
         freq_cats{pd} = categorize_freq(mean_f(f_overlap_index), f_bins);
         
         phases{pd} = d_phi(f_overlap_index);
         
     end
+        
+    freqs_by_folder(fo, :, :) = reshape(~isnan(MR_mat), [1 no_f_bins PD_struct.no_pds]);
 
     [~, ~, zero_test, ~, angle_pval] = circular_stats(f_bins, phases, freq_cats, bonferroni_count);
     
@@ -290,13 +296,19 @@ for pd = 1:PD_struct.no_pds
     
     figure
     
-    [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index), no_phase_bins, f_bins, bonferroni_count);
+    [MR_mat(:, pd), ~, freq_bin_centers, conf_mat(:, pd)] = ...
+        rose_plot(d_phi(f_overlap_index), mean_f(f_overlap_index),...
+        no_phase_bins, f_bins, bonferroni_count, PD_struct.no_folders);
     
     freq_cats{pd} = categorize_freq(mean_f(f_overlap_index), f_bins);
     
     phases{pd} = d_phi(f_overlap_index);
     
 end
+
+freqs_excluded = reshape(sum(freqs_by_folder) <= 1, no_f_bins, PD_struct.no_pds);
+
+MR_mat(freqs_excluded) = nan; conf_mat(freqs_excluded) = nan;
 
 conf_mat = reshape(conf_mat, size(conf_mat, 1), 1, size(conf_mat, 2));
 

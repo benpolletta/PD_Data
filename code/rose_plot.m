@@ -1,4 +1,4 @@
-function [MR_vec, p_hist, freqs, conf_vec] = rose_plot(p_vec, f_vec, no_p_bins, f_bins, no_comps)
+function [MR_vec, p_hist, freqs, conf_vec] = rose_plot(p_vec, f_vec, no_p_bins, f_bins, no_comps, min_p_bin_multiplier)
 
 % Produces a rose plot, with mean resultant vectors, from time series of
 % frequencies and phases.
@@ -45,7 +45,7 @@ for f = 1:no_f_bins
     
     MR_pval = exp(sqrt(1+4*n+4*(n^2-abs(R)^2))-(1+2*n));
     
-    if MR_pval <= 0.01/no_f_bins && length(f_phases) >= no_p_bins
+    if MR_pval <= 0.01/no_f_bins && length(f_phases) >= no_p_bins*min_p_bin_multiplier
         
         MR_vec(f) = R/n;
         
