@@ -37,12 +37,8 @@ PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('OPTO_subjects.mat', peak_suf
 make_opto_spectra_figures('OPTO', peak_suffix)
 
 for m = 1:no_mats
-
-    for ftol = 2:3
         
-        run_phase_analysis([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, 200, .5, ftol, freqs, no_cycles, bands, band_index, 1, [])
-        
-    end
+    run_phase_analysis([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, 200, .5, ftol, freqs, no_cycles, bands, band_index, 1, [])
 
 end
 
