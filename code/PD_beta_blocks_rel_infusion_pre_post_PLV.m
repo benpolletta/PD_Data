@@ -52,7 +52,7 @@ no_pds = length(pd_labels);
 
 [Coh_baseline, dP_baseline] = deal(nan(no_freqs, no_folders));
 
-[Coh_sec, Coh_sec_pct, dP_sec, dP_sec_pct] = deal(nan(no_freqs, epoch_secs, no_folders, no_pds, no_chans));
+[Coh_sec, Coh_sec_pct, dP_sec, dP_sec_pct] = deal(nan(no_freqs, epoch_secs, no_folders, no_pds));
 
 load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
@@ -76,6 +76,12 @@ for fo = 1:no_folders
     
     t_baseline = t(t <= 0);
     
+    dPhase_baseline = dPhase_data(t <= 0, :);
+        
+    dPhase_baseline = nans_to_end(dPhase_baseline);
+
+    [Coh_bl_folder, dP_bl_folder] = deal(nan(no_freqs, basetime));
+    
     for bl_secs = 1:basetime
         
         sec_start = (bl_secs - 1)*sampling_freq + 1;
@@ -84,11 +90,15 @@ for fo = 1:no_folders
         
         MRV_sec = nanmean(exp(sqrt(-1)*dPhase_data(sec_start:sec_end, :)))';
         
-        Coh_baseline(:, fo) = Coh_baseline(:, fo) + abs(MRV_sec)/basetime;
+        Coh_bl_folder(:, bl_secs) = abs(MRV_sec);
         
-        dP_baseline(:, fo) = dP_baseline(:, fo) + angle(MRV_sec)/basetime;
+        dP_bl_folder(:, bl_secs) = angle(MRV_sec);
         
     end
+    
+    Coh_baseline(:, fo) = nanmean(Coh_bl_folder, 2);
+    
+    dP_baseline(:, fo) = angle(nanmean(exp(sqrt(-1)*dP_bl_folder), 2));
     
     clear pd_indices
     
@@ -137,7 +147,7 @@ for fo = 1:no_folders
 end
 
 save([subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index}, ...
-    '_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_PLV.mat'], ... 
+    '_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '_PLV.mat'], ... 
     'freqs', 'band_indices', 'band_index', 'Coh_baseline', 'Coh_sec', 'Coh_sec_pct', 'dP_baseline', 'dP_sec', 'dP_sec_pct')
 
 end

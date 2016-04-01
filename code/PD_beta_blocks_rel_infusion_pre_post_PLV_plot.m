@@ -52,12 +52,12 @@ subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
 if ~isempty(epoch_secs)
     
     PLV_name = [subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index_for_time}, '_high_',...
-        num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_PLV'];
+        num2str(epoch_secs/60), '_min_secs', pd_handle, '_PLV'];
     
 else
     
     PLV_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_',...
-        short_band_labels{band_index_for_time}, pd_handle, norm, '_PLV'];
+        short_band_labels{band_index_for_time}, pd_handle, '_PLV'];
     
     epoch_secs = str2double(pd_handle(2:(end - length('trials'))));
     
@@ -75,9 +75,13 @@ figure
 
 array_names = {'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'dP_sec_pct'};
 
+long_array_names = {'Coherence', 'Coherence (%\Delta Baseline)', 'Phase of Coh.', 'Phase of Coh. (%\Delta Baseline)'};
+
 no_arrays = length(array_names);
 
 [rows, cols] = subplot_size(no_arrays);
+
+figure
 
 for a = 1:no_arrays
     
@@ -87,19 +91,43 @@ for a = 1:no_arrays
     
     for pd = 1:no_pds
         
-        PLV_for_stats = reshape(PLV_data(display_indices, :, :, pd, ch), no_freqs, no_folders*no_dps, 1);
+        PLV_for_stats = reshape(PLV_data(display_indices, :, :, pd), no_freqs, no_folders*no_dps, 1);
         
-        PLV_mean(:, pd) = nanmean(PLV_for_stats, 2);
+        if strcmp(array_names{a}(1:2), 'dP_sec')
+            
+            PLV_mean(:, pd) = angle(nanmean(exp(sqrt(-1)*PLV_for_stats), 2));
+    
+            PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
         
-        PLV_ci(:, pd) = norminv(1 - .05/bonferroni_count, 0, 1)*nanstd(PLV_for_stats, [], 2)/sqrt(no_folders*no_dps); % .*freq_multiplier, [], 2)/sqrt(epoch_secs);
+            PLV_ci(:, pd) = circ_confmean(PLV_for_stats, .05/bonferroni_count, [], [], 2);
+            
+        else
+            
+            PLV_mean(:, pd) = nanmean(PLV_for_stats, 2);
+            
+            PLV_ci(:, pd) = norminv(1 - .05/bonferroni_count, 0, 1)*nanstd(PLV_for_stats, [], 2)/sqrt(no_folders*no_dps);
+            
+        end
         
     end
     
     save([PLV_name, '_', array_names{a}, '_data_for_plot.mat'], 'PLV_mean', 'PLV_ci')
     
     subplot(rows, cols, a)
+    
+    if any(~isnan(PLV_mean))
         
-    boundedline(freqs(display_indices), PLV_mean, prep_for_boundedline(PLV_ci))
+        if any(~isnan(PLV_ci))
+            
+            boundedline(freqs(display_indices), PLV_mean, prep_for_boundedline(PLV_ci))
+            
+        else
+            
+            plot(freqs(display_indices), PLV_mean)
+            
+        end
+        
+    end
     
     axis tight
     
