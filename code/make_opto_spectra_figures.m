@@ -10,7 +10,7 @@ figure
 
 for ch = 1:no_chans
     
-    load([group_prefix, peak_suffix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
+    load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
 
     [sig_higher, sig_lower] = find_sig(WT_mean(:, 1:2), WT_ci(:, 1:2));
     
