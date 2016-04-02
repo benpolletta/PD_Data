@@ -58,7 +58,7 @@ total_folders = subj_mat_limits(end);
 
 [All_Coh_sec, All_Coh_pct_sec, All_dP_sec, All_dP_pct_sec] = deal(nan(no_freqs, epoch_secs, total_folders, no_pds));
 
-array_names = {'Coh', 'Coh_pct', 'dP', 'dP_pct'};
+array_names = {'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'dP_sec_pct'};
 
 for s = 1:no_groups
    
@@ -71,21 +71,21 @@ for s = 1:no_groups
     
     for a = [1 2 4]
         
-        eval(['All_', array_names{a}, '_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1)) = ', array_names{a}, '_sec;'])
+        eval(['All_', array_names{a}, '(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :) = ', array_names{a}, ';'])
         
     end
     
 end
 
-% clear Coh_sec Coh_pct_sec dP_sec dP_pct_sec
+% clear Coh_sec Coh_sec_pct dP_sec dP_sec_pct
 
 for a = 1:length(array_names)
     
     clear(array_names{a})
    
-    eval([array_names{a}, '_sec = All_', array_names{a}, '_sec;'])
+    eval([array_names{a}, ' = All_', array_names{a}, ';'])
     
 end
 
 save(['STR_M1', BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
-    num2str(epoch_secs/60), '_min_secs_PLV.mat'], 'Coh_sec', 'Coh_pct_sec', 'dP_sec', 'dP_pct_sec')
+    num2str(epoch_secs/60), '_min_secs_PLV.mat'], 'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'dP_sec_pct')

@@ -14,21 +14,21 @@ subject_mat_prefixes = {'st_m1_ali_control_opto', 'st_m1_ali2_control_opto', 'st
 
 no_mats = length(subject_mat_prefixes);
 
-for m = 2:no_mats
-
-    run_opto('Control_Opto', [subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands)
-
-end
+% for m = 1:no_mats
+% 
+%     run_opto('Control_Opto', [subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands)
+% 
+% end
 
 measures = {'', '_power'}; norms = {'', '_pct'};
 
-for m = 1:length(measures)
-    
-    collect_control_opto_power_density(peak_suffix, measures{m}, norms{m}, freqs, no_cycles, bands)
-    
-    PD_beta_blocks_rel_infusion_pre_post_plot('CONTROL_OPTO_subjects.mat', peak_suffix, [], ['_10trials', norms{m}, measures{m}], 't-test', freqs, no_cycles, bands)
-
-end
+% for m = 1:length(measures)
+%     
+%     collect_control_opto_power_density(peak_suffix, measures{m}, norms{m}, freqs, no_cycles, bands)
+%     
+%     PD_beta_blocks_rel_infusion_pre_post_plot('CONTROL_OPTO_subjects.mat', peak_suffix, [], ['_10trials', norms{m}, measures{m}], 't-test', freqs, no_cycles, bands)
+% 
+% end
    
 collect_control_opto_spectrum(peak_suffix, '_pct', no_bands, freqs, no_cycles, bands)
 

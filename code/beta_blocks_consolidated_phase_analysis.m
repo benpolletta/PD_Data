@@ -306,7 +306,15 @@ for pd = 1:PD_struct.no_pds
     
 end
 
-freqs_excluded = reshape(sum(freqs_by_folder) <= 1, no_f_bins, PD_struct.no_pds);
+if PD_struct.no_folders > 1
+    
+    freqs_excluded = reshape(sum(freqs_by_folder) <= 1, no_f_bins, PD_struct.no_pds);
+    
+else
+    
+    freqs_excluded = ones(no_f_bins, PD_struct.no_pds);
+    
+end
 
 MR_mat(freqs_excluded) = nan; conf_mat(freqs_excluded) = nan;
 

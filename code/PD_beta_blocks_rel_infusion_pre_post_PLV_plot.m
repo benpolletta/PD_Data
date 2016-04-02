@@ -71,8 +71,6 @@ no_dps = size(dP_sec, 2);
 
 %% Group mean spectrum plots.
 
-figure
-
 array_names = {'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'dP_sec_pct'};
 
 long_array_names = {'Coherence', 'Coherence (%\Delta Baseline)', 'Phase of Coh.', 'Phase of Coh. (%\Delta Baseline)'};
@@ -93,11 +91,11 @@ for a = 1:no_arrays
         
         PLV_for_stats = reshape(PLV_data(display_indices, :, :, pd), no_freqs, no_folders*no_dps, 1);
         
-        if strcmp(array_names{a}(1:2), 'dP_sec')
+        if strcmp(array_names{a}, 'dP_sec')
             
             PLV_mean(:, pd) = angle(nanmean(exp(sqrt(-1)*PLV_for_stats), 2));
     
-            PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
+            % PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
         
             PLV_ci(:, pd) = circ_confmean(PLV_for_stats, .05/bonferroni_count, [], [], 2);
             
@@ -127,6 +125,14 @@ for a = 1:no_arrays
             
         end
         
+    end
+        
+    if strcmp(array_names{a}, 'dP_sec')
+        
+        hold on
+        
+        plot(freqs(display_indices), zeros(sum(display_indices)), ':k')
+    
     end
     
     axis tight
