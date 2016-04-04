@@ -95,7 +95,7 @@ for a = 1:no_arrays
             
             PLV_mean(:, pd) = angle(nanmean(exp(sqrt(-1)*PLV_for_stats), 2));
     
-            % PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
+            PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
         
             PLV_ci(:, pd) = circ_confmean(PLV_for_stats, .05/bonferroni_count, [], [], 2);
             

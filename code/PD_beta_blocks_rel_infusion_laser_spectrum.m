@@ -104,18 +104,6 @@ for fo = 1:no_folders
         
     end
     
-    if isempty(freqs) && isempty(no_cycles) && isempty(bands)
-    
-        load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high_cum')
-    
-    else
-        
-        load([subj_name, BP_suffix, '_2sd_BP_high.mat'], 'BP_high')
-        
-        BP_high_cum = BP_high;
-        
-    end
-    
     for ch = 1:no_chans
         
         for pd = 1:no_pds
