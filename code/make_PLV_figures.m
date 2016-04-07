@@ -32,7 +32,7 @@ set(gca, 'FontSize', 16)
 
 xlabel('Freq. (Hz)', 'FontSize', 16)
 
-ylabel({'Mean \pm 95% CI'; 'Coherence'}, 'FontSize', 16)
+ylabel({'Mean \pm 95% CI'; 'Phase-Locking Magnitude'}, 'FontSize', 16)
 
 %% Plotting zoomed angle of coherence.
 
@@ -60,7 +60,7 @@ set(gca, 'FontSize', 16)
 
 xlabel('Freq. (Hz)', 'FontSize', 16)
 
-ylabel({'Mean \pm 95% CI'; 'Angle of Coherence'}, 'FontSize', 16)
+ylabel({'Mean \pm 95% CI'; 'Phase-Locking Angle'; '(Striatum - Motor Cortex)'}, 'FontSize', 16)
 
 save_as_eps(gcf, [group_prefix, peak_suffix, '_PLV'])
 

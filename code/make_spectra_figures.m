@@ -6,23 +6,23 @@ figure
 
 %% Plotting broadband spectrum.
 
-load([group_prefix, peak_suffix, '_pct_8-30Hz_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
+load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
 
-[sig_higher, sig_lower] = find_sig(WT_mean, WT_ci);
+[sig_lower, sig_higher] = find_sig(WT_mean, WT_ci);
 
 subplot(2, 1, 1)
 
 boundedline((1:200)', WT_mean, prep_for_boundedline(WT_ci))
 
-add_stars(gca, (1:200)', logical(sig_higher + sig_lower), 1, [1 0 0])
-
 axis tight
+
+add_stars(gca, (1:200)', logical(sig_lower), 0, [1 .5 0])
+
+add_stars(gca, (1:200)', logical(sig_higher), 1, [1 0 0])
 
 set(gca, 'FontSize', 16)
 
 title(chan_labels{1}, 'FontSize', 20)
-
-% xlabel('Freq. (Hz)', 'FontSize', 16)
 
 ylabel({'Mean \pm 95% CI'; 'Power (% \Delta Baseline)'}, 'FontSize', 16)
 
@@ -32,47 +32,19 @@ subplot(2, 1, 2)
 
 boundedline((1:50)', WT_mean(1:50, :), prep_for_boundedline(WT_ci(1:50, :)))
 
-add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
-
-hold on
-
-plot([15 30; 15 30], repmat([all_dimensions(@min, WT_mean(1:50, :) - WT_ci(1:50, :)); all_dimensions(@max, WT_mean(1:50, :) + WT_ci(1:50, :))], 1, 2), '--r')
-
 axis tight
 
-set(gca, 'FontSize', 16)
+add_stars(gca, (1:50)', logical(sig_lower(1:50)), 0, [1 .5 0])
 
-% title(chan_labels{1}, 'FontSize', 20)
+add_stars(gca, (1:50)', logical(sig_higher(1:50)), 1, [1 0 0])
+
+plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+
+set(gca, 'FontSize', 16)
 
 xlabel('Freq. (Hz)', 'FontSize', 16)
 
 ylabel({'Mean \pm 95% CI'; 'Power (% \Delta Baseline)'}, 'FontSize', 16)
-
-% %% Plotting narrowand spectra.
-% 
-% spec_labels = {'8-13Hz', '13-18Hz', '18-25Hz'};
-% 
-% for s = 1:length(spec_labels)
-%     
-%     load([group_prefix, '_8-30Hz_3-7cycles_6bands_pct_', spec_labels{s}, '_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
-%     
-%     subplot(3, 3, 3 + s)
-%     
-%     boundedline((8:.5:30)', WT_mean, prep_for_boundedline(WT_ci))
-%     
-%     axis tight
-%     
-%     set(gca, 'FontSize', 16)
-%     
-%     xlabel('Freq. (Hz)', 'FontSize', 16)
-%     
-%     if s == 1
-%         
-%         ylabel({'Mean \pm 95% CI'; 'Power (% \Delta Baseline)'}, 'FontSize', 16)
-%         
-%     end
-%     
-% end
 
 save_as_eps(gcf, [group_prefix, peak_suffix, '_spectra'])
 

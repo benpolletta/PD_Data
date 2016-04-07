@@ -500,7 +500,7 @@ for c = 1:no_clusters
     
 end
 
-save_as_pdf(gcf, [fig_name, '_wt_power_nopeak'])
+save_as_pdf(gcf, [fig_name, '_000_wt_power_nopeak'])
 
 figure
 
@@ -522,6 +522,6 @@ for c = 1:no_clusters
     
 end
 
-save_as_pdf(gcf, [fig_name, '_wt_phase'])
+save_as_pdf(gcf, [fig_name, '_000_wt_phase'])
 
 end
