@@ -1,4 +1,4 @@
-function PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, sd_lim, chunk_size) % , outlier_lims)
+function PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, sd_lim, chunk_size, freqs, no_cycles, bands) % , outlier_lims)
 
 % INPUTS:
 % subject_mat - .mat file containing info about recordings to be processed.
@@ -14,11 +14,27 @@ load(subject_mat)
 
 %sampling_freq = 1000;
 
-freqs = 1:200; no_freqs = length(freqs);
+if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+    
+    freqs = 1:200; in_freqs = [];
+    
+    no_cycles = linspace(3, 21, 200); in_no_cycles = [];
+    
+    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
+    
+    BP_suffix = ['', peak_suffix];
+    
+else
+    
+    in_freqs = freqs; in_no_cycles = no_cycles; in_bands = bands;
+    
+    BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+    BP_suffix = [BP_suffix, peak_suffix];
+    
+end
 
-no_cycles = linspace(3, 21, no_freqs);
-
-bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; no_bands = size(bands, 1);
+no_freqs = length(freqs); no_bands = size(bands, 1);
 
 [band_indices, band_labels] = deal(cell(no_bands, 1));
 
@@ -52,15 +68,15 @@ for fo = 1:length(folders)
     
     no_chunks = no_mins*60/chunk_size;
     
-    [BP_no_spikes, Spec] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '', [], [], []); % load([subj_name, '_wt.mat'], 'Spec') % 
+    [BP_no_spikes, Spec] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands); % load([subj_name, '_wt.mat'], 'Spec') % 
     
-    [BP_norm_no_spikes, ~] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '_norm', [], [], []); % 
+    [BP_norm_no_spikes, ~] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '_norm', in_freqs, in_no_cycles, in_bands); % 
     
-    load([subj_name, '_wt_BP.mat'], 'BP', 'BP_norm') % 
+    load([subj_name, BP_suffix, '_wt_BP.mat'], 'BP', 'BP_norm') % 
     
-    load([subj_name, peak_suffix, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
+    load([subj_name, BP_suffix, '_', num2str(sd_lim), 'sd_BP_norm_high.mat'], 'BP_high')
     
-    load([subj_name, peak_suffix, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high_cum')
+    load([subj_name, BP_suffix, '_', num2str(sd_lim), 'sd_BP_high.mat'], 'BP_high_cum')
     
     BP_high(BP_high == 0) = nan; BP_high_cum(BP_high_cum == 0) = nan;
     
@@ -90,7 +106,7 @@ for fo = 1:length(folders)
         
     for c = 1:no_chunks %(19*3):(29*3) %1:(19*3 - 1) 
         
-        chunk_name = [subj_name, peak_suffix, '_chunk', num2str(c, '%03d'), '_wt'];
+        chunk_name = [subj_name, BP_suffix, '_chunk', num2str(c, '%03d'), '_wt'];
     
         chunk_start = max(1, (c - 1)*chunk_size*sampling_freq + 1);
         

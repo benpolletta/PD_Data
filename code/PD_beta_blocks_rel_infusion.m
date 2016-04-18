@@ -36,11 +36,13 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands) % Defaults.
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
-    BP_suffix = '';
+    BP_suffix = peak_suffix;
     
 else % Suffix used to save non-default output.
     
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    
+    BP_suffix = [BP_suffix, peak_suffix];
     
 end
     
@@ -195,7 +197,7 @@ for fo = 1:length(folders)
         
         BP_high_cum(cumsum(BP_high, 2) > 1) = 0;
         
-        save([subj_name, BP_suffix, peak_suffix, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
+        save([subj_name, BP_suffix, '_', num2str(sd_lim), 'sd_BP', norms{n}, '_high.mat'], 'BP_high', 'BP_high_cum')
         
         for pd = 1:no_pds
         
@@ -213,6 +215,6 @@ for fo = 1:length(folders)
           
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, peak_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_', num2str(sd_lim), 'sd_BP_high_dps.mat'], 'BP_high_dps', 'BP_high_cum_dps')
 
 end

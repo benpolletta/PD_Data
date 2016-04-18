@@ -46,8 +46,8 @@ for i = 1:2
     
 end
 
-PD_beta_blocks_rel_infusion_laser_PLV(subject_mat, peak_suffix, 10, band_index, freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion_laser_PLV(subject_mat, peak_suffix, 10, no_bands, freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion_pre_post_PLV_plot(subject_mat, peak_suffix, [], '_10trials', no_bands, no_bands, freqs, no_cycles, bands)
 
-PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20)
+PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20, freqs, no_cycles, bands)

@@ -26,7 +26,7 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+load([folders{1}, '/', prefixes{1}, BP_suffix, '_wt.mat'], 'sampling_freq')
 
 no_bands = size(bands, 1);
 
