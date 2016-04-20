@@ -1,4 +1,4 @@
-function PD_all_data_wav(subjects_mat, freqs, no_cycles, bands)
+function PD_all_data_wav(subjects_mat, peak_suffix, freqs, no_cycles, bands)
 
 % Computes wavelet spectrogram for decimated data recordings contained in
 % the folders which are the entries in the 'folders' variable (a cell of
@@ -34,7 +34,7 @@ parfor fo = 1:length(folders)
     
     basetime = basetimes(fo);
     
-    wav_inner(folder, prefix, basetime, freqs, no_cycles, bands) % See below.
+    wav_inner(folder, prefix, basetime, freqs, no_cycles, bands, peak_suffix) % See below.
     
 end
 

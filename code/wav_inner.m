@@ -1,4 +1,4 @@
-function wav_inner(folder, prefix, basetime, freqs, no_cycles, bands)
+function wav_inner(folder, prefix, basetime, freqs, no_cycles, bands, peak_suffix)
 
 subj_name = [folder,'/',prefix];
 
@@ -10,11 +10,12 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
-    save_name = subj_name;
+    save_name = [subj_name, peak_suffix];
     
 else
 
-    save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+    save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands%s', subj_name,...
+        freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1), peak_suffix);
 
 end
     
