@@ -1,4 +1,4 @@
-function collect_opto_spectrum(peak_suffix, band_index, freqs, no_cycles, bands)
+function collect_control_opto_nm3_PLV(peak_suffix, band_index, freqs, no_cycles, bands)
 
 no_secs = 5; no_trials = 10;
 

@@ -10,15 +10,15 @@ else
     
 end
 
-% PD_pct_fix(subject_mat, peak_suffix, freqs, no_cycles, bands)
-% 
-% PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
-% 
-% PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
+PD_pct_fix(subject_mat, peak_suffix, freqs, no_cycles, bands)
+
+PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
+
+PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
 
 power_handles = {'', '_pct'};
 
-for i = 1 % :length(power_handles)
+for i = 1:length(power_handles)
     
     PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, freqs, no_cycles, bands);
    
@@ -48,4 +48,4 @@ PD_beta_blocks_rel_infusion_pre_post_PLV(subject_mat, peak_suffix, 150, '_by_STR
 
 PD_beta_blocks_rel_infusion_pre_post_PLV_plot(subject_mat, peak_suffix, 150, '_by_STR', 4, 7, freqs, no_cycles, bands)
 
-PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20, freqs, no_cycles, bands)
+% PD_rel_infusion_plot_spectrogram(subject_mat, peak_suffix, 2, 20, freqs, no_cycles, bands)

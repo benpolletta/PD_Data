@@ -12,17 +12,19 @@ for ch = 1:no_chans
     
     load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
 
-    [sig_higher, sig_lower] = find_sig(WT_mean(:, 1:2), WT_ci(:, 1:2));
+    [sig_lower, sig_higher] = find_sig(WT_mean(:, 1:2), WT_ci(:, 1:2));
     
     %% Plotting broadband spectrum.
     
     subplot(2, no_chans, ch)
     
-    boundedline((1:200)', WT_mean(:, 1:no_pds_plotted), prep_for_boundedline(WT_ci(:, 1:no_pds_plotted)))
-
-    add_stars(gca, (1:200)', logical(sig_higher + sig_lower), 1, [1 0 0])
+    boundedline((1:200)', WT_mean(:, 1:no_pds_plotted), prep_for_boundedline(WT_ci(:, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
     
     axis tight
+    
+    add_stars(gca, (1:200)', logical(sig_lower), 0, [1 .5 0])
+    
+    add_stars(gca, (1:200)', logical(sig_higher), 1, [1 0 0])
     
     set(gca, 'FontSize', 16)
     
@@ -42,19 +44,17 @@ for ch = 1:no_chans
     
     subplot(2, no_chans, 2 + ch)
     
-    boundedline((1:50)', WT_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(WT_ci(1:50, 1:no_pds_plotted)))
-
-    add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
-    
-    hold on
-    
-    plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+    boundedline((1:50)', WT_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(WT_ci(1:50, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
     
     axis tight
     
-    set(gca, 'FontSize', 16)
+    add_stars(gca, (1:50)', logical(sig_lower(1:50)), 0, [1 .5 0])
     
-    % title(chan_labels{1}, 'FontSize', 20)
+    add_stars(gca, (1:50)', logical(sig_higher(1:50)), 1, [1 0 0])
+    
+    plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+    
+    set(gca, 'FontSize', 16)
     
     xlabel('Freq. (Hz)', 'FontSize', 16)
     

@@ -55,7 +55,7 @@ prelaseron_times = t(xor(laser_transitions, prelaser_transitions) & prelaser_tra
 
 times = {prelaseron_times, laseron_times, laseroff_times};
 
-time_colors = {'g', 'w', 'c'}; time_LFP_colors = {'g', 'k', 'c'};
+time_colors = {'m', 'w', 'c'}; time_LFP_colors = {'m', 'k', 'c'};
 
 for c = 1:3
 

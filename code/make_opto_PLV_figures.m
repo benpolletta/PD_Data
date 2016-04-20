@@ -12,19 +12,19 @@ figure
 
 load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_PLV_Coh_sec_data_for_plot.mat'])
 
-[sig_higher, sig_lower] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
+[sig_lower, sig_higher] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
 
 subplot(2, 1, 1)
 
-boundedline((1:50)', PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(PLV_ci(1:50, 1:no_pds_plotted)))
-
-add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
-
-hold on
-
-plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+boundedline((1:50)', PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(PLV_ci(1:50, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
 
 axis tight
+
+add_stars(gca, (1:200)', logical(sig_lower), 0, [1 .5 0])
+
+add_stars(gca, (1:200)', logical(sig_higher), 1, [1 0 0])
+
+plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
 
 set(gca, 'FontSize', 16)
 
@@ -42,17 +42,17 @@ load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10t
 
 subplot(2, 1, 2)
 
-boundedline((1:50)', (180/pi)*PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline((180/pi)*PLV_ci(1:50, 1:no_pds_plotted)))
+boundedline((1:50)', (180/pi)*PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline((180/pi)*PLV_ci(1:50, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
 
-add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
+axis tight
 
-hold on
+add_stars(gca, (1:200)', logical(sig_lower), 0, [1 .5 0])
+
+add_stars(gca, (1:200)', logical(sig_higher), 1, [1 0 0])
 
 plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
 
 plot((1:50)', zeros(1, 50), ':k')
-
-axis tight
 
 set(gca, 'FontSize', 16)
 
