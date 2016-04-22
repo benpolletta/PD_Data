@@ -2,6 +2,8 @@ function make_all_band_figures
 
 group_prefix = 'STR_M1';
 
+short_chan_labels = {'Str.', 'M1'};
+
 band_labels = {'1-4', '4-8', '8-12', '15-30', '40-100', '120-180'}; % , '0-200'};
 
 no_bands = length(band_labels);
@@ -51,7 +53,7 @@ for b = 1:no_bands
     
     if b == 1
         
-        title({'Period';'Densest Str. BP'}, 'FontSize', 16)
+        title({'Pd. Densest';'Str. BP'}, 'FontSize', 16)
         
     elseif b == no_bands
         
@@ -61,7 +63,7 @@ for b = 1:no_bands
     
     y = ylabel([band_labels{b}, ' Hz'], 'FontSize', 16, 'Rotation', 0);
     
-    set(y, 'Units', 'Normalized', 'Position', [-0.5 0.4 0])
+    set(y, 'Units', 'Normalized', 'Position', [-0.7 0.4 0])
     
 end
 
@@ -69,7 +71,7 @@ no_chans = length(chan_labels);
 
 stat_suffixes = {'', 'pct_power_'}; no_stats = length(stat_suffixes);
 
-stat_labels = {'Band Density', 'Band Pow. (% \Delta BL)'};
+stat_labels = {'Band Density', 'BP (% \Delta BL)'};
 
 stats = nan(no_bands, 12, no_chans, no_stats);
 
@@ -191,7 +193,7 @@ for b = 1:no_bands
         
         if b == 1
             
-            title({[chan_labels{ch}, ' Power']; '(% \Delta BL, Mean \pm 95% CI)'}, 'FontSize', 16)
+            title({[short_chan_labels{ch}, ' Pow. (% \Delta BL)']; 'Mean \pm 95% CI'}, 'FontSize', 16)
             
         elseif b == no_bands
         

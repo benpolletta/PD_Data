@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_laser_PLV(subject_mat, peak_suffix, no_trials_analyzed, band_index, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_laser_PLV(subject_mat, peak_suffix, no_trials_analyzed, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -84,7 +84,7 @@ end
     
 no_secs = max_no_trials*5;
 
-[Coh_sec, Coh_sec_pct, dP_sec, dP_sec_pct] = deal(nan(sum(band_indices{band_index}), no_secs, no_folders, no_pds));
+[Coh_sec, Coh_sec_pct, dP_sec, dP_sec_pct] = deal(nan(sum(band_indices{no_bands}), no_secs, no_folders, no_pds));
 
 for fo = 1:no_folders
     
@@ -104,7 +104,7 @@ for fo = 1:no_folders
     
     for pd = 1:no_pds
         
-        dP_trials = nan(folder_trial_no*5*sampling_freq, length(band_indices{band_index}));
+        dP_trials = nan(folder_trial_no*5*sampling_freq, sum(band_indices{no_bands}));
         
         for tr = 1:folder_trial_no
             
@@ -112,7 +112,7 @@ for fo = 1:no_folders
             
             trial_end = trial_start + 5*sampling_freq - 1;
             
-            dP_trials((tr - 1)*5*sampling_freq + (1:5*sampling_freq), :) = dPhase_data(trial_start:trial_end, band_indices{band_index});
+            dP_trials((tr - 1)*5*sampling_freq + (1:5*sampling_freq), :) = dPhase_data(trial_start:trial_end, band_indices{no_bands});
             
         end
         
@@ -144,7 +144,7 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index},...
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{no_bands},...
     '_', num2str(no_trials_analyzed), 'trials', '_PLV.mat'], 'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'dP_sec_pct')
 
 end

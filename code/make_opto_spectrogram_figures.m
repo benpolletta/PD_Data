@@ -258,6 +258,8 @@ try
     
     save_as_pdf(gcf, [folder, '/', folder, '_spec_for_paper_altogether'])
     
+    save_as_eps(gcf, [folder, '/', folder, '_spec_for_paper_altogether'])
+    
 catch
     
     save(gcf, [folder, '/', folder, '_spec_for_paper_altogether.fig'])

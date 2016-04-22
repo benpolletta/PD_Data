@@ -18,7 +18,7 @@ else
     
 end
 
-subject_matnames = {'st_m1_ali_control_opto', 'st_m1_ali2_control_opto', 'st_m1_ali3_control_opto'};
+subject_matnames = {'mice2_control_opto', 'st_m1_ali2_control_opto', 'st_m1_ali3_control_opto'};
 
 no_mats = length(subject_matnames);
 
@@ -66,4 +66,4 @@ clear pct_bp_high
 
 pct_bp_high = All_pct_bp_high;
 
-save(['CONTROL_OPTO', BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', norm_for_power, measure, '.mat'], 'pct_bp_high')
+save(['CONTROL_OPTO_no_mice1_mice3', BP_suffix, '_pct_BP_high_laser_', num2str(no_trials), 'trials', norm_for_power, measure, '.mat'], 'pct_bp_high')

@@ -1,4 +1,4 @@
-function collect_opto_spectrum(peak_suffix, band_index, freqs, no_cycles, bands)
+function collect_opto_PLV(peak_suffix, freqs, no_cycles, bands)
 
 no_secs = 5; no_trials = 10;
 
@@ -66,7 +66,7 @@ for s = 1:no_mats
    
     clear WT_sec
     
-    load([subject_matnames{s}, BP_suffix, '_pct_', short_band_labels{band_index}, '_10trials_PLV.mat'])
+    load([subject_matnames{s}, BP_suffix, '_pct_', short_band_labels{no_bands}, '_10trials_PLV.mat'])
     
     All_dP_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :) = ((-1)^channels(s, 1))*dP_sec;
     
@@ -86,5 +86,5 @@ for a = 1:length(array_names)
     
 end
 
-save(['OPTO', BP_suffix, '_pct_', short_band_labels{band_index}, ...
+save(['OPTO', BP_suffix, '_pct_', short_band_labels{no_bands}, ...
     '_10trials_PLV.mat'], 'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'dP_sec_pct')

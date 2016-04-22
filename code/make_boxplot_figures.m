@@ -1,4 +1,4 @@
-function make_spectra_boxplot_figures(group_prefix, chan_label)
+function make_boxplot_figures(group_prefix, chan_label)
 
 band_labels = {'1-4', '4-8', '8-15', '15-30', '40-100', '120-180'};
 
@@ -81,6 +81,8 @@ ylabel({'Mean \pm S.E.'; 'Density'}, 'FontSize', 16)
 set(gca, 'XTick', mean(bar_pos), 'XTickLabel', band_labels, 'FontSize', 16)
 
 xticklabel_rotate([], 45, [], 'FontSize', 16)
+
+%% Plotting power barplots.
 
 stats_name = [group_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_2.5_mins_t-test_pct_power_', chan_label, '_stats.txt'];
 

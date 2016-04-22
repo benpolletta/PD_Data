@@ -1,4 +1,4 @@
-function run_all_carb_opto(peak_suffix, freqs, no_cycles, bands, band_index)
+function run_all_carb_opto(peak_suffix, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -35,17 +35,23 @@ collect_opto_spectrum(peak_suffix, '_pct', no_bands, freqs, no_cycles, bands)
 PD_beta_blocks_rel_infusion_pre_post_spectrum_plot('OPTO_subjects.mat', peak_suffix, [], '_10trials', '_pct', no_bands, no_bands, freqs, no_cycles, bands)
 
 make_opto_spectra_figures('OPTO', peak_suffix)
+   
+collect_opto_PLV(peak_suffix, freqs, no_cycles, bands)
 
-for m = 1:no_mats
-        
-    run_phase_analysis([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, 200, .5, ftol, freqs, no_cycles, bands, band_index, 1, [])
+PD_beta_blocks_rel_infusion_pre_post_PLV_plot('OPTO_subjects.mat', peak_suffix, [], '_10trials', no_bands, no_bands, freqs, no_cycles, bands)
 
-end
+make_opto_PLV_figures('OPTO', peak_suffix)
 
-collect_opto_freqs(peak_suffix, 200, .5, '', band_index, freqs, no_cycles, bands)
-
-for ftol = 2:3
-    
-    beta_blocks_consolidated_phase_analysis('OPTO_subjects.mat', peak_suffix, 200, .5, '', band_index, ftol, freqs, no_cycles, bands)
-    
-end
+% for m = 1:no_mats
+%         
+%     run_phase_analysis([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, 200, .5, ftol, freqs, no_cycles, bands, band_index, 1, [])
+% 
+% end
+% 
+% collect_opto_freqs(peak_suffix, 200, .5, '', band_index, freqs, no_cycles, bands)
+% 
+% for ftol = 2:3
+%     
+%     beta_blocks_consolidated_phase_analysis('OPTO_subjects.mat', peak_suffix, 200, .5, '', band_index, ftol, freqs, no_cycles, bands)
+%     
+% end

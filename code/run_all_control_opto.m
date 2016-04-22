@@ -40,9 +40,9 @@ PD_beta_blocks_rel_infusion_pre_post_spectrum_plot([name, '_subjects.mat'], peak
 
 make_opto_spectra_figures(name, peak_suffix)
    
-collect_control_opto_PLV(peak_suffix, '_pct', no_bands, freqs, no_cycles, bands)
+collect_control_opto_PLV(peak_suffix, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion_pre_post_PLV_plot([name, '_subjects.mat'], peak_suffix, [], '_10trials', '_pct', no_bands, no_bands, freqs, no_cycles, bands)
+PD_beta_blocks_rel_infusion_pre_post_PLV_plot([name, '_subjects.mat'], peak_suffix, [], '_10trials', no_bands, no_bands, freqs, no_cycles, bands)
 
 make_opto_spectra_figures(name, peak_suffix)
 

@@ -90,8 +90,8 @@ end
 %     
 % end
 
-save_as_eps(gcf, [group_prefix, '_spectra'])
+save_as_eps(gcf, [group_prefix, peak_suffix, '_spectra'])
 
-save_as_pdf(gcf, [group_prefix, '_spectra'])
+save_as_pdf(gcf, [group_prefix, peak_suffix, '_spectra'])
 
 end
