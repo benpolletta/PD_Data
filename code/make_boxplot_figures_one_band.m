@@ -107,8 +107,6 @@ bar_pos = get_bar_pos(h);
 p_vals = power_stats(:, 11);
 
 load('bonferroni_count')
-
-bar_pairs = {};
     
 if p_vals(band_index) < .05/bonferroni_count
     
@@ -149,19 +147,5 @@ xticklabel_rotate([], 45, [], 'FontSize', 16)
 save_as_eps(gcf, [group_prefix, '_', chan_label, '_', band_labels{band_index}, '_boxplots'])
 
 save_as_pdf(gcf, [group_prefix, '_', chan_label, '_', band_labels{band_index}, '_boxplots'])
-
-end
-
-function pos_bars = get_bar_pos(handle)
-
-    for i = 1:length(handle)
-
-        x = get(get(handle(i), 'children'), 'xdata');
-
-        x = mean(x([1 3],:));
-
-        pos_bars(i,:) = x;
-
-    end
 
 end
