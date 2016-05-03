@@ -1,4 +1,4 @@
-function make_opto_PLV_figures(group_prefix, peak_suffix)
+function make_PLV_figures(group_prefix, peak_suffix)
 
 load([group_prefix, '_subjects.mat'], 'chan_labels', 'pd_labels')
 
@@ -12,13 +12,15 @@ figure
 
 load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_PLV_Coh_sec_data_for_plot.mat'])
 
-[sig_higher, sig_lower] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
+[sig_lower, sig_higher] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
 
 subplot(2, 1, 1)
 
 boundedline((1:50)', PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(PLV_ci(1:50, 1:no_pds_plotted)))
 
-add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
+add_stars(gca, (1:50)', logical(sig_lower(1:50)), 0, [1 .5 0])
+
+add_stars(gca, (1:50)', logical(sig_higher(1:50)), 1, [1 0 0])
 
 hold on
 
@@ -38,13 +40,15 @@ ylabel({'Mean \pm 95% CI'; 'Phase-Locking Magnitude'}, 'FontSize', 16)
 
 load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_PLV_dP_sec_data_for_plot.mat'])
 
-[sig_higher, sig_lower] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
+[sig_lower, sig_higher] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
 
 subplot(2, 1, 2)
 
 boundedline((1:50)', (180/pi)*PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline((180/pi)*PLV_ci(1:50, 1:no_pds_plotted)))
 
-add_stars(gca, (1:50)', logical(sig_higher(1:50) + sig_lower(1:50)), 1, [1 0 0])
+add_stars(gca, (1:50)', logical(sig_lower(1:50)), 0, [1 .5 0])
+
+add_stars(gca, (1:50)', logical(sig_higher(1:50)), 1, [1 0 0])
 
 hold on
 
