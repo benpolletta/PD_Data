@@ -114,7 +114,7 @@ for ch = 1:2
     
     % Mean_spec = conv2(Mean_spec(1:80, t_trial <= 10), ones(sampling_freq/25)/((sampling_freq/25)^2), 'same');
     
-    subplot(3, 2, ch) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
+    subplot(3, 2, 4 + ch) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
     imagesc(t_trial(t_trial <= 10), 1:80, Mean_spec)
     
@@ -122,7 +122,7 @@ for ch = 1:2
     
     caxis(color_lims(chan_index, :))
     
-    title(chan_labels{ch}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
+    % title(chan_labels{ch}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
     
     ylabel('Frequency (Hz)', 'FontSize', 16)
     
@@ -215,13 +215,13 @@ for ch = 1:2
     
     t_interval = t(t_index)*60;
     
-    subplot(3, 2, 2 + ch) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
+    subplot(3, 2, ch) % figure, subplot(2, 1, 1) % subplot(4, 2, 4 + pd)
     
     imagesc(t_interval, 1:80, Ch_spec(t_index, 1:80)')
     
     set(gca, 'FontSize', 16)
     
-    % title(pd_labels{pd}, 'FontSize', 16)
+    title(chan_labels{ch}, 'FontSize', 20)
     
     ylabel('Frequency (Hz)', 'FontSize', 16)
     
@@ -257,7 +257,7 @@ for ch = 1:2
         
     end
     
-    subplot(6, 2, 8 + ch) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
+    subplot(6, 2, 4 + ch) % subplot(4, 1, 3) % subplot(4, 2, 6 + pd)
     
     plot(t_interval, PD_dec(t_index, chan_index), 'k')
     
@@ -301,7 +301,7 @@ for ch = 1:2
         
     end
     
-    subplot(6, 2, 10 + ch)
+    subplot(6, 2, 6 + ch)
     
     plot(t_sub_interval, PD_dec(t_sub_index, chan_index), 'k')
     
