@@ -2,6 +2,8 @@ function make_opto_spectrogram_figures(group_prefix, peak_suffix, subject_no, tr
 
 close('all')
 
+figure
+
 if size(color_lims, 1) == 1
     
     color_lims = repmat(color_lims, 2, 1);
@@ -43,7 +45,7 @@ t = ((1:length(Spec))/s_rate)/60;
 
 first_ten_endtime = t(find(no_laser_ons > 10, 1));
 
-trial_borders = t(find(no_laser_ons > trial_to_zoom - 1, 1)) + [-5 5]/60;
+trial_borders = t(find(no_laser_ons > trial_to_zoom - 1, 1)) + [-5 10]/60;
 
 prelaser_transitions = circshift(laser_transitions, -5*sampling_freq);
 
@@ -65,7 +67,25 @@ end
 
 figure()
 
-%% Plotting spectrogram for first 10 trials.
+%% Plotting trial-averaged spectrogram.
+
+trial_datapoints = int16((times{1}(2) - times{1}(1))*60*sampling_freq);
+
+smooth_x_datapoints = sampling_freq/25; smooth_y_datapoints = sampling_freq/25;
+
+mg_x = -3:(6/(smooth_x_datapoints - 1)):3; mg_y = -3:(6/(smooth_y_datapoints - 1)):3;
+
+[smooth_x, smooth_y] = meshgrid(mg_x, mg_y);
+
+smooth_matrix = mvnpdf([smooth_x(:) smooth_y(:)], [0 0], eye(2));
+
+smooth_matrix = reshape(smooth_matrix/sum(smooth_matrix), smooth_x_datapoints, smooth_y_datapoints);
+
+% single_spike_indicator = zeros(sampling_freq, 1);
+% 
+% single_spike_indicator(floor(sampling_freq/2)) = 1;
+%         
+% [single_spike_wav_nans, ~] = indicator_to_nans(single_spike_indicator, 500, 1:200, linspace(3, 21, 200), [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]);
 
 for ch = 1:2
     
@@ -73,16 +93,30 @@ for ch = 1:2
     
     Ch_spec = abs(Spec(:, :, chan_index));
     
-    dims = size(Ch_spec);
+    trials_start = find(t == times{1}(1));
+    trials_end = find(t == times{1}(end)) - 1;
     
-    Spec_dec = nanmean(reshape(Ch_spec', dims(2), dec_factor, dims(1)/dec_factor), 2);
-    Spec_dec = permute(Spec_dec, [1 3 2]);
+    Trials_spec = Ch_spec(trials_start:trials_end, :);
     
-    t_dec = ((1:length(Spec_dec))/s_rate_dec)/60;
+    Trials_spec = reshape(Trials_spec, size(Trials_spec, 1)/trial_datapoints, trial_datapoints, size(Trials_spec, 2));
+    
+    Mean_spec = reshape(nanmean(Trials_spec), trial_datapoints, size(Trials_spec, 3))';
+    
+    t_trial = (1:trial_datapoints)/sampling_freq - 5;
+    
+    % for f = 1:80
+    % 
+    %     Mean_spec(f, :) = conv(Mean_spec(f, :), single_spike_wav_nans(f, :), 'same');
+    % 
+    % end
+    
+    Mean_spec = conv2(Mean_spec(1:80, t_trial <= 10), smooth_matrix, 'same');
+    
+    % Mean_spec = conv2(Mean_spec(1:80, t_trial <= 10), ones(sampling_freq/25)/((sampling_freq/25)^2), 'same');
     
     subplot(3, 2, ch) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
     
-    imagesc(t_dec(t_dec < first_ten_endtime), 1:80, Spec_dec(1:80, t_dec < first_ten_endtime))
+    imagesc(t_trial(t_trial <= 10), 1:80, Mean_spec)
     
     set(gca, 'FontSize', 16)
     
@@ -92,7 +126,7 @@ for ch = 1:2
     
     ylabel('Frequency (Hz)', 'FontSize', 16)
     
-    xlabel('Time (min.)', 'FontSize', 16)
+    xlabel('Time (sec.) Rel. Laser On', 'FontSize', 16)
     
     % caxis([0 10])
     
@@ -100,17 +134,64 @@ for ch = 1:2
     
     hold on
     
-    plot([t_dec(1) t_dec(end)], [30 30], ':w', 'LineWidth', 2)
+    plot([t_trial(1) t_trial(end)], [30 30], ':w', 'LineWidth', 2)
     
-    plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
+    plot([t_trial(1) t_trial(end)], [8 8], ':w', 'LineWidth', 2)
     
-    for c = 1:3
-        
-        plot(repmat(times{c}, 2, 1), repmat([0; 80], 1, size(times{c}, 2)), time_colors{c}, 'LineWidth', 1.5)
-        
-    end
+    plot([-5 -5], [0 80], time_colors{1}, 'LineWidth', 2)
     
+    plot([0 0], [0 80], time_colors{2}, 'LineWidth', 2)
+    
+    plot([5 5], [0 80], time_colors{3}, 'LineWidth', 2)
+
 end
+
+% %% Plotting spectrogram for first 10 trials.
+% 
+% for ch = 1:2
+%     
+%     chan_index = abs(3*mod(3 - striatal_id(subject_no), 2) - ch);
+%     
+%     Ch_spec = abs(Spec(:, :, chan_index));
+%     
+%     dims = size(Ch_spec);
+%     
+%     Spec_dec = nanmean(reshape(Ch_spec', dims(2), dec_factor, dims(1)/dec_factor), 2);
+%     Spec_dec = permute(Spec_dec, [1 3 2]);
+%     
+%     t_dec = ((1:length(Spec_dec))/s_rate_dec)/60;
+%     
+%     subplot(3, 2, ch) % figure, subplot(2, 1, 1) % subplot(4, 1, 1)
+%     
+%     imagesc(t_dec(t_dec < first_ten_endtime), 1:80, Spec_dec(1:80, t_dec < first_ten_endtime))
+%     
+%     set(gca, 'FontSize', 16)
+%     
+%     caxis(color_lims(chan_index, :))
+%     
+%     title(chan_labels{ch}, 'FontSize', 20) % [folder, ', Channel ', num2str(ch)])
+%     
+%     ylabel('Frequency (Hz)', 'FontSize', 16)
+%     
+%     xlabel('Time (min.)', 'FontSize', 16)
+%     
+%     % caxis([0 10])
+%     
+%     axis xy
+%     
+%     hold on
+%     
+%     plot([t_dec(1) t_dec(end)], [30 30], ':w', 'LineWidth', 2)
+%     
+%     plot([t_dec(1) t_dec(end)], [8 8], ':w', 'LineWidth', 2)
+%     
+%     for c = 1:3
+%         
+%         plot(repmat(times{c}, 2, 1), repmat([0; 80], 1, size(times{c}, 2)), time_colors{c}, 'LineWidth', 1.5)
+%         
+%     end
+%     
+% end
 
 %% Plotting spectrogram & LFP for 10 seconds (during trial 5).
 
