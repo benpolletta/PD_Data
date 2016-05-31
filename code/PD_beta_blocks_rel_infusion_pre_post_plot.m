@@ -148,7 +148,7 @@ for b = 1:no_bands
             
             if strcmp(test_handle, 't-test')
                 
-                [~, p_vals(:, b, ch)] = ttest(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), [], 'left'); % 'tail', 'left');
+                [~, p_vals(:, b, ch)] = ttest2(pct_bp_high_for_test(:, 1), pct_bp_high_for_test(:, 2), 'tail', 'left'); % 'tail', 'left');
                 
             elseif strcmp(test_handle, 'ranksum')
                 
@@ -164,11 +164,11 @@ for b = 1:no_bands
                     
                     if strcmp(test_handle, 't-test')
                         
-                        [~, p_vals(comp, b, ch, 1)] = ttest(pct_bp_high_for_test(:, comparisons(comp, 1)),...
-                            pct_bp_high_for_test(:, comparisons(comp, 2)), [], 'left');
+                        [~, p_vals(comp, b, ch, 1)] = ttest2(pct_bp_high_for_test(:, comparisons(comp, 1)),...
+                            pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'left');
                         
-                        [~, p_vals(comp, b, ch, 2)] = ttest(pct_bp_high_for_test(:, comparisons(comp, 1)),...
-                            pct_bp_high_for_test(:, comparisons(comp, 2)), [], 'right');
+                        [~, p_vals(comp, b, ch, 2)] = ttest2(pct_bp_high_for_test(:, comparisons(comp, 1)),...
+                            pct_bp_high_for_test(:, comparisons(comp, 2)), 'tail', 'right');
                         
                     elseif strcmp(test_handle, 'ranksum')
                         

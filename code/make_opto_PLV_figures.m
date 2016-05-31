@@ -10,9 +10,11 @@ figure
 
 %% Plotting zoomed magnitude of coherence.
 
-load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_PLV_Coh_sec_data_for_plot.mat'])
+load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_PLV_Coh_sec_pct_data_for_plot.mat'])
 
-[sig_lower, sig_higher] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
+PLV_mean = All_mean_mean; PLV_ci = All_mean_ci;
+
+[sig_lower, sig_higher] = find_sig(PLV_mean(1:50, 1:no_pds_plotted), PLV_ci(1:50, 1:no_pds_plotted));
 
 subplot(2, 1, 1)
 
@@ -20,11 +22,13 @@ boundedline((1:50)', PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(PLV_
 
 axis tight
 
-add_stars(gca, (1:200)', logical(sig_lower), 0, [1 .5 0])
+add_stars(gca, (1:50)', logical(sig_lower), 0, [1 .5 0])
 
-add_stars(gca, (1:200)', logical(sig_higher), 1, [1 0 0])
+add_stars(gca, (1:50)', logical(sig_higher), 1, [1 0 0])
 
-plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+% plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+
+plot((1:50)', zeros(1, 50), ':k')
 
 set(gca, 'FontSize', 16)
 
@@ -32,25 +36,27 @@ set(gca, 'FontSize', 16)
 
 xlabel('Freq. (Hz)', 'FontSize', 16)
 
-ylabel({'Mean \pm 95% CI'; 'Coherence'}, 'FontSize', 16)
+ylabel({'Mean \pm 95% CI'; 'Coherence (%\Delta BL)'}, 'FontSize', 16)
 
 %% Plotting zoomed angle of coherence.
 
 load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_PLV_dP_sec_data_for_plot.mat'])
 
-[sig_higher, sig_lower] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
+PLV_mean = All_mean_mean; PLV_ci = All_mean_ci;
+
+[sig_higher, sig_lower] = find_sig(PLV_mean(1:50, 1:2), PLV_ci(1:50, 1:2));
 
 subplot(2, 1, 2)
 
-boundedline((1:50)', (180/pi)*PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline((180/pi)*PLV_ci(1:50, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
+boundedline((1:50)', PLV_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(PLV_ci(1:50, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
 
 axis tight
 
-add_stars(gca, (1:200)', logical(sig_lower), 0, [1 .5 0])
+add_stars(gca, (1:50)', logical(sig_lower), 0, [1 .5 0])
 
-add_stars(gca, (1:200)', logical(sig_higher), 1, [1 0 0])
+add_stars(gca, (1:50)', logical(sig_higher), 1, [1 0 0])
 
-plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+% plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
 
 plot((1:50)', zeros(1, 50), ':k')
 

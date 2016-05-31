@@ -28,7 +28,7 @@ for b = 1:no_bands
    
     subplot(no_bands, 6, (b - 1)*6 + 1)
     
-    for fo = 1:length(folders)
+    for fo = [1 2 4:length(folders)] % 1:length(folders)
         
         plot([-10 30], fo*[1 1], 'k')
         
@@ -81,16 +81,25 @@ for st = 1:no_stats
     
     for ch = 1:no_chans
         
-        stats_name = [group_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_2.5_mins_t-test_', stat_suffixes{st}, chan_labels{ch}, '_stats.txt'];
-        
-        density_stats_cell = text_read(stats_name, '%s');
+        % stats_name = [group_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_2.5_mins_t-test_', stat_suffixes{st}, chan_labels{ch}, '_stats.txt'];
+        %
+        % density_stats_cell = text_read(stats_name, '%s');
         
         for b = 1:no_bands
             
-            band_stats_start = 24 + (b - 1)*13 + 1;
+            stats_name = [group_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_2.5_mins_', band_labels{b},...
+                'Hz_individual_t-test_', stat_suffixes{st}, chan_labels{ch}, '_stats.txt'];
             
-            band_stats_end = 23 + b*13;
+            density_stats_cell = text_read(stats_name, '%s');
             
+            band_stats_start = 24 + length(folders)*13 + 1; % (b - 1)*13 + 1;
+            
+            band_stats_end = 23 + (length(folders) + 1)*13; % b*13;
+            
+            % band_stats_start = 24 + (b - 1)*13 + 1;
+            % 
+            % band_stats_end = 23 + b*13;
+
             stats(b, :, ch, st) = cellfun(@str2num, density_stats_cell(band_stats_start:band_stats_end))';
             
         end
@@ -123,7 +132,7 @@ for st = 1:no_stats
         
         for ch = 1:2
             
-            if p_vals(ch) < .05/bonferroni_count
+            if p_vals(ch) < .05 % /bonferroni_count
                 
                 bar_pairs = {bar_pairs{:}, [bar_pos(1, ch), bar_pos(2, ch)]};
                 
@@ -131,7 +140,7 @@ for st = 1:no_stats
             
         end
         
-        sigstar(bar_pairs, p_vals(p_vals < .05/bonferroni_count))
+        sigstar(bar_pairs, p_vals(p_vals < .05)) % /bonferroni_count))
         
         axis tight
         
@@ -177,13 +186,15 @@ for b = 1:no_bands
     
     for ch = 1:no_chans
         
-        load([group_prefixes{ch}, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_ch1_data_for_plot.mat'])
+        load([group_prefixes{ch}, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_no_130716_ch1_data_for_plot.mat'])
         
-        [sig_lower, sig_higher] = find_sig(WT_mean, WT_ci);
+        All_mean_ci = norminv(1 - .05, 0, 1)*All_mean_se;
+        
+        [sig_lower, sig_higher] = find_sig(All_mean_mean, All_mean_ci);
         
         subplot(no_bands, 4, (b - 1)*4 + 2 + ch)
         
-        boundedline((1:200)', WT_mean, prep_for_boundedline(WT_ci))
+        boundedline((1:200)', All_mean_mean, prep_for_boundedline(All_mean_ci))
         
         axis tight
         

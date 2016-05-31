@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, test_handle, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, test_handle, freqs, no_cycles, bands, folder_left_out)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -13,6 +13,16 @@ else
     BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
     
     BP_suffix = [BP_suffix, peak_suffix];
+    
+end
+
+if ~isempty(folder_left_out)
+    
+    folder_flag = ['_no_', folder_left_out];
+   
+else
+    
+    folder_flag = '';
     
 end
     
@@ -167,7 +177,11 @@ for b = 1:no_bands
                 nanmedian(pct_bp_high_for_test), quantile(pct_bp_high_for_test, .25), quantile(pct_bp_high_for_test, .75),...
                 reshape(subj_p_vals, 1, 2*no_comparisons));
             
-            All_mean(fo, :, ch) = nanmean(pct_bp_high_for_test);
+            if ~strcmp(folders{fo}, folder_left_out)
+                
+                All_mean(fo, :, ch) = nanmean(pct_bp_high_for_test);
+                
+            end
             
             if no_pds == 2
                 
@@ -207,7 +221,7 @@ for b = 1:no_bands
         
         if no_comparisons > 0
             
-            across_p_vals = run_stats(All_mean(:, :, ch), test_handle);
+            across_p_vals = run_stats(All_mean(:, :, ch), [test_handle, '_avg']);
             
             All_p_vals(:, b, ch, :) = permute(across_p_vals, [1 3 4 2]);
             
@@ -241,7 +255,7 @@ for b = 1:no_bands
     end
     
     save_as_pdf(gcf, [subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_mins_', short_band_labels{b},...
-        '_barplot_individual_avg_', test_handle, pd_handle])
+        '_barplot_individual_avg', folder_flag, '_', test_handle, pd_handle])
 
 end
 
@@ -275,9 +289,13 @@ if no_pds == 2 && any(~isnan(data_for_test(:, 1))) && any(~isnan(data_for_test(:
     
     if strcmp(test_handle, 't-test')
         
+        [~, p_vals(1)] = ttest2(data_for_test(:, 1), data_for_test(:, 2), 'tail', 'left'); % 'tail', 'left');
+        
+    elseif strcmp(test_handle, 't-test_avg')
+        
         [~, p_vals(1)] = ttest(data_for_test(:, 1), data_for_test(:, 2), [], 'left'); % 'tail', 'left');
         
-    elseif strcmp(test_handle, 'ranksum')
+    elseif strcmp(test_handle, 'ranksum') || strcmp(test_handle, 'ranksum_avg')
         
         p_vals(1) = ranksum(data_for_test(:, 1), data_for_test(:, 2), 'tail', 'left');
         
@@ -289,13 +307,19 @@ else
         
         if any(~isnan(data_for_test(:, comparisons(comp, 1)))) && any(~isnan(data_for_test(:, comparisons(comp, 2))))
             
-            if strcmp(test_handle, 'ranksum')
+            if strcmp(test_handle, 'ranksum') || strcmp(test_handle, 'ranksum_avg')
                 
                 p_vals(comp, 1) = ranksum(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'left');
                 
                 p_vals(comp, 2) = ranksum(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'right');
                 
             elseif strcmp(test_handle, 't-test')
+                
+                [~, p_vals(comp, 1)] = ttest2(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'left');
+                
+                [~, p_vals(comp, 2)] = ttest2(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), 'tail', 'right');
+                
+            elseif strcmp(test_handle, 't-test_avg')
                 
                 [~, p_vals(comp, 1)] = ttest(data_for_test(:, comparisons(comp, 1)), data_for_test(:, comparisons(comp, 2)), [], 'left');
                 

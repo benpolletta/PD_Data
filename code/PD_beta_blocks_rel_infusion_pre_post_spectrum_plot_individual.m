@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, band_index_for_time, band_index_for_display, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, band_index_for_time, band_index_for_display, freqs, no_cycles, bands, folders_left_out)
 
 % Leave epoch_secs empty when using for optogenetics data, and enter
 % '_ntrials' for the argument pd_handle.
@@ -19,7 +19,7 @@ else
     
 end
     
-close('all')
+% close('all')
 
 load(subject_mat)
 
@@ -47,6 +47,34 @@ no_pds = length(pd_labels);
 
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
 
+if ~isempty(folders_left_out)
+    
+    if ischar(folders_left_out)
+    
+        folder_flag = ['_no_', folders_left_out];
+        
+        folder_chi = ~strcmp(folders, folders_left_out);
+        
+    elseif iscell(folders_left_out)
+        
+        folder_flag = ['_missing_', length(folders_left_out)];
+        
+        folder_chi = ones(1, length(folders));
+        
+        for fo = 1:length(folders_left_out)
+           
+            folder_chi(strcmp(folders, folders_left_out{fo})) = 0;
+            
+        end
+        
+    end
+   
+else
+    
+    folder_flag = '';
+    
+end
+
 if ~isempty(epoch_secs)
     
     spectrum_name = [subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index_for_time}, '_high_',...
@@ -54,7 +82,7 @@ if ~isempty(epoch_secs)
     
 else
     
-    spectrum_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_',...
+    spectrum_name = [subj_mat_name, BP_suffix, '_pct_',...
         short_band_labels{band_index_for_time}, pd_handle, norm, '_spectrum'];
     
     epoch_secs = str2double(pd_handle(2:(end - length('trials'))));
@@ -75,7 +103,7 @@ no_freqs = sum(display_indices); % size(WT_sec, 1);
 % 
 % end
 
-%% Individual bar plots.
+%% Individual spectrum plots.
 
 figure
 
@@ -118,7 +146,11 @@ for fo = 1:no_folders
         
         axis tight
         
-        All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
+        if folder_chi(fo) 
+            
+            All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
+            
+        end
         
         if fo == 1
             
@@ -156,6 +188,8 @@ for ch = 1:no_chans
         
     end
     
+    save([spectrum_name, folder_flag, '_ch', num2str(ch), '_data_for_plot.mat'], 'All_mean_mean', 'All_mean_se')
+    
     subplot(1, no_chans, ch)
     
     if strcmp(norm, '_pct')
@@ -178,6 +212,6 @@ for ch = 1:no_chans
     
 end
 
-save_as_pdf(gcf, [spectrum_name, '_', short_band_labels{band_index_for_display}, '_individual_avg'])
+save_as_pdf(gcf, [spectrum_name, folder_flag, '_', short_band_labels{band_index_for_display}, '_individual_avg'])
 
 end

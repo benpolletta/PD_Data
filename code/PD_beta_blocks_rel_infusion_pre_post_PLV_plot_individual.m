@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_PLV_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, band_index_for_time, band_index_for_display, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_PLV_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, band_index_for_time, band_index_for_display, freqs, no_cycles, bands, folders_left_out)
 
 % Leave epoch_secs empty when using for optogenetics data, and enter
 % '_ntrials' for the argument pd_handle.
@@ -19,7 +19,7 @@ else
     
 end
     
-close('all')
+% close('all')
 
 load(subject_mat)
 
@@ -49,6 +49,36 @@ no_pds = length(pd_labels);
 
 subj_mat_name = subject_mat(1:(end - length('_subjects.mat')));
 
+if ~isempty(folders_left_out)
+    
+    if ischar(folders_left_out)
+    
+        folder_flag = ['_no_', folders_left_out];
+        
+        folder_chi = ~strcmp(folders, folders_left_out);
+        
+    elseif iscell(folders_left_out)
+        
+        folder_flag = ['_missing_', num2str(length(folders_left_out))];
+        
+        folder_chi = ones(1, length(folders));
+        
+        for fo = 1:length(folders_left_out)
+           
+            folder_chi(strcmp(folders, folders_left_out{fo})) = 0;
+            
+        end
+        
+    end
+    
+else
+    
+    folder_flag = '';
+    
+    folder_chi = ones(1, length(folders));
+    
+end
+
 if ~isempty(epoch_secs)
     
     PLV_name = [subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index_for_time}, '_high_',...
@@ -56,7 +86,7 @@ if ~isempty(epoch_secs)
     
 else
     
-    PLV_name = [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_',...
+    PLV_name = [subj_mat_name, BP_suffix, '_pct_',...
         short_band_labels{band_index_for_time}, pd_handle, '_PLV'];
     
     epoch_secs = str2double(pd_handle(2:(end - length('trials'))));
@@ -101,13 +131,13 @@ for fo = 1:no_folders
     
                 % PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
                 
-                PLV_ci(:, pd) = circ_confmean(PLV_sec(display_indices, :, fo, pd), .05/bonferroni_count, [], [], 2)/sqrt(epoch_secs);
+                PLV_ci(:, pd) = circ_confmean(PLV_sec(display_indices, :, fo, pd), .05, [], [], 2)/sqrt(epoch_secs); % .05/bonferroni_count
                 
             else
                 
                 PLV_mean(:, pd) = nanmean(PLV_sec(display_indices, :, fo, pd), 2);
                 
-                PLV_ci(:, pd) = norminv(1 - .05/length(freqs(display_indices)), 0, 1)*...
+                PLV_ci(:, pd) = norminv(1 - .05, 0, 1)*... % .05/length(freqs(display_indices)
                     nanstd(PLV_sec(display_indices, :, fo, pd), [], 2)/sqrt(epoch_secs);
                 
             end
@@ -129,7 +159,11 @@ for fo = 1:no_folders
         
         axis tight
         
-        All_mean(:, fo, :, a) = permute(PLV_mean, [1 3 2]);
+        if folder_chi(fo)
+            
+            All_mean(:, fo, :, a) = permute(PLV_mean, [1 3 2]);
+            
+        end
         
         if fo == 1
             
@@ -167,18 +201,20 @@ for a = 1:no_arrays
             
             All_mean_mean(:, pd) = (180/pi)*angle(nanmean(exp(sqrt(-1)*All_mean(:, :, pd, a)), 2));
             
-            All_mean_ci(:, pd) = (180/pi)*circ_confmean(exp(sqrt(-1)*All_mean(:, :, pd, a)), .05/length(freqs(display_indices)), [], [], 2);
+            All_mean_ci(:, pd) = (180/pi)*circ_confmean(All_mean(:, :, pd, a), .05, [], [], 2); % .05/length(freqs(display_indices)
             
         else
             
             All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, a), 2);
             
-            All_mean_ci(:, pd) = norminv(1 - .05/length(freqs(display_indices)), 0, 1)*...
+            All_mean_ci(:, pd) = norminv(1 - .05, 0, 1)*... % .05/length(freqs(display_indices))
                 nanstd(All_mean(:, :, pd, a), [], 2)/sqrt(no_folders);
             
         end
         
     end
+    
+    save([PLV_name, folder_flag, '_', array_names{a}, '_data_for_plot.mat'], 'All_mean_mean', 'All_mean_ci')
     
     subplot(1, no_arrays, a)
     
@@ -192,6 +228,6 @@ for a = 1:no_arrays
     
 end
 
-save_as_pdf(gcf, [PLV_name, '_', short_band_labels{band_index_for_display}, '_individual_avg'])
+save_as_pdf(gcf, [PLV_name, folder_flag, '_', short_band_labels{band_index_for_display}, '_individual_avg'])
 
 end

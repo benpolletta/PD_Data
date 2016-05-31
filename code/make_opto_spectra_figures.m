@@ -12,13 +12,15 @@ for ch = 1:no_chans
     
     load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_0-200Hz_10trials_pct_spectrum_ch', num2str(ch), '_data_for_plot.mat'])
 
-    [sig_lower, sig_higher] = find_sig(WT_mean(:, 1:2), WT_ci(:, 1:2));
+    All_mean_ci = norminv(1 - .05, 0, 1)*All_mean_se(:, 1:no_pds_plotted);
+    
+    [sig_lower, sig_higher] = find_sig(All_mean_mean(:, 1:no_pds_plotted), All_mean_ci);
     
     %% Plotting broadband spectrum.
     
     subplot(2, no_chans, ch)
     
-    boundedline((1:200)', WT_mean(:, 1:no_pds_plotted), prep_for_boundedline(WT_ci(:, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
+    boundedline((1:200)', All_mean_mean(:, 1:no_pds_plotted), prep_for_boundedline(All_mean_ci), 'cmap', [0 1 1; 1 0 1]);
     
     axis tight
     
@@ -44,7 +46,7 @@ for ch = 1:no_chans
     
     subplot(2, no_chans, 2 + ch)
     
-    boundedline((1:50)', WT_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(WT_ci(1:50, 1:no_pds_plotted)), 'cmap', [0 1 1; 1 0 1])
+    boundedline((1:50)', All_mean_mean(1:50, 1:no_pds_plotted), prep_for_boundedline(All_mean_ci(1:50, :)), 'cmap', [0 1 1; 1 0 1])
     
     axis tight
     
@@ -52,7 +54,7 @@ for ch = 1:no_chans
     
     add_stars(gca, (1:50)', logical(sig_higher(1:50)), 1, [1 0 0])
     
-    plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
+    % plot([15 30; 15 30], repmat(ylim', 1, 2), '--r')
     
     set(gca, 'FontSize', 16)
     
