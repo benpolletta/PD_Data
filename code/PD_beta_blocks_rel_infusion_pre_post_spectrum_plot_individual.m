@@ -73,6 +73,8 @@ else
     
     folder_flag = '';
     
+    folder_chi = ones(1, length(folders));
+    
 end
 
 if ~isempty(epoch_secs)
@@ -121,7 +123,7 @@ for fo = 1:no_folders
         
         [WT_mean, WT_se] = deal(nan(no_freqs, no_pds));
         
-        for pd = 1:no_pds
+        for pd = 1:2 % no_pds
             
             WT_mean(:, pd) = nanmean(WT_sec(display_indices, :, fo, pd, ch), 2); % .*freq_multiplier, 2);
             
