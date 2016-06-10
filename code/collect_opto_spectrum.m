@@ -58,7 +58,19 @@ subj_mat_limits = [0 cumsum(no_folders)];
 
 total_folders = subj_mat_limits(end);
 
-All_WT_sec = nan(length(freqs), no_secs*no_trials, total_folders, no_pds, 2);
+array_names = {'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se'};
+
+for a = 1:2
+
+    eval(sprintf('All_%s = nan(length(freqs), no_secs*no_trials, total_folders, no_pds, 2);', array_names{a}))
+
+end
+
+for a = 3:4
+   
+    eval(sprintf('All_%s = nan(length(freqs), total_folders, no_pds, 2);', array_names{a}))
+    
+end
 
 for s = 1:no_mats
    
@@ -69,15 +81,29 @@ for s = 1:no_mats
     
     for ch = 1:2
         
-        All_WT_sec(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :, ch) = WT_sec(:, :, :, :, channels(s, ch));
+        for a = 1:2
+        
+            eval(sprintf('All_%s(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :, ch) = %s(:, :, :, :, channels(s, ch));', array_names{a}, array_names{a}))
+        
+        end
+        
+        for a = 3:4
+        
+            eval(sprintf('All_%s(:, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :, ch) = %s(:, :, :, channels(s, ch));', array_names{a}, array_names{a}))
+        
+        end
         
     end
     
 end
 
-clear WT_sec
+clear WT_sec WT_trial_normed_sec WT_trial_normed_mean WT_trial_normed_se
 
-WT_sec = All_WT_sec;
+for a = 1:length(array_names)
+
+    eval(sprintf('%s = All_%s;', array_names{a}, array_names{a}))
+
+end
 
 save(['OPTO', BP_suffix, '_pct_', short_band_labels{band_index}, '_',...
-    num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec')
+    num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se')

@@ -68,11 +68,15 @@ for fo = 1:no_folders
         
         trials{fo, pd} = index_to_blocks(laser_periods(:, pd));
         
+        trials{fo, pd}(trials{fo, pd}(1,1) < trials{fo, 1}(1,1), :) = [];
+        
         no_trials(fo, pd) = size(trials{fo, pd}, 1);
         
     end
     
 end
+    
+no_trials = min(no_trials, [], 2);
 
 if isempty(no_trials_analyzed)
 
@@ -86,7 +90,9 @@ end
     
 no_secs = max_no_trials*5;
 
-WT_sec = nan(sum(band_indices{band_index}), no_secs, no_folders, no_pds, no_chans);
+[WT_sec, WT_trial_normed_sec] = deal(nan(sum(band_indices{band_index}), no_secs, no_folders, no_pds, no_chans));
+        
+[WT_trial_normed_mean, WT_trial_normed_se] = deal(nan(sum(band_indices{band_index}), no_folders, no_pds, no_chans));
 
 for fo = 1:no_folders
     
@@ -96,7 +102,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    [~, Spec_data] = get_BP(subj_name, peak_suffix, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
+    [~, Spec_data] = get_BP(subj_name, peak_suffix, no_trials, outlier_lims(fo), norm, in_freqs, in_no_cycles, in_bands);
     
     if strcmp(norm, '')
         
@@ -106,11 +112,11 @@ for fo = 1:no_folders
     
     for ch = 1:no_chans
         
-        for pd = 1:no_pds
-            
-            WT_trials = nan(min(max_no_trials, no_trials(fo, pd))*5*sampling_freq, length(band_indices{band_index}));
-            
-            for tr = 1:min(max_no_trials, no_trials(fo, pd))
+        [WT_trials, WT_trials_normed] = deal(nan(min(max_no_trials, no_trials(fo))*5*sampling_freq, length(band_indices{band_index}), no_pds));
+        
+        for tr = 1:min(max_no_trials, no_trials(fo))
+        
+            for pd = 1:no_pds
                 
                 trial_start = trials{fo, pd}(tr, 1);
                 
@@ -126,21 +132,43 @@ for fo = 1:no_folders
                 
                 trial_end = trial_start + 5*sampling_freq - 1;
                 
-                WT_trials((tr - 1)*5*sampling_freq + (1:5*sampling_freq), :) = Spec_data(trial_start:trial_end, band_indices{band_index}, ch);
+                WT_trial = Spec_data(trial_start:trial_end, band_indices{band_index}, ch);
+                
+                WT_trials((tr - 1)*5*sampling_freq + (1:5*sampling_freq), :, pd) = WT_trial;
+                
+                if pd == 1
+                    
+                    trial_baseline = nanmean(WT_trial);
+                    
+                end
+                
+                WT_trials_normed((tr - 1)*5*sampling_freq + (1:5*sampling_freq), :, pd) = 100*WT_trial./(ones(size(WT_trial))*diag(trial_baseline)) - 100;
                 
             end
-                
-            WT_trials = nans_to_end(WT_trials);
             
-            for sec = 1:min(max_no_trials, no_trials(fo, pd))*5
+        end
+                
+        for pd = 1:no_pds
+                
+            WT_trials(:, :, pd) = nans_to_end(WT_trials(:, :, pd));
+            
+            WT_trials_normed(:, :, pd) = nans_to_end(WT_trials_normed(:, :, pd));
+            
+            for sec = 1:min(max_no_trials, no_trials(fo))*5
                
                 sec_start = (sec - 1)*sampling_freq + 1;
                 
                 sec_end = sec*sampling_freq;
                 
-                WT_sec(:, sec, fo, pd, ch) = nanmean(WT_trials(sec_start:sec_end, :))';
+                WT_sec(:, sec, fo, pd, ch) = nanmean(WT_trials(sec_start:sec_end, :, pd))';
+                
+                WT_trial_normed_sec(:, sec, fo, pd, ch) = nanmean(WT_trials_normed(sec_start:sec_end, :, pd))';
                 
             end
+            
+            WT_trial_normed_mean(:, fo, pd, ch) = nanmean(WT_trials_normed(:, :, pd))';
+            
+            WT_trial_normed_se(:, fo, pd, ch) = nanstd(WT_trials_normed(:, :, pd))';
             
         end
         
@@ -148,7 +176,16 @@ for fo = 1:no_folders
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index},...
-    '_', num2str(no_trials_analyzed), 'trials', norm, '_spectrum.mat'], 'WT_sec')
+if strcmp(norm, '')
+    
+    save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index},...
+        '_', num2str(no_trials_analyzed), 'trials', norm, '_spectrum.mat'], 'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se')
+    
+else
+    
+    save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_', short_band_labels{band_index},...
+        '_', num2str(no_trials_analyzed), 'trials', norm, '_spectrum.mat'], 'WT_sec')
+    
+end
 
 end

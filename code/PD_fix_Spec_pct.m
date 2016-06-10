@@ -38,7 +38,7 @@ for fo = 1:length(folders)
         
         for ch = 1:2
             
-            baseline_mean = mean(abs(All_spec(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
+            baseline_mean = nanmean(abs(All_spec(t <= 0, :, ch))); %baseline_std = std(abs(Spec(t <= basetime, :, ch)));
             
             All_spec_pct(:, :, ch) = 100*abs(All_spec(:, :, ch))./(ones(size(All_spec(:, :, ch)))*diag(baseline_mean)) - 100;
             

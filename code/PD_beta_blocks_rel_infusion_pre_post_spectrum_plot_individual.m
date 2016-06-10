@@ -93,6 +93,12 @@ end
 
 load([spectrum_name, '.mat'])
 
+if exist('WT_trial_normed_sec', 'var')
+   
+    WT_sec = WT_trial_normed_sec;
+    
+end
+
 no_freqs = sum(display_indices); % size(WT_sec, 1);
         
 % if strcmp(norm, '_pct')
@@ -109,7 +115,7 @@ no_freqs = sum(display_indices); % size(WT_sec, 1);
 
 figure
 
-All_mean = nan(no_freqs, no_folders, no_pds, no_chans);
+[All_mean, All_se] = deal(nan(no_freqs, no_folders, no_pds, no_chans));
 
 for fo = 1:no_folders
     
@@ -152,6 +158,8 @@ for fo = 1:no_folders
             
             All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
             
+            All_se(:, fo, :, ch) = permute(WT_se, [1 3 2]);
+            
         end
         
         if fo == 1
@@ -184,9 +192,19 @@ for ch = 1:no_chans
     
     for pd = 1:no_pds
         
-        All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, ch), 2);
-        
-        All_mean_se(:, pd) = nanstd(All_mean(:, :, pd, ch), [], 2)/sqrt(no_folders);
+        if exist('WT_trial_normed_mean', 'var') && exist('WT_trial_normed_se', 'var')
+            
+            All_mean_mean(:, pd) = nanmean(WT_trial_normed_mean(:, :, pd, ch), 2);
+            
+            All_mean_se(:, pd) = nanstd(WT_trial_normed_mean(:, :, pd, ch), [], 2)/sqrt(no_folders); % sqrt(nanmean(WT_trial_normed_se(:, :, pd, ch), 2));
+            
+        else
+            
+            All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, ch), 2);
+            
+            All_mean_se(:, pd) = sqrt(nanmean(All_se(:, :, pd, ch), 2)); % nanstd(All_mean(:, :, pd, ch), [], 2)/sqrt(no_folders);
+            
+        end
         
     end
     

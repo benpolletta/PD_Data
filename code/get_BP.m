@@ -1,4 +1,4 @@
-function [BP, Spec] = get_BP(subj_name, peak_suffix, outlier_lim, norm, freqs, no_cycles, bands)
+function [BP, Spec] = get_BP(subj_name, peak_suffix, no_trials, outlier_lim, norm, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -19,6 +19,12 @@ else
 end
 
 load([subj_name, BP_suffix, '_wt.mat'], 'sampling_freq') % , 'freqs')
+
+if ~isempty(no_trials) && no_trials ~= 10 && strcmp(norm, '_pct')
+    
+    BP_suffix = sprintf('%s_%dtrials', BP_suffix, no_trials);
+    
+end
 
 BP_data = load([subj_name, BP_suffix, '_wt_BP.mat'], ['BP', norm]);
 
