@@ -1,6 +1,6 @@
-function collect_opto_spectrum(peak_suffix, norm_for_power, band_index, freqs, no_cycles, bands)
+function collect_opto_spectrum(peak_suffix, no_trials, norm_for_power, band_index, freqs, no_cycles, bands)
 
-no_secs = 5; no_trials = 10;
+no_secs = 5; % no_trials = 10;
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -58,15 +58,25 @@ subj_mat_limits = [0 cumsum(no_folders)];
 
 total_folders = subj_mat_limits(end);
 
-array_names = {'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se'};
+if strcmp(norm_for_power, '')
 
-for a = 1:2
+    array_names = {'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se'};
+
+else
+    
+    array_names = {'WT_sec'};
+    
+end
+
+no_arrays = length(array_names);
+    
+for a = 1:min(2, no_arrays)
 
     eval(sprintf('All_%s = nan(length(freqs), no_secs*no_trials, total_folders, no_pds, 2);', array_names{a}))
 
 end
 
-for a = 3:4
+for a = 3:min(4, no_arrays)
    
     eval(sprintf('All_%s = nan(length(freqs), total_folders, no_pds, 2);', array_names{a}))
     
@@ -81,13 +91,13 @@ for s = 1:no_mats
     
     for ch = 1:2
         
-        for a = 1:2
+        for a = 1:min(2, no_arrays)
         
             eval(sprintf('All_%s(:, :, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :, ch) = %s(:, :, :, :, channels(s, ch));', array_names{a}, array_names{a}))
         
         end
         
-        for a = 3:4
+        for a = 3:min(4, no_arrays)
         
             eval(sprintf('All_%s(:, (subj_mat_limits(s) + 1):subj_mat_limits(s + 1), :, ch) = %s(:, :, :, channels(s, ch));', array_names{a}, array_names{a}))
         
@@ -99,11 +109,20 @@ end
 
 clear WT_sec WT_trial_normed_sec WT_trial_normed_mean WT_trial_normed_se
 
-for a = 1:length(array_names)
+for a = 1:no_arrays
 
     eval(sprintf('%s = All_%s;', array_names{a}, array_names{a}))
 
 end
 
-save(['OPTO', BP_suffix, '_pct_', short_band_labels{band_index}, '_',...
-    num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se')
+if strcmp(norm_for_power, '')
+    
+    save(['OPTO', BP_suffix, '_pct_', short_band_labels{band_index}, '_',...
+        num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec', 'WT_trial_normed_sec', 'WT_trial_normed_mean', 'WT_trial_normed_se')
+    
+else
+    
+    save(['OPTO', BP_suffix, '_pct_', short_band_labels{band_index}, '_',...
+        num2str(no_trials), 'trials', norm_for_power, '_spectrum.mat'], 'WT_sec')
+    
+end

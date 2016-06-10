@@ -62,7 +62,9 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, no_trials, freqs, no
 
         base_trials = index_to_blocks(base_index);
         
-        base_end = base_trials(no_trials, 2);
+        no_subj_trials = min(no_trials, size(base_trials, 1));
+        
+        base_end = base_trials(no_subj_trials, 2);
         
         base_index((base_end + 1):end) = 0;
         
@@ -76,7 +78,7 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, no_trials, freqs, no
     
     clear Spec Spec_pct BP BP_pct
     
-    [BP, Spec] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
+    [BP, Spec] = get_BP(subj_name, peak_suffix, no_trials, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
 
     % Spec = load([subj_name, BP_suffix, '_wt.mat'], 'Spec');
     % 
