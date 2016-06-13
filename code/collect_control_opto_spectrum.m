@@ -1,6 +1,6 @@
-function collect_control_opto_spectrum(peak_suffix, norm_for_power, band_index, freqs, no_cycles, bands)
+function collect_control_opto_spectrum(peak_suffix, no_trials, norm_for_power, band_index, freqs, no_cycles, bands)
 
-no_secs = 5; no_trials = 10;
+no_secs = 5; % no_trials = 10;
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
