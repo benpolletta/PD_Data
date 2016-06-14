@@ -202,7 +202,7 @@ for ch = 1:no_chans
             
             All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, ch), 2);
             
-            All_mean_se(:, pd) = sqrt(nanmean(All_se(:, :, pd, ch), 2)); % nanstd(All_mean(:, :, pd, ch), [], 2)/sqrt(no_folders);
+            All_mean_se(:, pd) = nanstd(All_mean(:, :, pd, ch), [], 2)/sqrt(no_folders); % sqrt(nanmean(All_se(:, :, pd, ch), 2)); % 
             
         end
         
@@ -212,17 +212,17 @@ for ch = 1:no_chans
     
     subplot(1, no_chans, ch)
     
-    if strcmp(norm, '_pct')
+    % if strcmp(norm, '_pct')
     
         boundedline(freqs(display_indices), All_mean_mean, prep_for_boundedline(norminv(1 - .05, 0, 1)*All_mean_se))
         
-    else
-            
-        freq_multiplier = repmat(freqs(display_indices)', 1, no_pds);
-    
-        boundedline(freqs(display_indices), All_mean_mean.*freq_multiplier, prep_for_boundedline(All_mean_se.*freq_multiplier))
-    
-    end
+    % else
+    % 
+    %     freq_multiplier = repmat(freqs(display_indices)', 1, no_pds);
+    % 
+    %     boundedline(freqs(display_indices), All_mean_mean.*freq_multiplier, prep_for_boundedline(All_mean_se.*freq_multiplier))
+    % 
+    % end
         
     axis tight
     
