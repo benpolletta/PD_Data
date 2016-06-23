@@ -66,7 +66,7 @@ for fo = 1:no_folders
     
     subj_name = [folder,'/',prefix];
     
-    [~, Spec_data] = get_BP(subj_name, peak_suffix, outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
+    [~, Spec_data] = get_BP(subj_name, peak_suffix, [], outlier_lims(fo), '', in_freqs, in_no_cycles, in_bands);
     
     Phase_data = angle(Spec_data);
     
