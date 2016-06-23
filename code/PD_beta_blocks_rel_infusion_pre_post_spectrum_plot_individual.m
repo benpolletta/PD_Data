@@ -57,7 +57,7 @@ if ~isempty(folders_left_out)
         
     elseif iscell(folders_left_out)
         
-        folder_flag = ['_missing_', length(folders_left_out)];
+        folder_flag = ['_missing_', num2str(length(folders_left_out))];
         
         folder_chi = ones(1, length(folders));
         

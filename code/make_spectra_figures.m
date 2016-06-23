@@ -6,7 +6,7 @@ figure
 
 %% Plotting broadband spectrum.
 
-load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_pct_spectrum_no_130716_ch1_data_for_plot.mat'])
+load([group_prefix, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_pct_spectrum_missing_2_ch1_data_for_plot.mat'])
 
 All_mean_ci = norminv(1 - .05, 0, 1)*All_mean_se;
 
