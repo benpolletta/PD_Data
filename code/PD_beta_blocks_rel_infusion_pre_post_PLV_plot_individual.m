@@ -163,6 +163,12 @@ for fo = 1:no_folders
             
             All_mean(:, fo, :, a) = permute(PLV_mean, [1 3 2]);
             
+            if strcmp(array_names{a}, 'dP_sec')
+               
+                All_mean(:, fo, 1, a + 1) = diff(PLV_mean, [], 2);
+                
+            end
+            
         end
         
         if fo == 1
@@ -189,6 +195,12 @@ save_as_pdf(gcf, [PLV_name, '_', short_band_labels{band_index_for_display}, '_in
 
 %% Stats & figures treating each individual as an observation.
 
+array_names = {'Coh_sec', 'Coh_sec_pct', 'dP_sec', 'ddP_sec'};
+
+long_array_names = {'Coherence', 'Coherence (%\Delta Baseline)', 'Phase of Coh.', '\Delta Phase of Coh.'}; % , 'Phase of Coh. (%\Delta Baseline)'};
+
+no_arrays = length(array_names);
+
 figure
 
 for a = 1:no_arrays
@@ -197,7 +209,7 @@ for a = 1:no_arrays
     
     for pd = 1:no_pds
         
-        if strcmp(array_names{a}, 'dP_sec')
+        if strcmp(array_names{a}((end - length('dP_sec') + 1):end), 'dP_sec')
             
             All_mean_mean(:, pd) = (180/pi)*angle(nanmean(exp(sqrt(-1)*All_mean(:, :, pd, a)), 2));
             
