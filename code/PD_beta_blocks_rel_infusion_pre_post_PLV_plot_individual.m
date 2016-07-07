@@ -59,13 +59,15 @@ if ~isempty(folders_left_out)
         
     elseif iscell(folders_left_out)
         
-        folder_flag = ['_missing_', num2str(length(folders_left_out))];
+        folder_flag = folders_left_out{1};
+        
+        folder_cell = folders_left_out{2}; 
         
         folder_chi = ones(1, length(folders));
         
-        for fo = 1:length(folders_left_out)
+        for fo = 1:length(folder_cell)
            
-            folder_chi(strcmp(folders, folders_left_out{fo})) = 0;
+            folder_chi(strcmp(folders, folder_cell{fo})) = 0;
             
         end
         
@@ -190,6 +192,8 @@ for fo = 1:no_folders
     end
     
 end
+    
+save([PLV_name, '_data_for_plot.mat'], 'All_mean')
 
 save_as_pdf(gcf, [PLV_name, '_', short_band_labels{band_index_for_display}, '_individual'])
 
