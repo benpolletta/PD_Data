@@ -10,7 +10,7 @@ else
     
 end
 
-PD_pct_fix(subject_mat, peak_suffix, freqs, no_cycles, bands)
+PD_pct_fix(subject_mat, peak_suffix, [], freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
 
