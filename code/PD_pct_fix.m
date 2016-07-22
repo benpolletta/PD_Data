@@ -4,8 +4,6 @@ function PD_pct_fix(subjects_mat, peak_suffix, no_trials, freqs, no_cycles, band
 
 subjects_struct = load(subjects_mat);
 
-if isempty(no_trials), no_trials = 10; end
-
 parfor fo = 1:length(subjects_struct.folders)
     
     PD_pct_fix_inner(fo, subjects_struct, peak_suffix, no_trials, freqs, no_cycles, bands)
@@ -24,7 +22,7 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, no_trials, freqs, no
 
         bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200]; in_bands = [];
 
-        BP_suffix = ['', peak_suffix, '_', num2str(no_trials), 'trials'];
+        BP_suffix = ['', peak_suffix];
 
     else
 
@@ -32,7 +30,7 @@ function PD_pct_fix_inner(fo, subjects_struct, peak_suffix, no_trials, freqs, no
 
         BP_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
 
-        BP_suffix = [BP_suffix, peak_suffix, '_', num2str(no_trials), 'trials'];
+        BP_suffix = [BP_suffix, peak_suffix];
 
     end
 

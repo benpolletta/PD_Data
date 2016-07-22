@@ -68,7 +68,7 @@ for fo = 1:no_folders
         
     else
         
-        BP = get_BP(subj_name, peak_suffix, outlier_lim, norm, in_freqs, in_no_cycles, in_bands);
+        BP = get_BP(subj_name, peak_suffix, [], outlier_lim, norm, in_freqs, in_no_cycles, in_bands);
     
         % load([subj_name, BP_suffix, '_wt_BP.mat'])
         % 
