@@ -3,6 +3,8 @@ function PD_beta_blocks_rel_infusion_pre_post_PLV_plot_individual(subject_mat, p
 % Leave epoch_secs empty when using for optogenetics data, and enter
 % '_ntrials' for the argument pd_handle.
 
+p_cutoff = .01;
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
@@ -133,13 +135,13 @@ for fo = 1:no_folders
     
                 % PLV_mean(PLV_mean(:, pd) < -pi/2, pd) = 2*pi + PLV_mean(PLV_mean(:, pd) < -pi/2, pd);
                 
-                PLV_ci(:, pd) = circ_confmean(PLV_sec(display_indices, :, fo, pd), .05, [], [], 2)/sqrt(epoch_secs); % .05/bonferroni_count
+                PLV_ci(:, pd) = circ_confmean(PLV_sec(display_indices, :, fo, pd), p_cutoff, [], [], 2)/sqrt(epoch_secs); % p_cutoff/bonferroni_count
                 
             else
                 
                 PLV_mean(:, pd) = nanmean(PLV_sec(display_indices, :, fo, pd), 2);
                 
-                PLV_ci(:, pd) = norminv(1 - .05, 0, 1)*... % .05/length(freqs(display_indices)
+                PLV_ci(:, pd) = norminv(1 - p_cutoff, 0, 1)*... % p_cutoff/length(freqs(display_indices)
                     nanstd(PLV_sec(display_indices, :, fo, pd), [], 2)/sqrt(epoch_secs);
                 
             end
@@ -217,13 +219,13 @@ for a = 1:no_arrays
             
             All_mean_mean(:, pd) = (180/pi)*angle(nanmean(exp(sqrt(-1)*All_mean(:, :, pd, a)), 2));
             
-            All_mean_ci(:, pd) = (180/pi)*circ_confmean(All_mean(:, :, pd, a), .05, [], [], 2); % .05/length(freqs(display_indices)
+            All_mean_ci(:, pd) = (180/pi)*circ_confmean(All_mean(:, :, pd, a), p_cutoff, [], [], 2); % p_cutoff/length(freqs(display_indices)
             
         else
             
             All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, a), 2);
             
-            All_mean_ci(:, pd) = norminv(1 - .05, 0, 1)*... % .05/length(freqs(display_indices))
+            All_mean_ci(:, pd) = norminv(1 - p_cutoff, 0, 1)*... % p_cutoff/length(freqs(display_indices))
                 nanstd(All_mean(:, :, pd, a), [], 2)/sqrt(no_folders);
             
         end

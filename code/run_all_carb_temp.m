@@ -22,9 +22,9 @@ no_mats = length(subject_mat_prefixes);
 
 measures = {'', '_power'}; norms = {'', '_pct'};
 
-% load('M1_groups')
+load('M1_groups')
 
-missing = {'_missing_2', {'130716','130830'}}; % {}; % M1_not_increased; % 
+missing = {'_missing_2', {'130716','130830'}}; % {}; % M1_not_increased; % M1_increased; % 
 
 % for m = 1:length(measures)
 %     
@@ -34,21 +34,21 @@ missing = {'_missing_2', {'130716','130830'}}; % {}; % M1_not_increased; %
 % 
 % end
    
-collect_striatal_w_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+% collect_striatal_w_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('STR_w_M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands, missing)
 
-make_spectra_figures('STR_w_M1', peak_suffix)
-
-collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+% make_spectra_figures('STR_w_M1', peak_suffix)
+%
+% collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands, missing)
 
-make_spectra_figures('M1', peak_suffix)
+% make_spectra_figures('M1', peak_suffix)
+%
+% collect_striatal_w_motor_PLV(peak_suffix, 150, band_index, freqs, no_cycles, bands)
 
-collect_striatal_w_motor_PLV(peak_suffix, 150, band_index, freqs, no_cycles, bands)
-
-PD_beta_blocks_rel_infusion_pre_post_PLV_plot_individual('STR_M1_subjects.mat', peak_suffix, 150, '', band_index, no_bands, freqs, no_cycles, bands, missing)
+% PD_beta_blocks_rel_infusion_pre_post_PLV_plot_individual('STR_M1_subjects.mat', peak_suffix, 150, '', band_index, no_bands, freqs, no_cycles, bands, missing)
 
 % make_PLV_figures('STR_M1', peak_suffix, missing_2{1})
 

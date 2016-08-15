@@ -3,6 +3,8 @@ function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_m
 % Leave epoch_secs empty when using for optogenetics data, and enter
 % '_ntrials' for the argument pd_handle.
 
+p_val = .01;
+
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     freqs = 1:200;
@@ -144,7 +146,7 @@ for fo = 1:no_folders
         
         if strcmp(norm, '_pct')
             
-            boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(norminv(1 - .05, 0, 1)*WT_se))
+            boundedline(freqs(display_indices), WT_mean, prep_for_boundedline(norminv(1 - p_val, 0, 1)*WT_se))
             
         else
             
@@ -218,7 +220,7 @@ for ch = 1:no_chans
     
     % if strcmp(norm, '_pct')
     
-        boundedline(freqs(display_indices), All_mean_mean, prep_for_boundedline(norminv(1 - .05, 0, 1)*All_mean_se))
+        boundedline(freqs(display_indices), All_mean_mean, prep_for_boundedline(norminv(1 - p_val, 0, 1)*All_mean_se))
         
     % else
     % 
