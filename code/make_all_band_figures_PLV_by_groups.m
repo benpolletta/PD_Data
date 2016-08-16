@@ -146,8 +146,8 @@ for b = 1:no_bands
     
 end
 
-save_as_eps(gcf, [channel_prefix, '_all_bands_PLV_f', num2str(freq_limit), '_p', num2str(p_val, '%g')])
+save_as_eps(gcf, [channel_prefix, '_all_bands_PLV_by_groups_f', num2str(freq_limit), '_p', num2str(p_val, '%g')])
 
-save_as_pdf(gcf, [channel_prefix, '_all_bands_PLV_f', num2str(freq_limit), '_p', num2str(p_val, '%g')])
+save_as_pdf(gcf, [channel_prefix, '_all_bands_PLV_by_groups_f', num2str(freq_limit), '_p', num2str(p_val, '%g')])
 
 end
