@@ -200,7 +200,7 @@ for ch = 1:2
         
         y = ylabel({group_titles{1}; [' - ', group_titles{2}]}, 'FontSize', 20, 'Rotation', 0);
     
-        set(y, 'Units', 'Normalized', 'Position', [-0.35 0.4 0])
+        set(y, 'Units', 'Normalized', 'Position', [-0.4 0.4 0])
         
     end
     

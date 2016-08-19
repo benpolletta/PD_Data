@@ -83,13 +83,13 @@ for b = 1:no_bands
             if M1_beta(fo)
                 
                 plot([bp_max_start(fo, pd, b); bp_max_end(fo, pd, b)], folder_index*[1 1],... % '-d',...
-                    'LineWidth', 4, 'Color', colorspec(pd, :))
+                    'LineWidth', 4.5, 'Color', colorspec(pd, :))
                 % 'MarkerFaceColor', colorspec(pd, :), 'MarkerEdgeColor', colorspec(pd, :),...
                 
             else
                 
                 plot([bp_max_start(fo, pd, b); bp_max_end(fo, pd, b)], folder_index*[1 1],... % '-d',...
-                    'LineWidth', 3, 'Color', colorspec(pd, :)) % , 'LineStyle', '--')
+                    'LineWidth', 2.5, 'Color', colorspec(pd, :)) % , 'LineStyle', '--')
                 % 'MarkerFaceColor', colorspec(pd, :), 'MarkerEdgeColor', colorspec(pd, :),...
                 
             end
@@ -158,20 +158,12 @@ for b = 1:no_bands
         
         if b == 1
             
-            title({['PLV (% \Delta BL), ', short_group_labels{g}]; 'Mean \pm 95% CI'}, 'FontSize', 16)
+            title({'PLV (% \Delta BL)'; 'Mean \pm 95% CI'}, 'FontSize', 16)
             
         elseif b == no_bands
         
             xlabel('Freq. (Hz)', 'FontSize', 16)
         
-        end
-        
-        if g == 1
-            
-            y = ylabel([band_labels{b}, ' Hz'], 'FontSize', 16, 'Rotation', 0);
-            
-            set(y, 'Units', 'Normalized', 'Position', [-0.35 0.4 0])
-            
         end
         
         box off

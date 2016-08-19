@@ -81,13 +81,13 @@ for b = 1:no_bands
             if M1_beta(fo)
                 
                 plot([bp_max_start(fo, pd, b); bp_max_end(fo, pd, b)], folder_index*[1 1],... % '-d',...
-                    'LineWidth', 4, 'Color', colorspec(pd, :))
+                    'LineWidth', 4.5, 'Color', colorspec(pd, :))
                 % 'MarkerFaceColor', colorspec(pd, :), 'MarkerEdgeColor', colorspec(pd, :),...
                 
             else
                 
                 plot([bp_max_start(fo, pd, b); bp_max_end(fo, pd, b)], folder_index*[1 1],... % '-d',...
-                    'LineWidth', 3, 'Color', colorspec(pd, :)) % , 'LineStyle', '--')
+                    'LineWidth', 2.5, 'Color', colorspec(pd, :)) % , 'LineStyle', '--')
                 % 'MarkerFaceColor', colorspec(pd, :), 'MarkerEdgeColor', colorspec(pd, :),...
                 
             end
@@ -160,7 +160,7 @@ for b = 1:no_bands
         
         if b == 1
             
-            title({[channel_title, ' Pow. (% \Delta BL), ', short_group_labels{g}]; 'Mean \pm 95% CI'}, 'FontSize', 16)
+            title({[channel_title, ' Pow. (% \Delta BL)']; 'Mean \pm 95% CI'}, 'FontSize', 16)
             
         elseif b == no_bands
         
