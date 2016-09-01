@@ -5,10 +5,25 @@
 % function returns peak data, which is a matrix
 function [peak_indicator, Peak_data] = classify_peaks_single(folder, prefix, channel, channel_multiplier, sampling_freq, min_prominence, min_secs_apart, basetime, clusters, normalized)
     
+% INPUTS:
+% folder: folder where the data file is located.
+% prefix: prefix of the data file, i.e. [prefix,
+%   '_all_channel_data_dec.mat'].
+% channel: which channel you want to classify peaks in.
+% channel_multiplier: what the LFP from that channel should be multiplied
+%   by (e.g., 1 or -1).
+% sampling_freq: sampling frequency (in Hz).
+% min_prominence: prominence cutoff, in standard deviations from the mean.
+% MIN_SECS_APART: minimum number of seconds between peaks identified.
+% basetime: when carbachol infusion starts.
+% CLUSTERS: how many clusters kmeans finds. 
+% NORMALIZED: whether LFP time series are z-scored (1) or not (0) before
+%   clustering.
+
 load([folder, '/', prefix, '_all_channel_data_dec.mat'])
 
 if isempty(clusters)
-    clusters = 2;
+    clusters = 5;
 end
 
 % specify the minimum prominence
@@ -242,7 +257,7 @@ function plot_peaks_2(fig_name, t, sampling_freq, X, Peak_data, plot_bounds)
 
     colors = [0 0 0; 1 0 0; 0 0 1; 0 0.75 0];
 
-    no_epochs = ceil((diff(plot_bounds) + 1)/epoch_length);
+    no_epochs = ceil((diff(plot_bounds) + 1)/epoch_length;
 
     for e = 1:no_epochs
 
@@ -272,18 +287,27 @@ function plot_peaks_2(fig_name, t, sampling_freq, X, Peak_data, plot_bounds)
         cluster = Peak_data(epoch_loc_indices, 6);
 
         if mod(e, 3) == 1
-            if e < 10
+            
+            % if e < 10
+            %     save_as_pdf(gcf,sprintf('%s_%03d', fig_name, e));
+            % else    
                 save_as_pdf(gcf,sprintf('%s_%03d', fig_name, e));
-            else    
-                save_as_pdf(gcf,sprintf('%s_%03d', fig_name, e));
-            end
+            % end
             % close
+            
+            if no_epochs > 50
+ 
+                close(gcf)
+                
+            end
+                
             figure
+            
         end
 
         subplot(3, 1, mod(e, 3) + 3*(mod(e, 3) == 0))
 
-    %     be careful! Added next line...gets rid of second channel's data
+        %     Be careful! Added next line...gets rid of second channel's data
         epoch_data = epoch_data(:,1);
         plot(epoch_t, epoch_data)
 
@@ -337,21 +361,24 @@ end
 
 function plot_centroids(C, fig_name)
 dim = size(C,1);
+h = nan(C,1);
 xdim = 2;
 ydim = ceil(dim/2);
 figure
-yl = [min(C(:)), max(C(:))];
+% yl = [min(C(:)), max(C(:))];
 
 for i=1:dim
-    subplot(ydim,xdim,i)
+    h(i) = subplot(ydim,xdim,i);
     x = -(length(C(i,:))/2):(length(C(i,:))/2-1);
     plot(x,C(i,:));
     xlim([min(x) max(x)]);
-    ylim(yl)
+    % ylim(yl) % 
     title(['Cluster number ',num2str(i)]);
     xlabel('Index');
     ylabel('Normalized amplitude');
 end
+
+% linkaxes(h, 'xy')
 
 end
 

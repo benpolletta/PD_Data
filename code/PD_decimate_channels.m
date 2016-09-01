@@ -19,7 +19,7 @@ for ch = 1:2
     hanning_window = hanning(detrend_window*sampling_freq);
     hanning_window = hanning_window/sum(hanning_window);
     
-    PD_dec_temp_reflected = [flipud(PD_dec_temp(1:5*sampling_rate)); PD_dec_temp; fliplr(PD_dec_temp(1:5*sampling_rate))];
+    PD_dec_temp_reflected = [flipud(PD_dec_temp(1:5*sampling_rate)); PD_dec_temp; flipud(PD_dec_temp(1:5*sampling_rate))];
     
     PD_trend = conv(PD_dec_temp_reflected, hanning_window, 'same');
     
