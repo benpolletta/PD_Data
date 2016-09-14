@@ -81,6 +81,8 @@ else
     
 end
 
+folder_chi = logical(folder_chi);
+
 if ~isempty(epoch_secs)
     
     spectrum_name = [subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index_for_time}, '_high_',...
@@ -158,13 +160,13 @@ for fo = 1:no_folders
         
         axis tight
         
-        if folder_chi(fo) 
+        % if folder_chi(fo) 
             
             All_mean(:, fo, :, ch) = permute(WT_mean, [1 3 2]);
             
             All_se(:, fo, :, ch) = permute(WT_se, [1 3 2]);
             
-        end
+        % end
         
         if fo == 1
             
@@ -200,15 +202,15 @@ for ch = 1:no_chans
         
         if exist('WT_trial_normed_mean', 'var') && exist('WT_trial_normed_se', 'var')
             
-            All_mean_mean(:, pd) = nanmean(WT_trial_normed_mean(:, :, pd, ch), 2);
+            All_mean_mean(:, pd) = nanmean(WT_trial_normed_mean(:, folder_chi, pd, ch), 2);
             
-            All_mean_se(:, pd) = nanstd(WT_trial_normed_mean(:, :, pd, ch), [], 2)/sqrt(no_folders); % sqrt(nanmean(WT_trial_normed_se(:, :, pd, ch), 2));
+            All_mean_se(:, pd) = nanstd(WT_trial_normed_mean(:, folder_chi, pd, ch), [], 2)/sqrt(sum(folder_chi)); % sqrt(nanmean(WT_trial_normed_se(:, :, pd, ch), 2));
             
         else
             
-            All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, ch), 2);
+            All_mean_mean(:, pd) = nanmean(All_mean(:, folder_chi, pd, ch), 2);
             
-            All_mean_se(:, pd) = nanstd(All_mean(:, :, pd, ch), [], 2)/sqrt(no_folders); % sqrt(nanmean(All_se(:, :, pd, ch), 2)); % 
+            All_mean_se(:, pd) = nanstd(All_mean(:, folder_chi, pd, ch), [], 2)/sqrt(sum(folder_chi)); % sqrt(nanmean(All_se(:, :, pd, ch), 2)); % 
             
         end
         

@@ -2,7 +2,7 @@ function make_all_band_figures_PLV(freq_limit, p_val)
 
 channel_prefix = 'STR_M1';
 
-short_group_labels = {'M1 \beta\leq', 'M1 \beta>'};
+short_group_labels = {'All', 'M1+', 'M1-'};
 
 band_labels = {'1-4', '4-8', '8-12', '15-30', '40-100', '120-180'}; % , '0-200'};
 
@@ -14,7 +14,7 @@ figure
 
 colorspec = [0 0 1; 0 .5 0];
 
-group = {'missing_2'}; % {'M1_increased', 'M1_not_increased'};
+group = {'missing_2', 'M1_not_increased', 'M1_increased'}; % {'M1_increased', 'M1_not_increased'};
 
 no_groups = length(group);
 
@@ -36,13 +36,21 @@ for s_id = 1:2
     
 end
 
-folder_chi = ones(size(folders));
+folder_chi = ones(length(folders), length(group));
 
-folder_cell = {'130716', '130830'};
-
-for fo = 1:length(folder_cell)
+for g = 1:length(group)
     
-    folder_chi(strcmp(folders, folder_cell{fo})) = 0;
+    folder_cell = load(group{g});
+    
+    folder_cell = getfield(folder_cell, group{g});
+    
+    folder_cell = folder_cell{2};
+    
+    for fo = 1:length(folder_cell)
+        
+        folder_chi(strcmp(folders, folder_cell{fo}), g) = 0;
+        
+    end
     
 end
 
@@ -56,7 +64,7 @@ for fo = 1:length(M1_groups{2})
     
 end
 
-subj_index = find(folder_chi);
+subj_index = find(folder_chi(:, 1))';
 
 mean_bp_max_start = mean(bp_max_start(subj_index, :, :));
 
@@ -122,13 +130,33 @@ for b = 1:no_bands
     
 end
 
-%% Plotting spectra.
+%% Plotting PLV.
 
 for b = 1:no_bands
+    
+    % Computing stats between post-infusion increases.
+
+    load('missing_2.mat')
+    
+    missing_2 = missing_2{2};
+    
+    no_excluded = length(missing_2);
+    
+    folder_index = ones(1, length(folders));
+    
+    for e = 1:no_excluded
+    
+        folder_index = folder_index - strcmp(folders, missing_2{e});
+        
+    end
+    
+    load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
     
     for g = 1:no_groups
         
         load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_', group{g}, '_Coh_sec_pct_data_for_plot.mat'])
+        
+        All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
         
         subplot(no_bands, no_groups + 1, (b - 1)*(no_groups + 1) + g + 1)
         
@@ -144,21 +172,47 @@ for b = 1:no_bands
     
     for g = 1:no_groups
         
+        p_vals = nan(freq_limit, 2);
+        
+        for f = 1:freq_limit
+            
+            [~, p_vals(f, 1)] = ttest(All_mean(f, logical(folder_chi(:, g)), 1, 2)', All_mean(f, logical(folder_chi(:, g)), 2, 2)', 'tail', 'right');
+            
+            [~, p_vals(f, 2)] = ttest(All_mean(f, logical(folder_chi(:, g)), 1, 2)', All_mean(f, logical(folder_chi(:, g)), 2, 2)', 'tail', 'left');
+            
+        end
+        
+        test = p_vals < p_val;
+        
         h = subplot(no_bands, no_groups + 1, (b - 1)*(no_groups + 1) + g + 1);
         
         set(h, 'ylim', y_extremes)
         
+        add_stars(gca, (1:freq_limit)', logical(test(:, 1)), 0, [1 .5 0])
+        
+        add_stars(gca, (1:freq_limit)', logical(test(:, 2)), 1, [1 0 0])
+        
         load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_', group{g}, '_Coh_sec_pct_data_for_plot.mat'])
+        
+        All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
         
         [sig_lower, sig_higher] = find_sig(All_mean_mean(1:freq_limit, :), All_mean_ci(1:freq_limit, :));
         
-        add_stars(gca, (1:freq_limit)', logical(sig_lower), 0, [1 .5 0])
-        
-        add_stars(gca, (1:freq_limit)', logical(sig_higher), 1, [1 0 0])
+        % add_stars(gca, (1:freq_limit)', logical(sig_lower), 0, [1 .5 0])
+        % 
+        % add_stars(gca, (1:freq_limit)', logical(sig_higher), 1, [1 0 0])
         
         if b == 1
             
-            title({'PLV (% \Delta BL)'; 'Mean \pm 95% CI'}, 'FontSize', 16)
+            if length(group) > 1
+            
+                title({[short_group_labels{g}, ' PLV (% \Delta BL)']; 'Mean \pm 95% CI'}, 'FontSize', 16)
+                
+            else
+            
+                title({'PLV (% \Delta BL)'; 'Mean \pm 95% CI'}, 'FontSize', 16)
+                
+            end
             
         elseif b == no_bands
         

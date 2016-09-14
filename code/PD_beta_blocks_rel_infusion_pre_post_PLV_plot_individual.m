@@ -83,6 +83,8 @@ else
     
 end
 
+folder_chi = logical(folder_chi);
+
 if ~isempty(epoch_secs)
     
     PLV_name = [subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index_for_time}, '_high_',...
@@ -163,17 +165,17 @@ for fo = 1:no_folders
         
         axis tight
         
-        if folder_chi(fo)
+        % if folder_chi(fo)
             
-            All_mean(:, fo, :, a) = permute(PLV_mean, [1 3 2]);
-            
-            if strcmp(array_names{a}, 'dP_sec')
-               
-                All_mean(:, fo, 1, a + 1) = diff(PLV_mean, [], 2);
-                
-            end
-            
+        All_mean(:, fo, :, a) = permute(PLV_mean, [1 3 2]);
+
+        if strcmp(array_names{a}, 'dP_sec')
+
+            All_mean(:, fo, 1, a + 1) = diff(PLV_mean, [], 2);
+
         end
+            
+        % end
         
         if fo == 1
             
@@ -211,28 +213,29 @@ figure
 
 for a = 1:no_arrays
 
-    [All_mean_mean, All_mean_ci] = deal(nan(length(freqs(display_indices)), no_pds));
+    [All_mean_mean, All_mean_se, All_mean_ci] = deal(nan(length(freqs(display_indices)), no_pds));
     
     for pd = 1:no_pds
         
         if strcmp(array_names{a}((end - length('dP_sec') + 1):end), 'dP_sec')
             
-            All_mean_mean(:, pd) = (180/pi)*angle(nanmean(exp(sqrt(-1)*All_mean(:, :, pd, a)), 2));
+            All_mean_mean(:, pd) = (180/pi)*angle(nanmean(exp(sqrt(-1)*All_mean(:, folder_chi, pd, a)), 2));
             
-            All_mean_ci(:, pd) = (180/pi)*circ_confmean(All_mean(:, :, pd, a), p_cutoff, [], [], 2); % p_cutoff/length(freqs(display_indices)
+            All_mean_ci(:, pd) = (180/pi)*circ_confmean(All_mean(:, folder_chi, pd, a), p_cutoff, [], [], 2); % p_cutoff/length(freqs(display_indices)
             
         else
             
-            All_mean_mean(:, pd) = nanmean(All_mean(:, :, pd, a), 2);
+            All_mean_mean(:, pd) = nanmean(All_mean(:, folder_chi, pd, a), 2);
             
-            All_mean_ci(:, pd) = norminv(1 - p_cutoff, 0, 1)*... % p_cutoff/length(freqs(display_indices))
-                nanstd(All_mean(:, :, pd, a), [], 2)/sqrt(no_folders);
+            All_mean_se(:, pd) = nanstd(All_mean(:, folder_chi, pd, a), [], 2)/sqrt(sum(folder_chi));
+            
+            All_mean_ci(:, pd) = norminv(1 - p_cutoff, 0, 1)*All_mean_se(:, pd); % p_cutoff/length(freqs(display_indices))
             
         end
         
     end
     
-    save([PLV_name, folder_flag, '_', array_names{a}, '_data_for_plot.mat'], 'All_mean_mean', 'All_mean_ci')
+    save([PLV_name, folder_flag, '_', array_names{a}, '_data_for_plot.mat'], 'All_mean_mean', 'All_mean_se', 'All_mean_ci')
     
     subplot(1, no_arrays, a)
     
