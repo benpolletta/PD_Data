@@ -1,4 +1,4 @@
-function PD_fix_wav_BP(subjects_mat, freqs, no_cycles, bands, new_bands)
+function PD_fix_wav_BP(subjects_mat, peak_suffix, freqs, no_cycles, bands, new_bands)
 
 subjects_info = load(subjects_mat);
 
@@ -12,13 +12,13 @@ parfor fo = 1:length(folders)
     
     basetime = basetimes(fo);
     
-    PD_fix_wav_BP_inner(folder, prefix, basetime, freqs, no_cycles, bands, new_bands)
+    PD_fix_wav_BP_inner(folder, prefix, peak_suffix, basetime, freqs, no_cycles, bands, new_bands)
         
 end
 
 end
 
-function PD_fix_wav_BP_inner(folder, prefix, basetime, freqs, no_cycles, bands, new_bands)
+function PD_fix_wav_BP_inner(folder, prefix, peak_suffix, basetime, freqs, no_cycles, bands, new_bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -28,21 +28,25 @@ if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
     bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
     
-    suffix = '';
+    suffix = peak_suffix;
     
 else
 
     suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
     
+    suffix = [suffix, peak_suffix];
+    
 end
 
 if isempty(new_bands)
     
-    new_suffix = '';
+    new_suffix = peak_suffix;
     
 else
     
     new_suffix = sprintf('_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(new_bands, 1));
+    
+    new_suffix = [new_suffix, peak_suffix];
 
 end
 
