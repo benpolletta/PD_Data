@@ -1,9 +1,9 @@
-function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, band_index_for_time, band_index_for_display, freqs, no_cycles, bands, folders_left_out)
+function PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, band_index_for_time, band_index_for_display, freqs, no_cycles, bands, folders_left_out, p_val)
 
 % Leave epoch_secs empty when using for optogenetics data, and enter
 % '_ntrials' for the argument pd_handle.
 
-p_val = .01;
+if isempty(p_val), p_val = .01; end
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -159,6 +159,23 @@ for fo = 1:no_folders
         end
         
         axis tight
+        
+        % Calculate paired t-tests over 150 observations.
+        display_freqs = freqs(display_indices);
+        
+        for f = 1:length(display_freqs)
+            
+            [~, p_vals(f, 1)] = ttest(WT_sec(freqs == display_freqs(f), :, fo, 1, ch)', WT_sec(freqs == display_freqs(f), :, fo, 2, ch)', 'tail', 'right');
+            
+            [~, p_vals(f, 2)] = ttest(WT_sec(freqs == display_freqs(f), :, fo, 1, ch)', WT_sec(freqs == display_freqs(f), :, fo, 2, ch)', 'tail', 'left');
+            
+        end
+        
+        test = p_vals < p_val;
+        
+        add_stars(gca, freqs(display_indices), logical(test(:, 1)), 0, [1 .5 0])
+        
+        add_stars(gca, freqs(display_indices), logical(test(:, 2)), 1, [1 0 0])
         
         % if folder_chi(fo) 
             

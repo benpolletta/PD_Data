@@ -61,4 +61,3 @@ make_PLV_figures('STR_M1', peak_suffix)
 %     beta_blocks_consolidated_phase_analysis('STR_M1_subjects.mat', peak_suffix, 200, .5, '', band_index, ftol, freqs, no_cycles, bands)
 %     
 % end
-
