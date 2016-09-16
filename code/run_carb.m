@@ -40,7 +40,7 @@ for i = 1:length(power_handles)
     
     PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands);
     
-    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands, {});
+    PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands, {}, []);
     
 end
 

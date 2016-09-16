@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_stats(subject_mat, epoch_secs, peak_suffix, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_stats(subject_mat, peak_suffix, epoch_secs, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     

@@ -1,8 +1,16 @@
-function make_all_band_figures_spectrum(channel_prefix, channel_title, freq_limit, p_val, test_flag)
+function make_all_band_figures_spectrum(channel_prefix, channel_title, freq_limit, p_val, test_flag, bands)
 
 short_group_labels = {'All', 'M1+', 'M1-'};
 
-band_labels = {'1-4', '4-8', '8-12', '15-30', '40-100', '120-180'}; % , '0-200'};
+for b = 1:length(bands);
+    
+    band_labels{b} = sprintf('%d-%d', bands(b, 1), bands(b,2));
+    
+end
+
+band_flag = sprintf('%dbands', length(bands));
+
+% band_labels = {'1-4', '4-8', '8-12', '15-30', '40-100', '120-180'}; % , '0-200'};
 
 no_bands = length(band_labels);
 
@@ -18,11 +26,11 @@ no_groups = length(group);
 
 %% Plotting period boxplots.
     
-load('STR_M1_1-200Hz_3-21cycles_7bands_kmeans_pct_BP_high_2.5_min_secs.mat') % _by_STR.mat'])
+load(['STR_M1_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_BP_high_2.5_min_secs.mat']) % _by_STR.mat'])
 
 basetimes_mat = repmat(basetimes', [1, size(All_bp_max_start, 4), size(All_bp_max_start, 3)])/60;
 
-[bp_max_start, bp_max_end] = deal(nan(length(folders), 2, no_bands + 1));
+[bp_max_start, bp_max_end] = deal(nan(length(folders), 2, no_bands));
 
 for s_id = 1:2
     
@@ -68,7 +76,7 @@ mean_bp_max_start = mean(bp_max_start(subj_index, :, :));
 
 std_bp_max_start = std(bp_max_start(subj_index, :, :)); 
 
-for b = 1:no_bands
+for b = 1:(no_bands - 1)
 
     fprintf('Mean Start of Max. High %s Hz Density = %g\n', band_labels{b}, mean_bp_max_start(:, 2, b))
 
@@ -152,7 +160,7 @@ for b = 1:no_bands
     
     for g = 1:no_groups  % Loading & plotting mean & SE data for each group.
         
-        load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
+        load([channel_prefix, '_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
         
         All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se; % Constructing CI from p_val & SE.
         
@@ -168,7 +176,7 @@ for b = 1:no_bands
     
     y_extremes = [min(y_lims(:, 1)) max(y_lims(:, 2))];
     
-    load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat']) % Loading mean data for all individuals.
+    load([channel_prefix, '_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat']) % Loading mean data for all individuals.
     
     for g = 1:no_groups
         
@@ -211,7 +219,7 @@ for b = 1:no_bands
         add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
         
         % % Finding nonoverlap of confidence intervals.
-        % load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
+        % load([channel_prefix, '_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
         % 
         % All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
         % 
