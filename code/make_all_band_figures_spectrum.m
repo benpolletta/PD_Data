@@ -82,7 +82,7 @@ for b = 1:(no_bands - 1)
 
     fprintf('St. Dev. Start of Max. High %s Hz Density = %g\n', band_labels{b}, std_bp_max_start(:, 2, b))
    
-    subplot(no_bands, no_groups + 1, (b - 1)*(no_groups + 1) + 1)
+    subplot(no_bands - 1, no_groups + 1, (b - 1)*(no_groups + 1) + 1)
     
     folder_index = 1;
     
@@ -138,7 +138,7 @@ end
 
 %% Plotting spectra.
 
-for b = 1:no_bands
+for b = 1:(no_bands - 1)
     
     % Computing stats between post-infusion increases.
 
@@ -164,7 +164,7 @@ for b = 1:no_bands
         
         All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se; % Constructing CI from p_val & SE.
         
-        subplot(no_bands, no_groups + 1, (b - 1)*(no_groups + 1) + 1 + g)
+        subplot(no_bands - 1, no_groups + 1, (b - 1)*(no_groups + 1) + 1 + g)
         
         boundedline((1:freq_limit)', All_mean_mean(1:freq_limit, :), prep_for_boundedline(All_mean_ci(1:freq_limit, :)))
         
@@ -210,7 +210,7 @@ for b = 1:no_bands
         
         % test = p_vals < p_val;
         
-        h = subplot(no_bands, no_groups + 1, (b - 1)*(no_groups + 1) + 1 + g);
+        h = subplot(no_bands - 1, no_groups + 1, (b - 1)*(no_groups + 1) + 1 + g);
         
         set(h, 'ylim', y_extremes)
         
@@ -251,9 +251,9 @@ for b = 1:no_bands
     
 end
 
-save_as_eps(gcf, [channel_prefix, '_all_bands_spec_f', num2str(freq_limit), p_tag, '_', test_flag]) % '_p', num2str(p_val, '%g')])
+save_as_eps(gcf, [channel_prefix, '_all_bands_', band_flag, '_spec_f', num2str(freq_limit), p_tag, '_', test_flag]) % '_p', num2str(p_val, '%g')])
 
-save_as_pdf(gcf, [channel_prefix, '_all_bands_spec_f', num2str(freq_limit), p_tag, '_', test_flag]) % '_p', num2str(p_val, '%g')])
+save_as_pdf(gcf, [channel_prefix, '_all_bands_', band_flag, '_spec_f', num2str(freq_limit), p_tag, '_', test_flag]) % '_p', num2str(p_val, '%g')])
 
 end
 

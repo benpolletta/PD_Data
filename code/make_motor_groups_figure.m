@@ -1,4 +1,4 @@
-function make_motor_groups_figure(freq_limit, p_val, test_flag)
+function make_motor_groups_figure(freq_limit, p_val, test_flag, bands, band_index)
 
 load('STR_M1_subjects.mat', 'pd_labels', 'folders')
 
@@ -15,6 +15,14 @@ no_chans = length(chan_labels);
 peak_suffix = '_kmeans';
 
 no_pds_plotted = 2;
+
+for b = 1:length(bands);
+    
+    band_labels{b} = sprintf('%d-%d', bands(b, 1), bands(b,2));
+    
+end
+
+band_flag = sprintf('%dbands', length(bands));
 
 figure
 
@@ -40,7 +48,7 @@ end
 
 for group = 1:2 % Plotting mean and CI.
 
-    load(['STR_M1_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_PLV_', group_flags{group} '_Coh_sec_pct_data_for_plot.mat'])
+    load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_', group_flags{group} '_Coh_sec_pct_data_for_plot.mat'])
     
     PLV_mean = All_mean_mean; PLV_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
     
@@ -59,7 +67,7 @@ y_extremes(3, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
 for group = 1:2 % Plotting stats.
     
     % Loading data for all individuals.
-    load('STR_M1_1-200Hz_3-21cycles_7bands_kmeans_pct_15-30Hz_high_2.5_min_secs_PLV_data_for_plot.mat')
+    load(['STR_M1_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
     
     % Calculating difference between pre-infusion and post-infusion.
     p_vals = nan(freq_limit, 2);
@@ -87,7 +95,7 @@ for group = 1:2 % Plotting stats.
     % test = p_vals < p_val;
     
     % % Calculating overlap of CIs.
-    % load(['STR_M1_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_PLV_', group_flags{group}, '_Coh_sec_pct_data_for_plot.mat'])
+    % load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_', group_flags{group}, '_Coh_sec_pct_data_for_plot.mat'])
     % 
     % PLV_mean = All_mean_mean; PLV_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
     % 
@@ -134,7 +142,7 @@ for ch = 1:2
     % Plotting mean and CI.
     for group = 1:2
         
-        load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_pct_spectrum_', group_flags{group}, '_ch1_data_for_plot.mat'])
+        load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_', group_flags{group}, '_ch1_data_for_plot.mat'])
         
         All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
         
@@ -154,7 +162,7 @@ for ch = 1:2
     for group = 1:2
         
         % Loading data for all individuals.
-        load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_7bands_kmeans_pct_15-30Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
+        load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
         
         p_vals = nan(freq_limit, 2);
         
@@ -189,7 +197,7 @@ for ch = 1:2
         add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2))
         
         % % Calculating non-overlap of CIs.
-        % load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_7bands', peak_suffix, '_pct_15-30Hz_high_2.5_min_secs_pct_spectrum_', group_flags{group}, '_ch1_data_for_plot.mat'])
+        % load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_', group_flags{group}, '_ch1_data_for_plot.mat'])
         % 
         % All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
         % 
@@ -225,9 +233,9 @@ end
 
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 9.1], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 9.1])
 
-print(gcf, '-painters', '-dpdf', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_f%d', freq_limit), p_tag, '_', test_flag, '.pdf'])
+print(gcf, '-painters', '-dpdf', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.pdf'])
 
-print(gcf, '-painters', '-depsc', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_f%d', freq_limit), p_tag, '_', test_flag, '.eps'])
+print(gcf, '-painters', '-depsc', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.eps'])
 
 end
 
