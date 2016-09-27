@@ -4,7 +4,9 @@ p_val = .01; freq_limit = 100;
 
 short_chan_labels = {'M1'};
 
-band_labels = {'1-4', '4-8', '8-12', '15-30', '40-100', '120-180'}; % , '0-200'};
+band_number_flag = {'7', '8', '8', '7', '7', '7'};
+
+band_labels = {'1-4', '5-8', '9-14', '15-30', '40-100', '120-180'}; % , '0-200'};
 
 no_bands = length(band_labels);
 
@@ -17,20 +19,26 @@ colorspec = [0 0 1; 0 .5 0];
 load('missing_2')
 
 %% Plotting period boxplots.
+
+[bp_max_start, bp_max_end] = deal(nan(length(folders), 2, no_bands, 2));
     
-load('STR_M1_1-200Hz_3-21cycles_7bands_kmeans_pct_BP_high_2.5_min_secs.mat') % _by_STR.mat'])
+band_number_labels = {'7', '8'};
 
-basetimes_mat = repmat(basetimes', [1, size(All_bp_max_start, 4), size(All_bp_max_start, 3)])/60;
-
-[bp_max_start, bp_max_end] = deal(nan(length(folders), 2, no_bands + 1));
-
-for s_id = 1:2
+for b = 1:2
     
-    s_ind = striatal_id == s_id;
+    load(['STR_M1_1-200Hz_3-21cycles_', band_number_labels{b}, 'bands_kmeans_pct_BP_high_2.5_min_secs.mat']) % _by_STR.mat'])
     
-    bp_max_start(s_ind, :, :) = permute(All_bp_max_start(s_ind, s_id, :, :), [1 4 3 2])/(500*60) - basetimes_mat(s_ind, :, :);
-
-    bp_max_end(s_ind, :, :) = permute(All_bp_max_end(s_ind, s_id, :, :), [1 4 3 2])/(500*60) - basetimes_mat(s_ind, :, :);
+    basetimes_mat = repmat(basetimes', [1, size(All_bp_max_start, 4), no_bands])/60;
+    
+    for s_id = 1:2
+        
+        s_ind = striatal_id == s_id;
+        
+        bp_max_start(s_ind, :, :, b) = permute(All_bp_max_start(s_ind, s_id, 1:no_bands, :), [1 4 3 2])/(500*60) - basetimes_mat(s_ind, :, :);
+        
+        bp_max_end(s_ind, :, :, b) = permute(All_bp_max_end(s_ind, s_id, 1:no_bands, :), [1 4 3 2])/(500*60) - basetimes_mat(s_ind, :, :);
+        
+    end
     
 end
 
@@ -70,6 +78,8 @@ for b = 1:no_bands
     
     folder_index = 1;
     
+    if b == 2 || b == 3, band_number_index = 2; else band_number_index = 1; end
+    
     for fo = subj_index % 1:length(folders)
         
         plot([-10 30], folder_index*[1 1], 'k')
@@ -80,13 +90,13 @@ for b = 1:no_bands
             
             if M1_beta(fo)
                 
-                plot([bp_max_start(fo, pd, b); bp_max_end(fo, pd, b)], folder_index*[1 1],... % '-d',...
+                plot([bp_max_start(fo, pd, b, band_number_index); bp_max_end(fo, pd, b, band_number_index)], folder_index*[1 1],... % '-d',...
                     'LineWidth', 4.5, 'Color', colorspec(pd, :))
                 % 'MarkerFaceColor', colorspec(pd, :), 'MarkerEdgeColor', colorspec(pd, :),...
                 
             else
                 
-                plot([bp_max_start(fo, pd, b); bp_max_end(fo, pd, b)], folder_index*[1 1],... % '-d',...
+                plot([bp_max_start(fo, pd, b, band_number_index); bp_max_end(fo, pd, b, band_number_index)], folder_index*[1 1],... % '-d',...
                     'LineWidth', 2.5, 'Color', colorspec(pd, :)) % , 'LineStyle', '--')
                 % 'MarkerFaceColor', colorspec(pd, :), 'MarkerEdgeColor', colorspec(pd, :),...
                 
@@ -130,7 +140,7 @@ for b = 1:no_bands
     
     for ch = 1:no_chans
         
-        load([chan_prefixes{ch}, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_missing_2_ch1_data_for_plot.mat'])
+        load([chan_prefixes{ch}, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_missing_2_ch1_data_for_plot.mat'])
         
         All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
         
@@ -140,7 +150,7 @@ for b = 1:no_bands
         
         axis tight
         
-        load([chan_prefixes{ch}, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
+        load([chan_prefixes{ch}, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
         
         p_vals = nan(freq_limit, 2);
         
@@ -154,7 +164,7 @@ for b = 1:no_bands
         
         test = p_vals < p_val;
         
-        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, 1)), 0, [1 .5 0])
+        % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, 1)), 0, [1 .5 0])
         
         add_stars_one_line(gca, (1:freq_limit)', logical(test(:, 2)), 1, [1 0 0])
         
@@ -176,7 +186,7 @@ end
 
 for b = 1:no_bands
     
-    load(['STR_M1_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_missing_2_Coh_sec_pct_data_for_plot.mat'])
+    load(['STR_M1_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_missing_2_Coh_sec_pct_data_for_plot.mat'])
     
     All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
     
@@ -186,7 +196,7 @@ for b = 1:no_bands
     
     axis tight
     
-    load(['STR_M1_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
+    load(['STR_M1_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
     
     p_vals = nan(freq_limit, 2);
     
@@ -200,7 +210,7 @@ for b = 1:no_bands
     
     test = p_vals < p_val;
     
-    add_stars_one_line(gca, (1:freq_limit)', logical(test(:, 1)), 0, [1 .5 0])
+    % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, 1)), 0, [1 .5 0])
     
     add_stars_one_line(gca, (1:freq_limit)', logical(test(:, 2)), 1, [1 0 0])
     

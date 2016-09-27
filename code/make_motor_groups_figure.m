@@ -105,7 +105,7 @@ for group = 1:2 % Plotting stats.
     
     ylim(y_extremes(3, :))
     
-    add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
+    % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
     
     add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
     
@@ -192,7 +192,7 @@ for ch = 1:2
         
         ylim(y_extremes(ch, :))
         
-        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1))
+        % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1))
         
         add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2))
         
@@ -236,6 +236,8 @@ set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0
 print(gcf, '-painters', '-dpdf', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.pdf'])
 
 print(gcf, '-painters', '-depsc', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.eps'])
+
+saveas(gcf, [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.fig'])
 
 end
 

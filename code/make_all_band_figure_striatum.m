@@ -12,7 +12,9 @@ test_flag = 'ttest';
 
 short_group_labels = {'All', 'M1+', 'M1-'};
 
-band_labels = {'1-4', '4-8', '8-12', '15-30', '40-100', '120-180'}; % , '0-200'};
+band_number_flag = {'7', '8', '8', '7', '7', '7'};
+
+band_labels = {'1-4', '5-8', '9-14', '15-30', '40-100', '120-180'}; % , '0-200'};
 
 no_bands = length(band_labels);
 
@@ -68,7 +70,7 @@ for b = 1:no_bands
     
     for g = 1:no_groups  % Loading & plotting mean & SE data for each group.
         
-        load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
+        load([channel_prefix, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
         
         All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se; % Constructing CI from p_val & SE.
         
@@ -84,7 +86,7 @@ for b = 1:no_bands
     
     y_extremes = [min(y_lims(:, 1)) max(y_lims(:, 2))];
     
-    load([channel_prefix, '_1-200Hz_3-21cycles_7bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat']) % Loading mean data for all individuals.
+    load([channel_prefix, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat']) % Loading mean data for all individuals.
     
     for g = 1:no_groups
         
@@ -170,6 +172,8 @@ set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0
 print(gcf, '-painters', '-dpdf', '-r600', ['striatum_all_bands_spec_f', num2str(freq_limit), p_tag, '_', test_flag, '.pdf'])
 
 print(gcf, '-painters', '-depsc', '-r600', ['striatum_all_bands_spec_f', num2str(freq_limit), p_tag, '_', test_flag, '.eps'])
+
+saveas(gcf, ['striatum_all_bands_spec_f', num2str(freq_limit), p_tag, '_', test_flag, '.fig'])
 
 end
 
