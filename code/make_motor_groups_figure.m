@@ -44,6 +44,8 @@ for group = 1:2
     
 end
 
+ax = nan(3, 2);
+
 %% Plotting PLV by group.
 
 for group = 1:2 % Plotting mean and CI.
@@ -52,17 +54,19 @@ for group = 1:2 % Plotting mean and CI.
     
     PLV_mean = All_mean_mean; PLV_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
     
-    subplot(3, 2, 4 + group) % 3*(group - 1) + 3) % 
+    ax(3, group) = subplot(3, 2, 4 + group); % 3*(group - 1) + 3) % 
     
     boundedline((1:freq_limit)', PLV_mean(1:freq_limit, 1:no_pds_plotted), prep_for_boundedline(PLV_ci(1:freq_limit, 1:no_pds_plotted)))
     
     axis tight
     
-    y_lims(group, :) = ylim;
+    % y_lims(group, :) = ylim;
     
 end
 
-y_extremes(3, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
+linkaxes(ax(3, :))
+
+% y_extremes(3, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
 
 for group = 1:2 % Plotting stats.
     
@@ -103,7 +107,7 @@ for group = 1:2 % Plotting stats.
     
     subplot(3, 2, 4 + group) % 3*(group - 1) + 3) %
     
-    ylim(y_extremes(3, :))
+    % ylim(y_extremes(3, :))
     
     % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
     
@@ -146,17 +150,19 @@ for ch = 1:2
         
         All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
         
-        subplot(3, 2, 2*(ch - 1) + group) % 3*(group - 1) + ch) %
+        ax(ch, group) = subplot(3, 2, 2*(ch - 1) + group); % 3*(group - 1) + ch) %
         
         boundedline((1:freq_limit)', All_mean_mean(1:freq_limit, :), prep_for_boundedline(All_mean_ci(1:freq_limit, :)))
         
         axis tight
         
-        y_lims(group, :) = ylim;
+        % y_lims(group, :) = ylim;
         
     end
 
-    y_extremes(ch, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
+    linkaxes(ax(ch, :))
+    
+    % y_extremes(ch, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
     
     % Plotting stats.
     for group = 1:2
@@ -190,7 +196,7 @@ for ch = 1:2
         
         subplot(3, 2, 2*(ch - 1) + group) % 3*(group - 1) + ch) %
         
-        ylim(y_extremes(ch, :))
+        % ylim(y_extremes(ch, :))
         
         % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1))
         
