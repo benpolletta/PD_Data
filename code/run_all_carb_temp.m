@@ -14,11 +14,11 @@ subject_mat_prefixes = {'st_m1', 'st_m1_ali', 'st_m1_ali2'};
 
 no_mats = length(subject_mat_prefixes);
 
-for m = 1:no_mats
-
-    run_carb_temp([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands, band_index)
-
-end
+% for m = 1:no_mats
+% 
+%     run_carb_temp([subject_mat_prefixes{m}, '_subjects.mat'], peak_suffix, freqs, no_cycles, bands, band_index)
+% 
+% end
 
 % measures = {'', '_power'}; norms = {'', '_pct'};
 % 
@@ -30,15 +30,15 @@ end
 % 
 % end
    
-collect_striatal_w_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+% collect_striatal_w_motor_spectrum(peak_suffix, 150, '', band_index, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('STR_w_M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands, {}, [])
+% PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('STR_w_M1_subjects.mat', peak_suffix, 150, '', '', band_index, no_bands, freqs, no_cycles, bands, {}, [])
 
 % make_spectra_figures('STR_w_M1', peak_suffix)
 
-collect_motor_spectrum(peak_suffix, 150, '_pct', band_index, freqs, no_cycles, bands)
+collect_motor_spectrum(peak_suffix, 150, '', band_index, freqs, no_cycles, bands)
 
-PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('M1_subjects.mat', peak_suffix, 150, '', '_pct', band_index, no_bands, freqs, no_cycles, bands, {}, [])
+PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual('M1_subjects.mat', peak_suffix, 150, '', '', band_index, no_bands, freqs, no_cycles, bands, {}, [])
 
 % make_spectra_figures('M1', peak_suffix)
 

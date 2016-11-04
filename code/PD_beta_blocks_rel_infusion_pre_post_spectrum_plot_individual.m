@@ -225,6 +225,12 @@ for ch = 1:no_chans
             
         else
             
+            if strcmp(norm, '')
+                
+                All_mean(:, folder_chi, pd, ch) = All_mean(:, folder_chi, pd, ch)*diag(1./nansum(All_mean(:, folder_chi, pd, ch)));
+                
+            end
+            
             All_mean_mean(:, pd) = nanmean(All_mean(:, folder_chi, pd, ch), 2);
             
             All_mean_se(:, pd) = nanstd(All_mean(:, folder_chi, pd, ch), [], 2)/sqrt(sum(folder_chi)); % sqrt(nanmean(All_se(:, :, pd, ch), 2)); % 
