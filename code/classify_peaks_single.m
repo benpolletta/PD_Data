@@ -2,7 +2,7 @@
 % LFP data, sampling_freq in Hz, prominence (minimum prominence to use for
 % peaks) and basetime, which is the time in seconds at which the carbachol
 % infusion begins. Clusters is the number of clusters to be used. This
-% function returns peak data, which is a matrix
+% function returns peak data, which is a matrix.
 function [peak_indicator, Peak_data] = classify_peaks_single(folder, prefix, channel, channel_multiplier, sampling_freq, min_prominence, min_secs_apart, basetime, clusters, normalized)
     
 % INPUTS:
@@ -257,7 +257,7 @@ function plot_peaks_2(fig_name, t, sampling_freq, X, Peak_data, plot_bounds)
 
     colors = [0 0 0; 1 0 0; 0 0 1; 0 0.75 0];
 
-    no_epochs = ceil((diff(plot_bounds) + 1)/epoch_length;
+    no_epochs = ceil((diff(plot_bounds) + 1)/epoch_length);
 
     for e = 1:no_epochs
 
