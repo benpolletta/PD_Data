@@ -1,12 +1,14 @@
 function data_subtracted = subtract_peaks(subj_name, peak_suffix, outlier_lim, plot_opt)
 
-load([subj_name, '_all_channel_data_dec.mat'])
+% format long g
 
-data_subtracted = PD_dec;
+load([subj_name, '_all_channel_data_dec.mat'])
 
 [Spike_indicator, Peak_data] = peak_loader(subj_name, peak_suffix, length(PD_dec));
 
 data_subtracted = PD_dec;
+
+%% Subtracting peaks.
 
 for ch = 1:2
     
@@ -78,6 +80,8 @@ for ch = 1:2
             
         peak_forms = get_peak_forms(data, cluster_peak_locs, min_peak_distance);
         
+        %% Peaks belonging to a cluster.
+        
         if no_peaks > 1
             
             cluster_centroid = nanmean(peak_forms)';
@@ -105,7 +109,7 @@ for ch = 1:2
                 
                 data_subtracted(window_indices, ch) = peak_subtracted;
                 
-                if plot_opt && ~w
+                if plot_opt > 0 && ~w
                     
                     figure
                     
@@ -138,13 +142,19 @@ for ch = 1:2
                     
                     save_as_pdf(gcf, sprintf('%s_chan%d_clust%d_peak%d', subj_name, ch, c, p))
                     
-                    w = waitforbuttonpress;
-                
-                    if w, close('all'), end
+                    if plot_opt == 1
+                        
+                        w = waitforbuttonpress;
+                        
+                        if w, close('all'), end
+                        
+                    end
                     
                 end
                 
             end
+            
+        %% Peaks that make up their own cluster.
             
         else
             
@@ -169,7 +179,7 @@ for ch = 1:2
             
             data_subtracted(window_indices, ch) = peak_subtracted;
             
-            if plot_opt && ~w
+            if plot_opt > 0 && ~w
                 
                 figure
                 
@@ -202,9 +212,116 @@ for ch = 1:2
                 
                 save_as_pdf(gcf, sprintf('%s_chan%d_clust%d_peak1', subj_name, ch, c))
                 
-                w = waitforbuttonpress;
+                if plot_opt == 1
+                    
+                    w = waitforbuttonpress;
+                    
+                    if w, close('all'), end
+                    
+                end
                 
-                if w, close('all'), end
+            end
+            
+        end
+        
+    end
+    
+end
+
+outlier_min = sampling_freq/100;
+
+%% Removing outliers.
+
+if ~isempty(outlier_lim) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier_lim), 'sd_outliers.mat']))
+    
+    load([subj_name, '_wav_BP_', num2str(outlier_lim), 'sd_outliers.mat'])
+    
+    outlier_blocks = index_to_blocks(artifact_indicator);
+    
+    no_outliers = size(outlier_blocks, 1);
+    
+    for ch = 1:2
+        
+        data = data_subtracted(:, ch);
+        
+        w = 0;
+        
+        for o = 7:no_outliers
+            
+            outlier_indices = outlier_blocks(o, 1):outlier_blocks(o, 2);
+            
+            if length(outlier_indices) < outlier_min
+                
+                % format long g
+               
+                outlier_start = floor(mean(outlier_indices) - ceil(outlier_min/2));
+                
+                outlier_end = ceil(mean(outlier_indices) + ceil(outlier_min/2));
+                
+                outlier_indices = outlier_start:outlier_end;
+                
+            end
+            
+            outlier_window = outlier_indices - mean(outlier_indices);
+            
+            x_envelope = outlier_window/max(outlier_window);
+            
+            envelope = exp(-1./(1 - x_envelope.^2))';
+            
+            envelope = envelope/max(envelope);
+            
+            outlier_data = data(outlier_indices);
+            
+            trend = polyfit(outlier_indices', outlier_data, 1);
+            
+            outlier_trend = trend(1)*outlier_indices' + trend(2);
+            
+            outlier_detrended = outlier_data - outlier_trend;
+            
+            outlier_subtracted = outlier_data - envelope.*outlier_detrended;
+            
+            data_subtracted(outlier_indices, ch) = outlier_subtracted;
+            
+            if plot_opt > 0 && ~w
+                
+                figure
+                
+                subplot(211) % (311)
+                
+                plot(outlier_window, [outlier_data, outlier_detrended,...
+                    outlier_subtracted, envelope.*outlier_detrended])
+                
+                axis tight
+                
+                legend({'Data', 'Detrended', 'Subtracted', 'Windowed'})
+                
+                title(sprintf('%s, Channel %d, Outlier %d', subj_name, ch, o))
+                
+                outlier_wav = wavelet_spectrogram(outlier_data, sampling_freq, 1:200, linspace(3,21,200), 0, '');
+                
+                % subplot(312)
+                %
+                % imagesc(window_indices, 1:200, nanzscore(abs(outlier_wav))')
+                %
+                % axis xy
+                
+                subtracted_wav = wavelet_spectrogram(outlier_subtracted, sampling_freq, 1:200, linspace(3,21,200), 0, '');
+                
+                subplot(212) % (313)
+                
+                imagesc(outlier_window, 1:200, nanzscore(abs(outlier_wav) - abs(subtracted_wav))') % (nanzscore(abs(outlier_wav)) - nanzscore(abs(subtracted_wav)))')
+                
+                axis xy
+                
+                save_as_pdf(gcf, sprintf('%s_chan%d_outlier%d', subj_name, ch, o))
+                
+                if plot_opt == 1
+                    
+                    w = waitforbuttonpress;
+                    
+                    if w, close('all'), end
+                    
+                end
                 
             end
             
