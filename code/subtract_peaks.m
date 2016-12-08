@@ -246,7 +246,7 @@ if ~isempty(outlier_lim) && ~isempty(dir([subj_name, '_wav_BP_', num2str(outlier
         
         w = 0;
         
-        for o = 7:no_outliers
+        for o = 1:no_outliers
             
             outlier_indices = outlier_blocks(o, 1):outlier_blocks(o, 2);
             
