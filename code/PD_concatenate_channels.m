@@ -93,6 +93,6 @@ if plot_opt > 0
     
     xlabel('Time (min.)')
     
-    save_as_pdf(gcf,'-v7.3',[prefix,'_all_channel_data'])
+    save_as_pdf(gcf,[prefix,'_all_channel_data'])
     
 end
