@@ -28,7 +28,7 @@ end
 
 % specify the minimum prominence
 if isempty(min_prominence)
-    min_prominence = 0;
+    min_prominence = -3;
 end
 
 % specify minimum separation in time between the spikes
@@ -294,6 +294,12 @@ function plot_peaks_2(fig_name, t, sampling_freq, X, Peak_data, plot_bounds)
                 save_as_pdf(gcf,sprintf('%s_%03d', fig_name, e));
             % end
             % close
+            
+            if e > 1
+                
+                waitforbuttonpress;
+                
+            end
             
             if no_epochs > 50
  
