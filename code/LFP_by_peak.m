@@ -1,8 +1,18 @@
-function LFP_by_peak(subj_name)
+function LFP_by_peak(subj_name, chan_labels)
 
-% format long g
+if isempty(chan_labels)
+    
+    chan_labels = cell(2, 1);
+    
+    for ch = 1:2
+        
+        chan_labels{ch} = sprintf('Ch. %d', ch);
+        
+    end
+    
+end
 
-pair_colors = [0 0 1; 0 .5 0];
+pair_colors = {[0 0 0; 0 0 1], [0 0 0; 0 .5 0]};
 
 load([subj_name, '_all_channel_data_dec.mat'])
 
@@ -16,35 +26,49 @@ figure
 
 for p = 1:2
     
-    data = PD_dec(:, chan_pairs(p, 2));
+    clear Spike_locs
     
     Spike_locs = find(Spike_indicator(:, chan_pairs(p, 1)));
     
     min_peak_distance = max(min(diff(Spike_locs)), sampling_freq);
     
-    peak_forms = get_peak_forms(data, Spike_locs, min_peak_distance);
+    for ch = 1:2
+        
+        clear data sum_peak_form
+        
+        data = PD_dec(:, chan_pairs(p, ch));
+        
+        peak_forms = get_peak_forms(data, Spike_locs, min_peak_distance);
+        
+        sum_peak_form = nansum(peak_forms);
+        
+        time_re_peak = ((1:length(sum_peak_form)) - round(length(sum_peak_form)/2))/sampling_freq;
+        
+        subplot(1,2,p)
+        
+        plot(time_re_peak, sum_peak_form, 'Color', pair_colors{p}(ch, :))
+        
+        axis tight, hold on
+        
+        legends{ch} = sprintf('%s LFP by %s Peaks', chan_labels{chan_pairs(p, ch)}, chan_labels{chan_pairs(p, 1)});
+        
+    end
     
-    sum_peak_form = nansum(peak_forms);
-    
-    time_re_peak = ((1:length(sum_peak_form)) - round(length(sum_peak_form)/2))/sampling_freq;
-    
-    subplot(1,2,p)
-    
-    plot(time_re_peak, sum_peak_form, 'Color', pair_colors(p, :))
-    
-    axis tight, hold on
+    legend(legends, 'Location', 'Southwest')
     
     y_limits = ylim;
     
     plot([0 0]', y_limits', 'k')
     
-    title(sprintf('Channel %d LFP (Mean) Relative to Channel %d Peaks', fliplr(chan_pairs(p, :))), 'FontSize', 16)
+    title(sprintf('%s, %s LFP (Mean) Relative to %s Peaks', subj_name, chan_labels{fliplr(chan_pairs(p, :))}), 'FontSize', 16)
     
-    xlabel(sprintf('Time Rel. Channel %d Peak Location (s)', chan_pairs(p, 1)), 'FontSize', 16)
+    xlabel(sprintf('Time Rel. %s Peak Location (s)', chan_labels{chan_pairs(p, 1)}), 'FontSize', 16)
     
-    ylabel(sprintf('Average Channel %d LFP', chan_pairs(p, 2)), 'FontSize', 16)
+    ylabel(sprintf('Average %s LFP', chan_labels{chan_pairs(p, 2)}), 'FontSize', 16)
         
 end
+
+save_as_pdf(gcf, [subj_name, '_LFP_by_peak'])
 
 end
 

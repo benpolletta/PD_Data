@@ -1,6 +1,16 @@
-function peak_by_peak_hist(subj_name)
+function peak_by_peak_hist(subj_name, chan_labels)
 
-% format long g
+if isempty(chan_labels)
+    
+    chan_labels = cell(2, 1);
+    
+    for ch = 1:2
+        
+        chan_labels{ch} = sprintf('Ch. %d', ch);
+        
+    end
+    
+end
 
 pair_colors = [0 0 1; 0 .5 0];
 
@@ -11,8 +21,6 @@ load([subj_name, '_all_channel_data_dec.mat'])
 chan_pairs = [1 2; 2 1];
 
 figure
-
-%% Subtracting peaks.
 
 for p = 1:2
     
@@ -54,7 +62,7 @@ for p = 1:2
     
     axis tight
     
-    legends{p} = sprintf('Channel %d Peaks Relative to Channel %d Peaks', fliplr(chan_pairs(p, :)));
+    legends{p} = sprintf('%s Peaks Relative to %s Peaks', chan_labels{fliplr(chan_pairs(p, :))});
     
     % subplot(2,2, 2 + p)
     % 
@@ -74,7 +82,7 @@ y_limits = ylim;
 
 plot([0 0]', y_limits', 'k:')
 
-title('Peak-by-Peak Histograms', 'FontSize', 16)
+title(sprintf('%s, Peak-by-Peak Histograms', subj_name), 'FontSize', 16)
 
 xlabel(sprintf('Time Rel. Peak Location (s)', chan_pairs(p, 1)), 'FontSize', 16)
 
