@@ -20,6 +20,8 @@ load([subj_name, '_all_channel_data_dec.mat'])
 
 chan_pairs = [2 1; 1 2];
 
+chan_linewidth = [1 2];
+
 figure
 
 %% Subtracting peaks.
@@ -46,7 +48,7 @@ for p = 1:2
         
         subplot(1,2,p)
         
-        plot(time_re_peak, sum_peak_form, 'Color', pair_colors{p}(ch, :))
+        plot(time_re_peak, sum_peak_form, 'Color', pair_colors{p}(ch, :), 'LineWidth', chan_linewidth(ch))
         
         axis tight, hold on
         
