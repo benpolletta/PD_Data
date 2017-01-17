@@ -18,7 +18,7 @@ else
     
 end
 
-load([subj_name, BP_suffix, '_wt.mat'], 'sampling_freq') % , 'freqs')
+sampling_freq = 500; % load([subj_name, BP_suffix, '_wt.mat'], 'sampling_freq') % , 'freqs')
 
 if ~isempty(no_trials) && no_trials ~= 10 && strcmp(norm, '_pct')
     
