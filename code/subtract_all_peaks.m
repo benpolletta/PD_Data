@@ -10,7 +10,9 @@ present_dir = pwd;
 
 all_fig = figure;
 
-for s = 1:no_subjects
+for s = 6:no_subjects
+    
+    folders{s}
     
     cd (folders{s})
     

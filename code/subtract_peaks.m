@@ -6,6 +6,8 @@ load([subj_name, '_all_channel_data_dec.mat'])
 
 [Spike_indicator, Peak_data] = peak_loader(subj_name, peak_suffix, length(PD_dec));
 
+% if all_dimensions(Spike_indicator, sum) == 0, return, end
+
 data_subtracted = PD_dec;
 
 %% Subtracting peaks.
@@ -14,37 +16,13 @@ for ch = 1:2
     
     data = PD_dec(:, ch);
     
-    if isempty(Peak_data{ch}) | isnan(Peak_data{ch})
+    if sum(Spike_indicator(:, ch)) > 0
         
-        Spike_locs = find(Spike_indicator(:, ch));
-        
-        min_peak_distance = min(diff(Spike_locs));
-        
-        peak_forms = get_peak_forms(data, Spike_locs, min_peak_distance);
-        
-        opts = statset('Display','final');
-        
-        no_clusters = 5; clusters = 1:no_clusters;
-        
-        [IDX, ~] = kmeans(peak_forms, no_clusters, 'Replicates', 10, 'Options', opts);
-        
-        Peak_data{ch} = [nan(size(Spike_locs)) Spike_locs];
-        
-        Peak_data{ch}(:, 6) = IDX;
-        
-    else
-
-        min_peak_distance = min(diff(Peak_data{ch}(:, 2)));
-        
-        [clusters, no_spikes] = find_clusters(Spike_indicator(:, ch), Peak_data{ch});
-        
-        no_clusters = length(clusters);
-        
-        if no_clusters < 5 & no_spikes > 100
-            
-            Peak_data{ch} = [];
+        if isempty(Peak_data{ch}) | isnan(Peak_data{ch})
             
             Spike_locs = find(Spike_indicator(:, ch));
+            
+            min_peak_distance = min(diff(Spike_locs));
             
             peak_forms = get_peak_forms(data, Spike_locs, min_peak_distance);
             
@@ -53,47 +31,139 @@ for ch = 1:2
             no_clusters = 5; clusters = 1:no_clusters;
             
             [IDX, ~] = kmeans(peak_forms, no_clusters, 'Replicates', 10, 'Options', opts);
-        
+            
             Peak_data{ch} = [nan(size(Spike_locs)) Spike_locs];
             
             Peak_data{ch}(:, 6) = IDX;
             
+        else
+            
+            min_peak_distance = min(diff(Peak_data{ch}(:, 2)));
+            
+            [clusters, no_spikes] = find_clusters(Spike_indicator(:, ch), Peak_data{ch});
+            
+            no_clusters = length(clusters);
+            
+            if no_clusters < 5 & no_spikes > 100
+                
+                Peak_data{ch} = [];
+                
+                Spike_locs = find(Spike_indicator(:, ch));
+                
+                peak_forms = get_peak_forms(data, Spike_locs, min_peak_distance);
+                
+                opts = statset('Display','final');
+                
+                no_clusters = 5; clusters = 1:no_clusters;
+                
+                [IDX, ~] = kmeans(peak_forms, no_clusters, 'Replicates', 10, 'Options', opts);
+                
+                Peak_data{ch} = [nan(size(Spike_locs)) Spike_locs];
+                
+                Peak_data{ch}(:, 6) = IDX;
+                
+            end
+            
         end
         
-    end
-    
-    for c = 1:no_clusters
+        for c = 1:no_clusters
             
-        w = 0;
-        
-        cluster_peak_locs = Peak_data{ch}(Peak_data{ch}(:, 6) == clusters(c), 2);
-        
-        no_peaks = size(cluster_peak_locs, 1);
-        
-        standard_window = -ceil(min_peak_distance/2):ceil(min_peak_distance/2);
-        
-        x_envelope = standard_window/max(standard_window);
-        
-        envelope = exp(-1./(1 - x_envelope.^2))';
-        
-        envelope = envelope/max(envelope);
+            w = 0;
             
-        peak_forms = get_peak_forms(data, cluster_peak_locs, min_peak_distance);
-        
-        %% Peaks belonging to a cluster.
-        
-        if no_peaks > 1
+            cluster_peak_locs = Peak_data{ch}(Peak_data{ch}(:, 6) == clusters(c), 2);
             
-            cluster_centroid = nanmean(peak_forms)';
+            no_peaks = size(cluster_peak_locs, 1);
             
-            cluster_centroid = cluster_centroid - nanmean(cluster_centroid);
+            standard_window = -ceil(min_peak_distance/2):ceil(min_peak_distance/2);
             
-            cluster_centroid = cluster_centroid/norm(cluster_centroid, 2);
+            x_envelope = standard_window/max(standard_window);
             
-            for p = 1:no_peaks
+            envelope = exp(-1./(1 - x_envelope.^2))';
+            
+            envelope = envelope/max(envelope);
+            
+            peak_forms = get_peak_forms(data, cluster_peak_locs, min_peak_distance);
+            
+            %% Peaks belonging to a cluster.
+            
+            if no_peaks > 1
+                
+                cluster_centroid = nanmean(peak_forms)';
+                
+                cluster_centroid = cluster_centroid - nanmean(cluster_centroid);
+                
+                cluster_centroid = cluster_centroid/norm(cluster_centroid, 2);
+                
+                for p = 1:no_peaks
+                    
+                    % Get location of current peak.
+                    loc = cluster_peak_locs(p);
+                    
+                    % Get beginning and end of window that surrounds the peak.
+                    window_start = max(loc - ceil(min_peak_distance/2), 1);
+                    window_end = min(loc + ceil(min_peak_distance/2), length(data));
+                    window_indices = window_start:window_end;
+                    window_indicator = standard_window >= (window_start - loc) & standard_window <= (window_end - loc);
+                    
+                    peak_data = data(window_indices);
+                    
+                    peak_proj = (peak_data'*cluster_centroid(window_indicator))*cluster_centroid(window_indicator);
+                    
+                    peak_subtracted = peak_data - envelope(window_indicator).*peak_proj;
+                    
+                    data_subtracted(window_indices, ch) = peak_subtracted;
+                    
+                    if plot_opt > 0 && ~w
+                        
+                        figure
+                        
+                        subplot(211) % (311)
+                        
+                        plot(window_indices, [peak_data, cluster_centroid(window_indicator),...
+                            peak_subtracted, peak_proj, envelope(window_indicator).*peak_proj])
+                        
+                        axis tight
+                        
+                        legend({'Data', 'Centroid', 'Subtracted', 'Projection', 'Windowed Proj.'})
+                        
+                        title(sprintf('%s, Channel %d, Cluster %d, Peak %d', subj_name, ch, c, p))
+                        
+                        peak_wav = wavelet_spectrogram(peak_data, sampling_freq, 1:200, linspace(3,21,200), 0, '');
+                        
+                        % subplot(312)
+                        %
+                        % imagesc(window_indices, 1:200, nanzscore(abs(peak_wav))')
+                        %
+                        % axis xy
+                        
+                        subtracted_wav = wavelet_spectrogram(peak_subtracted, sampling_freq, 1:200, linspace(3,21,200), 0, '');
+                        
+                        subplot(212) % (313)
+                        
+                        imagesc(window_indices, 1:200, nanzscore(abs(peak_wav) - abs(subtracted_wav))') % (nanzscore(abs(peak_wav)) - nanzscore(abs(subtracted_wav)))')
+                        
+                        axis xy
+                        
+                        save_as_pdf(gcf, sprintf('%s_chan%d_clust%d_peak%d', subj_name, ch, c, p))
+                        
+                        if plot_opt == 1
+                            
+                            w = waitforbuttonpress;
+                            
+                            if w, close('all'), end
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
+                %% Peaks that make up their own cluster.
+                
+            else
                 
                 % Get location of current peak.
-                loc = cluster_peak_locs(p);
+                loc = cluster_peak_locs(1);
                 
                 % Get beginning and end of window that surrounds the peak.
                 window_start = max(loc - ceil(min_peak_distance/2), 1);
@@ -103,9 +173,13 @@ for ch = 1:2
                 
                 peak_data = data(window_indices);
                 
-                peak_proj = (peak_data'*cluster_centroid(window_indicator))*cluster_centroid(window_indicator);
+                trend = polyfit(window_indices', peak_data, 1);
                 
-                peak_subtracted = peak_data - envelope(window_indicator).*peak_proj;
+                peak_trend = trend(1)*window_indices' + trend(2);
+                
+                peak_detrended = peak_data - peak_trend;
+                
+                peak_subtracted = peak_data - envelope(window_indicator).*peak_detrended;
                 
                 data_subtracted(window_indices, ch) = peak_subtracted;
                 
@@ -115,14 +189,14 @@ for ch = 1:2
                     
                     subplot(211) % (311)
                     
-                    plot(window_indices, [peak_data, cluster_centroid(window_indicator),...
-                        peak_subtracted, peak_proj, envelope(window_indicator).*peak_proj])
+                    plot(window_indices, [peak_data, peak_detrended,...
+                        peak_subtracted, envelope(window_indicator).*peak_detrended])
                     
                     axis tight
                     
-                    legend({'Data', 'Centroid', 'Subtracted', 'Projection', 'Windowed Proj.'})
+                    legend({'Data', 'Detrended', 'Subtracted', 'Windowed'})
                     
-                    title(sprintf('%s, Channel %d, Cluster %d, Peak %d', subj_name, ch, c, p))
+                    title(sprintf('%s, Channel %d, Cluster %d, Peak 1', subj_name, ch, c))
                     
                     peak_wav = wavelet_spectrogram(peak_data, sampling_freq, 1:200, linspace(3,21,200), 0, '');
                     
@@ -140,7 +214,7 @@ for ch = 1:2
                     
                     axis xy
                     
-                    save_as_pdf(gcf, sprintf('%s_chan%d_clust%d_peak%d', subj_name, ch, c, p))
+                    save_as_pdf(gcf, sprintf('%s_chan%d_clust%d_peak1', subj_name, ch, c))
                     
                     if plot_opt == 1
                         
@@ -149,74 +223,6 @@ for ch = 1:2
                         if w, close('all'), end
                         
                     end
-                    
-                end
-                
-            end
-            
-        %% Peaks that make up their own cluster.
-            
-        else
-            
-            % Get location of current peak.
-            loc = cluster_peak_locs(1);
-            
-            % Get beginning and end of window that surrounds the peak.
-            window_start = max(loc - ceil(min_peak_distance/2), 1);
-            window_end = min(loc + ceil(min_peak_distance/2), length(data));
-            window_indices = window_start:window_end;
-            window_indicator = standard_window >= (window_start - loc) & standard_window <= (window_end - loc);
-            
-            peak_data = data(window_indices);
-            
-            trend = polyfit(window_indices', peak_data, 1);
-            
-            peak_trend = trend(1)*window_indices' + trend(2);
-            
-            peak_detrended = peak_data - peak_trend;
-            
-            peak_subtracted = peak_data - envelope(window_indicator).*peak_detrended;
-            
-            data_subtracted(window_indices, ch) = peak_subtracted;
-            
-            if plot_opt > 0 && ~w
-                
-                figure
-                
-                subplot(211) % (311)
-                
-                plot(window_indices, [peak_data, peak_detrended,...
-                    peak_subtracted, envelope(window_indicator).*peak_detrended])
-                
-                axis tight
-                
-                legend({'Data', 'Detrended', 'Subtracted', 'Windowed'})
-                
-                title(sprintf('%s, Channel %d, Cluster %d, Peak 1', subj_name, ch, c))
-                
-                peak_wav = wavelet_spectrogram(peak_data, sampling_freq, 1:200, linspace(3,21,200), 0, '');
-                
-                % subplot(312)
-                %
-                % imagesc(window_indices, 1:200, nanzscore(abs(peak_wav))')
-                %
-                % axis xy
-                
-                subtracted_wav = wavelet_spectrogram(peak_subtracted, sampling_freq, 1:200, linspace(3,21,200), 0, '');
-                
-                subplot(212) % (313)
-                
-                imagesc(window_indices, 1:200, nanzscore(abs(peak_wav) - abs(subtracted_wav))') % (nanzscore(abs(peak_wav)) - nanzscore(abs(subtracted_wav)))')
-                
-                axis xy
-                
-                save_as_pdf(gcf, sprintf('%s_chan%d_clust%d_peak1', subj_name, ch, c))
-                
-                if plot_opt == 1
-                    
-                    w = waitforbuttonpress;
-                    
-                    if w, close('all'), end
                     
                 end
                 
