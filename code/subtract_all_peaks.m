@@ -10,9 +10,9 @@ present_dir = pwd;
 
 all_fig = figure;
 
-for s = 6:no_subjects
+for s = 3 % 1:no_subjects
     
-    folders{s}
+    display(folders{s})
     
     cd (folders{s})
     
@@ -44,6 +44,6 @@ for s = 6:no_subjects
     
 end
 
-save_as_pdf(all_fig, [subject_mat(1:(end - length('_subjects.mat'))), '_data_subtracted.mat'])
+save_as_pdf(all_fig, [subject_mat(1:(end - length('_subjects.mat'))), '_data_subtracted'])
 
 close('all')
