@@ -10,7 +10,7 @@ present_dir = pwd;
 
 all_fig = figure;
 
-for s = 3 % 1:no_subjects
+for s = 1:no_subjects
     
     display(folders{s})
     
