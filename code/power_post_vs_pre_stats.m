@@ -262,7 +262,7 @@ for fo = 1:no_folders
             
         end
             
-        save([subj_name, BP_suffix,  win_flag, short_band_labels{b}, '_power_post_vs_pre_stats.mat'], 't_sec', 'p_win', 'win_secs', 'test_win')
+        save([subj_name, BP_suffix, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'], 't_sec', 'p_win', 'win_secs', 'test_win')
         
     end
     

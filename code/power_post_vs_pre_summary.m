@@ -32,7 +32,7 @@ if isempty(window_length)
     
 else
     
-    win_flag = ['_win', num2str(epoch_secs)];
+    win_flag = ['_win', num2str(window_length)];
     
 end
 
@@ -68,7 +68,7 @@ for fo = 1:no_folders
     
     for b = band_indices
             
-        load([subj_name, BP_suffix, win_flag, short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
+        load([subj_name, BP_suffix,win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
         
         for ch = 1:no_chans
             
@@ -156,6 +156,6 @@ end
 
 save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix,...
     '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, norm,...
-    win_flag, short_band_labels{b}, '_power_post_vs_pre_summary.mat'], 'increase_summary')
+   win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_summary.mat'], 'increase_summary')
 
 end

@@ -1,4 +1,4 @@
-function power_post_vs_pre_plot(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices, window_length)
+function power_post_vs_pre_plot(subject_mat_cell, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices, window_length)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -20,9 +20,15 @@ else
     
 end
 
-load(subject_mat)
+for s = 1:length(subject_mat_cell)
+    
+    load(subject_mat_cell{s})
+    
+    no_folders(s) = length(folders);
+    
+end
 
-no_folders = length(folders);
+total_folders = sum(no_folders);
 
 sampling_freq = 500; % load([folders{1}, '/', prefixes{1}, BP_suffix, '_wt.mat'], 'sampling_freq')
 
@@ -42,95 +48,123 @@ no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
 
-if isempty(window_length), window_length = epoch_secs; end
+if isempty(window_length)
+    
+    window_length = epoch_secs; 
 
-All_BP_plot = nan(30*60*sampling_freq, no_folders);
+    win_flag = '';
+    
+else
+    
+    win_flag = ['_win', num2str(window_length)];
+    
+end
 
-All_BP_increase = nan(30*60*sampling_freq, no_folders, 2, 2); 
+All_BP_plot = nan(30*60*sampling_freq, total_folders, 2);
+
+All_BP_increase = nan(30*60*sampling_freq, total_folders, 2, 2); 
 
 All_time = (1:(30*60*sampling_freq))/sampling_freq - 10*60;
 
 for b = band_indices
     
-    for fo = 1:no_folders
+    folder_index = 0;
+    
+    for s = 1:length(subject_mat_cell)
         
-        folder = folders{fo};
+        load(subject_mat_cell{s})
         
-        prefix = prefixes{fo};
+        chan_order = [1 2];
         
-        outlier_lim = outlier_lims(fo);
-        
-        subj_name = [folder,'/',prefix];
-        
-        if strcmp(norm, '_peaks')
+        if ~strcmp(chan_labels{1}, 'Striatum');
             
-            data = load([subj_name, BP_suffix, '_wt_BP.mat']);
-            
-            Spike_indicator = peak_loader(subj_name, peak_suffix, size(data.BP, 1));
-            
-            BP = repmat(permute(Spike_indicator, [1 2 3]), [1 no_bands 1]);
-            
-        else
-            
-            BP = get_BP(subj_name, peak_suffix, [], outlier_lim, norm, in_freqs, in_no_cycles, in_bands);
-            
-            % load([subj_name, BP_suffix, '_wt_BP.mat'])
-            %
-            % eval(['BP = BP', norm, ';'])
+            chan_order = fliplr(chan_order);
             
         end
         
-        t = (1:size(BP, 1))/sampling_freq - basetimes(fo); % t = t/60;
+        for fo = 1:no_folders(s)
             
-        t_indices = All_time >= t(1) & All_time <= t(end);
-        
-        load([subj_name, BP_suffix, '_power_post_vs_pre_stats_', short_band_labels{b}, '.mat'])
-        
-        blocks = cell(3, 1);
-        
-        for ch = 1:no_chans
+            folder_index = folder_index + 1;
             
-            BP_plot = nanconv(BP(:, b, ch), ones(5*60*sampling_freq, 1)/(5*60*sampling_freq), 'nanout');
+            folder = folders{fo};
             
-            All_BP_plot(t_indices, fo, ch) = BP_plot;
+            prefix = prefixes{fo};
             
-            increase_blocks = index_to_blocks(test_win(:, 2, ch));
+            outlier_lim = outlier_lims(fo);
             
-            increase_sec_blocks = win_secs(increase_blocks);
+            subj_name = [folder,'/',prefix];
             
-            blocks{ch} = increase_sec_blocks;
-            
-        end
-        
-        overlap_index = test_win(:, 2, 1) & test_win(:, 2, 2);
-        
-        overlap_blocks = index_to_blocks(overlap_index);
-        
-        overlap_sec_blocks = win_secs(overlap_blocks);
-        
-        blocks{3} = overlap_sec_blocks;
-        
-        for ch = 1:no_chans
-            
-            block_indices = [ch 3];
-            
-            for bl = 1:2;
+            if strcmp(norm, '_peaks')
                 
-                if ~isempty(blocks{block_indices(bl)})
+                data = load([subj_name, BP_suffix, '_wt_BP.mat']);
+                
+                Spike_indicator = peak_loader(subj_name, peak_suffix, size(data.BP, 1));
+                
+                BP = repmat(permute(Spike_indicator, [1 2 3]), [1 no_bands 1]);
+                
+            else
+                
+                BP = get_BP(subj_name, peak_suffix, [], outlier_lim, norm, in_freqs, in_no_cycles, in_bands);
+                
+                % load([subj_name, BP_suffix, '_wt_BP.mat'])
+                %
+                % eval(['BP = BP', norm, ';'])
+                
+            end
+            
+            t = (1:size(BP, 1))/sampling_freq - basetimes(fo); % t = t/60;
+            
+            t_indices = All_time >= t(1) & All_time <= t(end);
+            
+            load([subj_name, BP_suffix,win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
+            
+            blocks = cell(3, 1);
+            
+            for ch = 1:no_chans
+                
+                BP_plot = nanzscore(nanconv(BP(:, b, chan_order(ch)), ones(5*60*sampling_freq, 1)/(5*60*sampling_freq), 'nanout'));
+                
+                All_BP_plot(t_indices, folder_index, ch) = BP_plot;
+                
+                increase_blocks = index_to_blocks(test_win(:, 2, chan_order(ch)));
+                
+                channel_sec_blocks = win_secs(increase_blocks);
+                
+                blocks{ch} = channel_sec_blocks;
+                
+            end
+            
+            overlap_index = test_win(:, 2, 1) & test_win(:, 2, 2);
+            
+            overlap_blocks = index_to_blocks(overlap_index);
+            
+            overlap_sec_blocks = win_secs(overlap_blocks);
+            
+            blocks{3} = overlap_sec_blocks;
+            
+            for ch = 1:no_chans
+                
+                block_indices = [ch 3];
+                
+                for bl = 1:2;
                     
-                    if size(blocks{block_indices(bl)}, 2) ~= 2
+                    if ~isempty(blocks{block_indices(bl)})
                         
-                        blocks{bl} = blocks{bock_indices(bl)}';
+                        if size(blocks{block_indices(bl)}, 2) ~= 2
+                            
+                            blocks{bl} = blocks{block_indices(bl)}';
+                            
+                        end
+                        
+                        increase_sec_blocks = blocks{bl} + (epoch_secs/2)*ones(size(blocks{bl}))*diag([-1 1]);
+                        
+                        increase_index = t_indices;
+                        
+                        increase_index(t_indices) = blocks_to_index(increase_sec_blocks, t);
+                        
+                        All_BP_increase(increase_index, folder_index, bl, ch) = All_BP_plot(increase_index, fo, ch);
                         
                     end
-                    
-                    increase_sec_blocks = blocks{bl} + (epoch_secs/2)*ones(size(blocks{bl}))*diag([-1 1]);
-                    
-                    increase_index = t_indices;
-                    
-                    increase_index(t_indices) = blocks_to_index(increase_sec_blocks, t);
-                    
-                    All_BP_increase(increase_index, fo, bl, ch) = All_BP_plot(increase_index, fo, ch);
                     
                 end
                 
@@ -138,48 +172,48 @@ for b = band_indices
             
         end
         
-    end
-    
-    for ch = 1:no_chans
-        
-        figure(b)
-        
-        subplot(2, 1, ch);
-        
-        plot(All_time/60, All_BP_plot)
-        
-        axis tight
-        
-        box off
-        
-        hold on
-        
-        plot(All_time/60, All_BP_increase(:, :, 1, ch), 'LineWidth', 1.5)
-        
-        plot(All_time/60, All_BP_increase(:, :, 2, ch), 'LineWidth', 2)
-        
-        if fo == 1
+        for ch = 1:no_chans
             
-            title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
+            figure(b)
             
-        elseif fo == no_folders
+            subplot(2, 1, ch);
             
-            xlabel('Time Rel. Infusion (Min.)')
+            plot(All_time/60, All_BP_plot(:, :, ch))
+            
+            axis tight
+            
+            box off
+            
+            hold on
+            
+            plot(All_time/60, All_BP_increase(:, :, 1, ch), 'LineWidth', 2)
+            
+            plot(All_time/60, All_BP_increase(:, :, 2, ch), 'LineWidth', 3)
+            
+            if fo == 1
+                
+                title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
+                
+            elseif fo == no_folders
+                
+                xlabel('Time Rel. Infusion (Min.)')
+                
+            end
+            
+            if ch == 1
+                
+                ylabel({folder; 'Power (per 5 Min.)'})
+                
+            end
+            
+            plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
+            
             
         end
         
-        if ch == 1
-            
-            ylabel({folder; 'Power (per 5 Min.)'})
-            
-        end
-        
-        plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
-        
-        
     end
-    
-    save_as_pdf([subj_name, BP_suffix, win_flag, short_band_labels{b} '_power_post_vs_pre_timeseries.mat'])
+        
+    save_as_pdf(gcf, [subj_name, BP_suffix, win_flag, '_', short_band_labels{b} '_power_post_vs_pre_timeseries.mat'])
     
 end
 
