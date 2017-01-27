@@ -1,4 +1,4 @@
-function power_post_vs_pre_stats(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices)
+function power_post_vs_pre_stats(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices, window_length)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -42,7 +42,17 @@ no_chans = length(chan_labels);
 
 no_pds = length(pd_labels);
 
-window_length = epoch_secs;
+if isempty(window_length)
+    
+    window_length = epoch_secs; 
+
+    win_flag = '';
+    
+else
+    
+    win_flag = ['_win', num2str(window_length)];
+    
+end
 
 window_step = 30;
 
@@ -252,7 +262,7 @@ for fo = 1:no_folders
             
         end
             
-        save([subj_name, BP_suffix, '_power_post_vs_pre_stats.mat'], 't_sec', 'p_win', 'win_secs', 'test_win')
+        save([subj_name, BP_suffix,  win_flag, short_band_labels{b}, '_power_post_vs_pre_stats.mat'], 't_sec', 'p_win', 'win_secs', 'test_win')
         
     end
     
@@ -260,9 +270,11 @@ end
 
 for b = band_indices
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, pd_handle, norm, '_power_post_vs_pre'])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), '_', short_band_labels{b},...
+        pd_handle, norm, win_flag, '_power_post_vs_pre'])
     
-    save_as_pdf(no_bands + b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, pd_handle, norm, '_power_post_vs_pre_pvals'])
+    save_as_pdf(no_bands + b, [subject_mat(1:(end - length('_subjects.mat'))), '_', short_band_labels{b},...
+        pd_handle, norm, win_flag, '_power_post_vs_pre_pvals'])
     
 end
 

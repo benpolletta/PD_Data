@@ -1,5 +1,7 @@
 function [moAIC,info,varargout] = mvgc_analysis(X,momax,filename,spec_flag)
 
+if isempty(momax), momax = 300; end
+
 if nargin < 4 || isempty(spec_flag)
     
     spec_flag = 1;

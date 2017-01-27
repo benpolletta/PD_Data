@@ -24,6 +24,18 @@ sampling_freq = 500;
 
 no_folders = length(folders);
 
+if isempty(window_length)
+    
+    window_length = epoch_secs; 
+
+    win_flag = '';
+    
+else
+    
+    win_flag = ['_win', num2str(epoch_secs)];
+    
+end
+
 no_bands = size(bands, 1);
 
 [short_band_labels, band_labels] = deal(cell(no_bands, 1));
@@ -55,10 +67,10 @@ for fo = 1:no_folders
     subj_name = [folder,'/',prefix];
     
     for b = band_indices
+            
+        load([subj_name, BP_suffix, win_flag, short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
         
         for ch = 1:no_chans
-            
-            load([subj_name, BP_suffix, '_power_post_vs_pre_stats.mat'])
             
             increase_blocks = index_to_blocks(test_win(:, 2, ch));
             
@@ -142,6 +154,8 @@ for stat = 1:no_stats
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_power_post_vs_pre_summary.mat'], 'increase_summary')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix,...
+    '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, norm,...
+    win_flag, short_band_labels{b}, '_power_post_vs_pre_summary.mat'], 'increase_summary')
 
 end

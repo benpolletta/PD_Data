@@ -1,12 +1,10 @@
-function run_PD_GC(epoch_length, time_step, maxorder)
+function run_PD_GC(subjects_mat, peak_suffix, epoch_length, time_step, maxorder)
+
+load(subjects_mat)
+
+sampling_freq = 500;
 
 present_dir = pwd;
-
-folders = {'090312','130703','130709','130718','130725'};
-
-prefixes = {'09312','13703','13709','13718','13725'};
-
-sampling_freq = 1000;
 
 f_length = sampling_freq*epoch_length + 1;
 
