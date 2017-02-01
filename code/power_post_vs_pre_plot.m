@@ -127,7 +127,7 @@ for b = band_indices
             for ch = 1:no_chans
                 
                 BP_plot = nanzscore(nanconv(BP(BP_t_indices, b, chan_order(ch)),...
-                    ones(window_length, 1)/(window_length), 'nanout'));
+                    ones(window_length*sampling_freq, 1)/(window_length*sampling_freq), 'nanout'));
                 
                 All_BP_plot(All_t_indices, folder_index, ch) = BP_plot;
                 
@@ -165,7 +165,7 @@ for b = band_indices
                         
                         increase_index = All_t_indices;
                         
-                        increase_index(All_t_indices) = blocks_to_index(increase_sec_blocks, t);
+                        increase_index(All_t_indices) = blocks_to_index(increase_sec_blocks, t(BP_t_indices));
                         
                         if ~any(increase_index)
                         
@@ -209,7 +209,7 @@ for b = band_indices
                 
                 for l = 1:length(line_indices)
                     
-                    set(h(lin_indices(l)), 'LineWidth', block + 1)
+                    set(h(line_indices(l)), 'LineWidth', block + 1)
                     
                 end
                 
