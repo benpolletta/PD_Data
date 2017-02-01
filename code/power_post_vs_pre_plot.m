@@ -48,9 +48,7 @@ end
 
 no_chans = length(chan_labels);
 
-no_pds = length(pd_labels);
-
-if isempty(window_length)
+if isempty(window_length) || window_length == 150
     
     window_length = epoch_secs; 
 
@@ -62,9 +60,11 @@ else
     
 end
 
-All_BP_plot = nan(30*60*sampling_freq, total_folders, 2);
+All_BP_plot = nan(30*60*sampling_freq, total_folders, no_chans);
 
-All_BP_increase = nan(30*60*sampling_freq, total_folders, 2, 2); 
+All_BP_increase = nan(30*60*sampling_freq, total_folders, 2, no_chans); 
+
+BP_increased = zeros(total_folders, 2, no_chans);
 
 All_time = (1:(30*60*sampling_freq))/sampling_freq - 10*60;
 
@@ -127,7 +127,7 @@ for b = band_indices
             for ch = 1:no_chans
                 
                 BP_plot = nanzscore(nanconv(BP(BP_t_indices, b, chan_order(ch)),...
-                    ones(5*60*sampling_freq, 1)/(5*60*sampling_freq), 'nanout'));
+                    ones(window_length, 1)/(window_length), 'nanout'));
                 
                 All_BP_plot(All_t_indices, folder_index, ch) = BP_plot;
                 
@@ -167,7 +167,17 @@ for b = band_indices
                         
                         increase_index(All_t_indices) = blocks_to_index(increase_sec_blocks, t);
                         
-                        All_BP_increase(increase_index, folder_index, bl, ch) = All_BP_plot(increase_index, fo, ch);
+                        if ~any(increase_index)
+                        
+                            All_BP_increase(:, folder_index, bl, ch) = All_BP_plot(:, folder_index, ch);
+                            
+                        else
+                            
+                            All_BP_increase(increase_index, folder_index, bl, ch) = All_BP_plot(increase_index, fo, ch);
+                            
+                            BP_increased(folder_index, bl, ch) = 1;
+                            
+                        end
                         
                     end
                     
@@ -191,9 +201,19 @@ for b = band_indices
             
             hold on
             
-            plot(All_time/60, All_BP_increase(:, :, 1, ch), 'LineWidth', 2)
-            
-            plot(All_time/60, All_BP_increase(:, :, 2, ch), 'LineWidth', 3)
+            for block = 1:2
+                
+                h = plot(All_time/60, All_BP_increase(:, :, block, ch));
+                
+                line_indices = find(BP_increased(:, block, ch));
+                
+                for l = 1:length(line_indices)
+                    
+                    set(h(lin_indices(l)), 'LineWidth', block + 1)
+                    
+                end
+                
+            end
             
             if fo == 1
                 

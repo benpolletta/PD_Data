@@ -11,7 +11,7 @@ if r>c
     X = X';
 end
 
-nobs = size(X,2);
+[nchans, nobs] = size(X);
 
 if isempty(momax), momax = min(300, nobs - 1); end
 
@@ -26,99 +26,111 @@ morder = moAIC;
 
 % Fit vector autoregressive model.
 [A,SIG] = tsdata_to_var(X,morder,'OLS');
-    
+
 assert(~isbad(A),'VAR estimation failed');
 
 % Get autocovariance from VAR.
 [G,info] = var_to_autocov(A,SIG,nobs);
 
-if spec_flag == 0
+switch spec_flag
     
-    % Get Granger from autocovariance.
-    F = autocov_to_pwcgc(G);
-    
-    varargout{1} = F;
-    
-    % Significance test using theoretical null distribution, adjusting for multiple
-    % hypotheses.
-    
-    if ~isempty(F)
+    case 0
         
-        pval = mvgc_pval(F,morder,nobs,1,1,1,size(X,1)-2,''); % take careful note of arguments!
-        sig  = significance(pval,0.01,'FDR');
+        % Get Granger from autocovariance.
+        F = autocov_to_pwcgc(G);
         
-    else
-        
-        pval = nan; sig = nan;
-        
-    end
-        
-    varargout{2} = pval; varargout{3} = sig;
-    
-    if ~isempty(filename)
-        
-        save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig')
-        
-    end
-    
-    varargout{4} = moAIC;
-    
-    varargout{5} = info;
-    
-elseif spec_flag == 1
-    
-    % Get spectral GC from autocovariance.
-    f = autocov_to_spwcgc(G,nobs);
-    
-    varargout{1} = permute(f, [3 1 2]);
-    
-    if ~isempty(filename)
-        
-        save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','f')
-        
-    end
-    
-    varargout{2} = moAIC;
-    
-    varargout{3} = info;
-    
-elseif spec_flag == 2
-    
-    % Get Granger from autocovariance.
-    F = autocov_to_pwcgc(G);
-    
-    % varargout{1} = F;
-    
-    if ~isempty(F)
+        varargout{1} = F;
         
         % Significance test using theoretical null distribution, adjusting for multiple
         % hypotheses.
-        pval = mvgc_pval(F,morder,nobs,1,1,1,size(X,1)-2,''); % take careful note of arguments!
-        sig  = significance(pval,0.01,'FDR');
+        
+        if ~isempty(F)
+            
+            pval = mvgc_pval(F,morder,nobs,1,1,1,size(X,1)-2,''); % take careful note of arguments!
+            sig  = significance(pval,0.01,'FDR');
+            
+        else
+            
+            pval = nan; sig = nan;
+            
+        end
+        
+        varargout{2} = pval; varargout{3} = sig;
+        
+        if ~isempty(filename)
+            
+            save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig')
+            
+        end
+        
+        varargout{4} = moAIC;
+        
+        varargout{5} = info;
+        
+    case 1
         
         % Get spectral GC from autocovariance.
         f = autocov_to_spwcgc(G,nobs);
         
-    else
+        if ~isempty(f)
+            
+            varargout{1} = permute(f, [3 1 2]);
+            
+        else
+            
+            varargout{1} = nan(nobs + 1, nchans, nchans);
+            
+        end
         
-        F = nan(size(X,1)); pval = nan(size(X,1)); sig = nan(size(X,1));
+        if ~isempty(filename)
+            
+            save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','f')
+            
+        end
         
-        f = nan(size(X,1), size(X,1), size(X,2)+1);
+        varargout{2} = moAIC;
         
-    end
+        varargout{3} = info;
         
-    varargout{1} = F; varargout{2} = pval; varargout{3} = sig;
-   
-    varargout{4} = f;
-    
-    if ~isempty(filename)
+    case 2
         
-        save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig','f')
+        % Get Granger from autocovariance.
+        F = autocov_to_pwcgc(G);
         
-    end
-    
-    varargout{5} = moAIC;
-    
-    varargout{6} = info;
-    
+        % varargout{1} = F;
+        
+        if ~isempty(F)
+            
+            % Significance test using theoretical null distribution, adjusting for multiple
+            % hypotheses.
+            pval = mvgc_pval(F,morder,nobs,1,1,1,size(X,1)-2,''); % take careful note of arguments!
+            sig  = significance(pval,0.01,'FDR');
+            
+            % Get spectral GC from autocovariance.
+            f = autocov_to_spwcgc(G,nobs);
+            
+        else
+            
+            F = nan(size(X,1)); pval = nan(size(X,1)); sig = nan(size(X,1));
+            
+            f = nan(size(X,1), size(X,1), size(X,2)+1);
+            
+        end
+        
+        varargout{1} = F; varargout{2} = pval; varargout{3} = sig;
+        
+        varargout{4} = f;
+        
+        if ~isempty(filename)
+            
+            save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig','f')
+            
+        end
+        
+        varargout{5} = moAIC;
+        
+        varargout{6} = info;
+        
+end
+
 end
