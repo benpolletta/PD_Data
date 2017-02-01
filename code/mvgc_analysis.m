@@ -1,6 +1,4 @@
-function [moAIC,info,varargout] = mvgc_analysis(X,momax,filename,spec_flag)
-
-if isempty(momax), momax = 300; end
+function [varargout] = mvgc_analysis(X,momax,filename,spec_flag)
 
 if nargin < 4 || isempty(spec_flag)
     
@@ -14,6 +12,8 @@ if r>c
 end
 
 nobs = size(X,2);
+
+if isempty(momax), momax = min(300, nobs - 1); end
 
 % Find optimal model order.
 [AIC,BIC,moAIC,moBIC] = tsdata_to_infocrit(X,momax,'LWR',false);
@@ -61,12 +61,16 @@ if spec_flag == 0
         
     end
     
+    varargout{4} = moAIC;
+    
+    varargout{5} = info;
+    
 elseif spec_flag == 1
     
     % Get spectral GC from autocovariance.
     f = autocov_to_spwcgc(G,nobs);
     
-    varargout{1} = f;
+    varargout{1} = permute(f, [3 1 2]);
     
     if ~isempty(filename)
         
@@ -74,12 +78,16 @@ elseif spec_flag == 1
         
     end
     
+    varargout{2} = moAIC;
+    
+    varargout{3} = info;
+    
 elseif spec_flag == 2
     
     % Get Granger from autocovariance.
     F = autocov_to_pwcgc(G);
     
-    varargout{1} = F;
+    % varargout{1} = F;
     
     if ~isempty(F)
         
@@ -108,5 +116,9 @@ elseif spec_flag == 2
         save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig','f')
         
     end
+    
+    varargout{5} = moAIC;
+    
+    varargout{6} = info;
     
 end

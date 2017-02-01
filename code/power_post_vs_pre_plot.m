@@ -1,4 +1,6 @@
-function power_post_vs_pre_plot(subject_mat_cell, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices, window_length)
+function power_post_vs_pre_plot(subject_mat_cell, file_name, peak_suffix, epoch_secs, norm, freqs, no_cycles, bands, band_indices, window_length)
+
+% Plots time series of beta power for all subjects.
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -114,7 +116,9 @@ for b = band_indices
             
             t = (1:size(BP, 1))/sampling_freq - basetimes(fo); % t = t/60;
             
-            t_indices = All_time >= t(1) & All_time <= t(end);
+            All_t_indices = All_time >= t(1) & All_time <= t(end);
+            
+            BP_t_indices = t >= All_time(1) & t <= All_time(end);
             
             load([subj_name, BP_suffix,win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
             
@@ -122,9 +126,10 @@ for b = band_indices
             
             for ch = 1:no_chans
                 
-                BP_plot = nanzscore(nanconv(BP(:, b, chan_order(ch)), ones(5*60*sampling_freq, 1)/(5*60*sampling_freq), 'nanout'));
+                BP_plot = nanzscore(nanconv(BP(BP_t_indices, b, chan_order(ch)),...
+                    ones(5*60*sampling_freq, 1)/(5*60*sampling_freq), 'nanout'));
                 
-                All_BP_plot(t_indices, folder_index, ch) = BP_plot;
+                All_BP_plot(All_t_indices, folder_index, ch) = BP_plot;
                 
                 increase_blocks = index_to_blocks(test_win(:, 2, chan_order(ch)));
                 
@@ -158,9 +163,9 @@ for b = band_indices
                         
                         increase_sec_blocks = blocks{bl} + (epoch_secs/2)*ones(size(blocks{bl}))*diag([-1 1]);
                         
-                        increase_index = t_indices;
+                        increase_index = All_t_indices;
                         
-                        increase_index(t_indices) = blocks_to_index(increase_sec_blocks, t);
+                        increase_index(All_t_indices) = blocks_to_index(increase_sec_blocks, t);
                         
                         All_BP_increase(increase_index, folder_index, bl, ch) = All_BP_plot(increase_index, fo, ch);
                         
@@ -213,7 +218,7 @@ for b = band_indices
         
     end
         
-    save_as_pdf(gcf, [subj_name, BP_suffix, win_flag, '_', short_band_labels{b} '_power_post_vs_pre_timeseries.mat'])
+    save_as_pdf(gcf, [file_name, BP_suffix, win_flag, '_', short_band_labels{b} '_power_post_vs_pre_timeseries.mat'])
     
 end
 
