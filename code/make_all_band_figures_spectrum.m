@@ -214,9 +214,9 @@ for b = 1:(no_bands - 1)
         
         set(h, 'ylim', y_extremes)
         
-        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
+        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, 'c_order', colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
         
-        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
+        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, 'c_order', colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
         
         % % Finding nonoverlap of confidence intervals.
         % load([channel_prefix, '_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', group{g}, '_ch1_data_for_plot.mat'])
@@ -257,38 +257,38 @@ save_as_pdf(gcf, [channel_prefix, '_all_bands_', band_flag, '_spec_f', num2str(f
 
 end
 
-function [test, colors, p_tag] = test_p_vals(p_vals, p_val, colors_in)
-
-no_ps = length(p_val);
-
-no_tests = size(p_vals, 2);
-
-test = nan([size(p_vals, 1), no_ps, no_tests]);
-
-colors = nan(no_ps, 3, no_tests);
-    
-for t = 1:no_tests
-    
-    test(:, 1, t) = p_vals(:, t) < p_val(1);
-    
-    for p = 2:no_ps
-    
-        test(:, p, t) = p_vals(:, t) >= p_val(p - 1) & p_vals(:, t) < p_val(p);
-    
-    end
-
-    colors(:, :, t) = flipud(color_gradient(no_ps, .5*colors_in(t, :), colors_in(t, :)));
-    
-end
-
-if isscalar(p_val)
-    
-    p_tag = sprintf('_p%g', p_val);
-    
-else
-    
-    p_tag = sprintf('_p%gto%g', p_val(1), p_val(end));
-
-end
-
-end
+% function [test, colors, p_tag] = test_p_vals(p_vals, p_val, colors_in)
+% 
+% no_ps = length(p_val);
+% 
+% no_tests = size(p_vals, 2);
+% 
+% test = nan([size(p_vals, 1), no_ps, no_tests]);
+% 
+% colors = nan(no_ps, 3, no_tests);
+%     
+% for t = 1:no_tests
+%     
+%     test(:, 1, t) = p_vals(:, t) < p_val(1);
+%     
+%     for p = 2:no_ps
+%     
+%         test(:, p, t) = p_vals(:, t) >= p_val(p - 1) & p_vals(:, t) < p_val(p);
+%     
+%     end
+% 
+%     colors(:, :, t) = flipud(color_gradient(no_ps, .5*colors_in(t, :), colors_in(t, :)));
+%     
+% end
+% 
+% if isscalar(p_val)
+%     
+%     p_tag = sprintf('_p%g', p_val);
+%     
+% else
+%     
+%     p_tag = sprintf('_p%gto%g', p_val(1), p_val(end));
+% 
+% end
+% 
+% end

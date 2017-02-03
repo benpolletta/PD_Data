@@ -1,4 +1,4 @@
-function increase_summary = power_post_vs_pre_summary(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices)
+function increase_summary = power_post_vs_pre_summary(subject_mat_cell, save_name, channel_labels, peak_suffix, norm, freqs, no_cycles, bands, band_indices, window_length)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -18,15 +18,11 @@ else
     
 end
 
-load(subject_mat)
-
 sampling_freq = 500;
 
-no_folders = length(folders);
-
-if isempty(window_length)
+if isempty(window_length) || window_length == 150
     
-    window_length = epoch_secs; 
+    window_length = 150; 
 
     win_flag = '';
     
@@ -48,7 +44,17 @@ for b = 1:no_bands
     
 end
 
-no_chans = length(chan_labels);
+no_chans = length(channel_labels);
+
+for s = 1:length(subject_mat_cell)
+    
+    load(subject_mat_cell{s})
+    
+    subject_mat_folders(s) = length(folders);
+    
+end
+
+no_folders = sum(subject_mat_folders); % - 2;
 
 no_blocks = 3;
 
@@ -56,61 +62,83 @@ stat_labels = {'Total Duration', 'Start Time', 'End Time'}; no_stats = length(st
 
 increase_summary = nan(no_stats, no_folders, no_blocks);
 
-blocks = cell(3, 1);
+blocks = cell(no_blocks, 1);
 
-for fo = 1:no_folders
+folder_index = 0;
+
+for s = 1:length(subject_mat_cell)
     
-    folder = folders{fo};
+    load(subject_mat_cell{s})
     
-    prefix = prefixes{fo};
+    chan_order = [1 2];
     
-    subj_name = [folder,'/',prefix];
+    if ~strcmp(chan_labels{1}, 'Striatum');
+        
+        chan_order = fliplr(chan_order);
+        
+    end
     
-    for b = band_indices
-            
-        load([subj_name, BP_suffix,win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
+    for fo = 1:subject_mat_folders(s)
         
-        for ch = 1:no_chans
-            
-            increase_blocks = index_to_blocks(test_win(:, 2, ch));
-            
-            increase_sec_blocks = win_secs(increase_blocks);
-            
-            blocks{ch} = increase_sec_blocks;
-            
-        end
+        folder_index = folder_index + 1;
         
-        overlap_index = test_win(:, 2, 1) & test_win(:, 2, 2);
+        folder = folders{fo};
         
-        overlap_blocks = index_to_blocks(overlap_index);
+        prefix = prefixes{fo};
         
-        overlap_sec_blocks = win_secs(overlap_blocks);
+        subj_name = [folder,'/',prefix];
         
-        blocks{3} = overlap_sec_blocks;
-        
-        for block = 1:no_blocks
+        if ~(strcmp(folder, '130716') || strcmp(folder, '130830'))
             
-            if ~isempty(blocks{block})
+            for b = band_indices
                 
-                if size(blocks{block}, 2) ~= 2
+                load([subj_name, BP_suffix, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
+                
+                for ch = 1:no_chans
                     
-                    blocks{block} = blocks{block}';
+                    increase_blocks = index_to_blocks(test_win(:, 2, chan_order(ch)));
+                    
+                    increase_sec_blocks = win_secs(increase_blocks);
+                    
+                    blocks{ch} = increase_sec_blocks;
                     
                 end
                 
-                increase_sec_blocks = blocks{block} + (epoch_secs/2)*ones(size(blocks{block}))*diag([-1 1]);
+                overlap_index = test_win(:, 2, 1) & test_win(:, 2, 2);
                 
-                increase_index_secs = blocks_to_index(increase_sec_blocks, t_sec{2});
+                overlap_blocks = index_to_blocks(overlap_index);
                 
-                increase_sec_blocks = index_to_blocks(increase_index_secs);
+                overlap_sec_blocks = win_secs(overlap_blocks);
                 
-                increase_length = sum(diff(increase_sec_blocks, [], 2)); % + epoch_secs);
+                blocks{3} = overlap_sec_blocks;
                 
-                increase_start = increase_sec_blocks(1, 1); % - epoch_secs/2;
-                
-                increase_end = increase_sec_blocks(end, end); % + epoch_secs/2;
-                
-                increase_summary(:, fo, block) = [increase_length; increase_start; increase_end]/60;
+                for block = 1:no_blocks
+                    
+                    if ~isempty(blocks{block})
+                        
+                        if size(blocks{block}, 2) ~= 2
+                            
+                            blocks{block} = blocks{block}';
+                            
+                        end
+                        
+                        increase_sec_blocks = blocks{block} + (window_length/2)*ones(size(blocks{block}))*diag([-1 1]);
+                        
+                        increase_index_secs = blocks_to_index(increase_sec_blocks, t_sec{2});
+                        
+                        increase_sec_blocks = index_to_blocks(increase_index_secs);
+                        
+                        increase_length = sum(diff(increase_sec_blocks, [], 2)); % + epoch_secs);
+                        
+                        increase_start = increase_sec_blocks(1, 1); % - epoch_secs/2;
+                        
+                        increase_end = increase_sec_blocks(end, end); % + epoch_secs/2;
+                        
+                        increase_summary(:, folder_index, block) = [increase_length; increase_start; increase_end]/60;
+                        
+                    end
+                    
+                end
                 
             end
             
@@ -122,23 +150,29 @@ end
 
 increase_summary = permute(increase_summary, [3 2 1]);
 
+save([save_name, BP_suffix, norm, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_summary.mat'], 'increase_summary')
+
 figure
 
 for stat = 1:no_stats
     
-    subplot(2, no_stats, stat)
+    h = subplot(2, no_stats, stat);
+        
+    set(h, 'NextPlot', 'add', 'ColorOrder', distinguishable_colors(no_folders), 'FontSize', 14)
+    
+    non_nan_indices = any(~isnan(increase_summary(:, :, stat)));
 
-    plot((1:no_blocks)', increase_summary(:, :, stat))
+    plot((1:no_blocks)', increase_summary(:, non_nan_indices, stat), 'LineWidth', 2)
     
     hold on
     
     for block = 1:no_blocks
     
-        plot(block, increase_summary(block, :, stat)', 'o')
+        plot(block, increase_summary(block, non_nan_indices, stat)', 'o', 'MarkerSize', 8, 'LineWidth', 1)
         
     end
     
-    set(gca, 'XLim', [.5 no_stats + .5], 'XTick', 1:no_stats, 'XTickLabel', {chan_labels{:}, 'Overlap'}, 'FontSize', 14)
+    set(gca, 'XLim', [.5 no_stats + .5], 'XTick', 1:no_stats, 'XTickLabel', {channel_labels{:}, 'Overlap'}, 'FontSize', 14)
     
     ylabel('Time (min.)')
     
@@ -146,16 +180,16 @@ for stat = 1:no_stats
     
     subplot(2, no_stats, no_stats + stat)
     
-    barwitherr(nanstd(increase_summary(:, :, stat)'), nanmean(increase_summary(:, :, stat)'));
+    h = barwitherr(nanstd(increase_summary(:, :, stat)'), nanmean(increase_summary(:, :, stat)'));
     
-    set(gca, 'XTickLabel', {chan_labels{:}, 'Overlap'}, 'FontSize', 14)
+    set(h, 'FaceColor', [.5 .5 .5])
+    
+    set(gca, 'XLim', [.25 no_stats + .75], 'XTickLabel', {channel_labels{:}, 'Overlap'}, 'FontSize', 14)
     
     ylabel('Time (min.)')
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix,...
-    '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, norm,...
-   win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_summary.mat'], 'increase_summary')
+save_as_pdf(gcf, [save_name, BP_suffix, norm, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_summary'])
 
 end

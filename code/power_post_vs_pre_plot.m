@@ -60,6 +60,8 @@ else
     
 end
 
+symbols = {'x', '+'};
+
 All_BP_plot = nan(30*60*sampling_freq, total_folders, no_chans);
 
 All_BP_increase = nan(30*60*sampling_freq, total_folders, 2, no_chans); 
@@ -149,9 +151,9 @@ for b = band_indices
             
             for ch = 1:no_chans
                 
-                block_indices = [ch 3];
+                block_indices = ch; % [ch 3];
                 
-                for bl = 1:2;
+                for bl = 1:length(block_indices);
                     
                     if ~isempty(blocks{block_indices(bl)})
                         
@@ -167,17 +169,19 @@ for b = band_indices
                         
                         increase_index(All_t_indices) = blocks_to_index(increase_sec_blocks, t(BP_t_indices));
                         
-                        if ~any(increase_index)
+                        All_BP_increase(:, folder_index, bl, ch) = increase_index;
                         
-                            All_BP_increase(:, folder_index, bl, ch) = All_BP_plot(:, folder_index, ch);
-                            
-                        else
-                            
-                            All_BP_increase(increase_index, folder_index, bl, ch) = All_BP_plot(increase_index, fo, ch);
-                            
-                            BP_increased(folder_index, bl, ch) = 1;
-                            
-                        end
+                        % if sum(increase_index) == 0
+                        % 
+                        %     All_BP_increase(:, folder_index, bl, ch) = All_BP_plot(:, folder_index, ch);
+                        % 
+                        % else
+                        % 
+                        %     All_BP_increase(increase_index, folder_index, bl, ch) = All_BP_plot(increase_index, fo, ch);
+                        % 
+                        %     BP_increased(folder_index, bl, ch) = 1;
+                        % 
+                        % end
                         
                     end
                     
@@ -187,54 +191,56 @@ for b = band_indices
             
         end
         
-        for ch = 1:no_chans
+    end
+    
+    for ch = 1:no_chans
+        
+        figure(b)
+        
+        subplot(2, 1, ch);
+        
+        plot(All_time/60, All_BP_plot(:, :, ch))
+        
+        axis tight
+        
+        box off
+        
+        hold on
+        
+        add_stars_one_line(gca, All_time/60, All_BP_increase(:, :, 1, ch), 1, 'symbol', symbols{ch})
+        
+%         for block = 1:2
+%             
+%             h = plot(All_time/60, All_BP_increase(:, :, block, ch));
+%             
+%             line_indices = find(BP_increased(:, block, ch));
+%             
+%             for l = 1:length(line_indices)
+%                 
+%                 set(h(line_indices(l)), 'LineWidth', block + 1)
+%                 
+%             end
+%             
+%         end
+        
+        if fo == 1
             
-            figure(b)
+            title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
             
-            subplot(2, 1, ch);
+        elseif fo == no_folders
             
-            plot(All_time/60, All_BP_plot(:, :, ch))
-            
-            axis tight
-            
-            box off
-            
-            hold on
-            
-            for block = 1:2
-                
-                h = plot(All_time/60, All_BP_increase(:, :, block, ch));
-                
-                line_indices = find(BP_increased(:, block, ch));
-                
-                for l = 1:length(line_indices)
-                    
-                    set(h(line_indices(l)), 'LineWidth', block + 1)
-                    
-                end
-                
-            end
-            
-            if fo == 1
-                
-                title(sprintf('%s, %d - %d Hz', chan_labels{ch}, bands(b, :)))
-                
-            elseif fo == no_folders
-                
-                xlabel('Time Rel. Infusion (Min.)')
-                
-            end
-            
-            if ch == 1
-                
-                ylabel({folder; 'Power (per 5 Min.)'})
-                
-            end
-            
-            plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
-            
+            xlabel('Time Rel. Infusion (Min.)')
             
         end
+        
+        if ch == 1
+            
+            ylabel({folder; 'Power (per 5 Min.)'})
+            
+        end
+        
+        plot([0; 0], [min(BP_plot); max(BP_plot)], 'k', 'LineWidth', 1)
+        
         
     end
         
