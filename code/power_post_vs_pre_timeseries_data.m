@@ -162,7 +162,7 @@ for b = band_indices
                         end
                         
                         increase_sec_blocks = blocks{block_indices(bl)} +...
-                            (epoch_secs/2)*ones(size(blocks{block_indices(bl)}))*diag([-1 1]);
+                            (window_length/2)*ones(size(blocks{block_indices(bl)}))*diag([-1 1]);
                         
                         increase_index = All_t_indices;
                         
