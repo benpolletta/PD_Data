@@ -120,7 +120,7 @@ for b = band_indices
             
             BP_t_indices = t >= All_time(1) & t <= All_time(end);
             
-            load([subj_name, BP_suffix,win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
+            load([subj_name, BP_suffix, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
             
             blocks = cell(3, 1);
             
