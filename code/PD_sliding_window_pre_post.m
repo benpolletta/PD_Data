@@ -57,7 +57,7 @@ parfor fo = 1:no_folders
         data_selected = data(max_beta_density_index, :);
         
         [~, ~] = sliding_window_analysis_multichannel(function_handle, data_selected,...
-            sampling_freq, sliding_window_cell, 1, 1, [subj_name, pd_names{pd}], varargin{:});
+            sampling_freq, sliding_window_cell, 1, 1, [subj_name, pd_names{pd}, '_band', num2str(band_index)], varargin{:});
         
     end
     

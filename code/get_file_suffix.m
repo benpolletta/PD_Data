@@ -24,3 +24,5 @@ if isempty(file_suffix)
     display(sprintf('Data type %s has no defined file suffix in get_file_suffix.m.', data_type))
     
 end
+
+end
