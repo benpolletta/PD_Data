@@ -58,7 +58,7 @@ parfor fo = 1:no_folders
         data_selected = data(max_beta_density_index, :);
         
         [~, ~] = sliding_window_analysis_multichannel(@mvgc_analysis, data_selected,...
-            {sampling_freq, 1}, {[window_length, window_length]}, 1, 1, [subj_name, pd_names{pd}], [], [], []);
+            {sampling_freq, 1}, {[window_length, window_length]}, 1, 1, [subj_name, '_', pd_names{pd}], [], [], []);
         
     end
     
