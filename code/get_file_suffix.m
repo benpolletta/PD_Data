@@ -12,6 +12,10 @@ switch data_type
         
         file_suffix = ['_all_channel_data_dec', data_labels_struct.data_suffix, '.mat'];
         
+    case 'data_subtracted'
+        
+        file_suffix = '_all_channel_data_dec_peakless.mat';
+        
     case 'high_density_periods'
         
         file_suffix = [data_labels_struct.BP_suffix, data_labels_struct.peak_suffix,...

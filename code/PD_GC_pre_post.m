@@ -49,16 +49,17 @@ parfor fo = 1:no_folders
     
     for pd = 1:2
         
-        bp_max_start = max_beta_density.All_bp_max_start(fo, striatal_channel, band_index, 2);
+        bp_max_start = max_beta_density.All_bp_max_start(fo, striatal_channel, band_index, pd);
         
-        bp_max_end = max_beta_density.All_bp_max_end(fo, striatal_channel, band_index, 2);
+        bp_max_end = max_beta_density.All_bp_max_end(fo, striatal_channel, band_index, pd);
         
         max_beta_density_index = t >= t(bp_max_start) & t <= t(bp_max_end);
         
         data_selected = data(max_beta_density_index, :);
         
         [~, ~] = sliding_window_analysis_multichannel(@mvgc_analysis, data_selected,...
-            {sampling_freq, 1}, {[window_length, window_length]}, 1, 1, [subj_name, '_', pd_names{pd}], [], [], []);
+            {sampling_freq, 1}, {[window_length, window_length]}, 1, 1,...
+            [subj_name, '_', pd_names{pd}, '_band', num2str(band_index)], [], [], []);
         
     end
     
