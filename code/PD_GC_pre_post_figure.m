@@ -1,10 +1,10 @@
-function PD_GC_pre_post_figure
+function PD_GC_pre_post_figure(significance)
 
 filename = 'STR_w_M1';
 
 band_index = 4;
 
-significance = .025;
+if isempty(significance), significance = .025; end
 
 figure
 
