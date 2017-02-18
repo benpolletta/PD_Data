@@ -1,5 +1,20 @@
 function PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin)
     
+% Performs sliding window analysis on carbachol data at times of highest
+% striatal beta band density, pre- and post-infusion.
+% INPUTS:
+%     function_handle (function handle): analysis to be performed on each window.
+%     sliding_window_cell (2 x 1 cell of 2 x 1 arrays): cell
+%       containing sliding window length and step length (in indices) for the
+%       two dimensions of the carbachol data.
+%     subjects_mat_cell (n x 1 cell of strings): cell containing names of
+%       *subjects.mat files to be (batch) analyzed.
+%     data_labels_struct (structure): can be initialized by
+%       init_data_labels.m, contains fields: BP_suffix, peak_suffix,
+%       data_suffix, epoch_secs, pd_handle, data_field, band_index,
+%       sampling_freq.
+%     varargin: further arguments to function_handle.
+
 close('all')
 
 pd_names = {'pre', 'post'};
@@ -33,6 +48,8 @@ for s = 1:length(subjects_mat_cell)
         if isfield(data, data_labels_struct.data_field)
             
             data = data.(data_labels_struct.data_field);
+            
+            display(sprintf('Evaluating %s for %s.', func2str(function_handle), folder))
             
         else
             
