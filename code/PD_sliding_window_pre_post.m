@@ -14,6 +14,24 @@ function PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjec
 %       data_suffix, epoch_secs, pd_handle, data_field, band_index,
 %       sampling_freq.
 %     varargin: further arguments to function_handle.
+% SAMPLE CALLS:
+% >> load('seven_bands')
+% >> data_labels_struct = init_data_labels(freq, no_cycles, bands,
+%       'data_field', 'data_subtracted')
+% >> subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat',
+%       'st_m1_ali2_subjects.mat'};
+% Granger causality analysis:
+% >> sliding_window_cell = {[500 500], [2 2]};
+% >> function_handle = @mvgc_analysis;
+% >> varargin = {[], '', 1};
+% >> PD_sliding_window_pre_post(function_handle, sliding_window_cell,
+%       subjects_mat_cell, data_labels_struct, varargin{:})
+% PMTM:
+% >> sliding_window_cell = {[500 500], [1 1]};
+% >> function_handle = @pmtm;
+% >> varargin = {150, [], 500};
+% >> PD_sliding_window_pre_post(function_handle, sliding_window_cell,
+%       subjects_mat_cell, data_labels_struct, varargin{:})
 
 close('all')
 

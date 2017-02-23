@@ -34,7 +34,7 @@ assert(~isbad(A),'VAR estimation failed');
 
 switch spec_flag
     
-    case 0
+    case 0 % Return Granger.
         
         % Get Granger from autocovariance.
         F = autocov_to_pwcgc(G);
@@ -57,30 +57,44 @@ switch spec_flag
         
         varargout{2} = pval; varargout{3} = sig;
         
+        varargout{4} = moAIC;
+        
+        varargout{5} = info;
+        
         if ~isempty(filename)
             
             save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig')
             
         end
         
-        varargout{4} = moAIC;
-        
-        varargout{5} = info;
-        
-    case 1
+    case 1 % Return spectral Granger.
         
         % Get spectral GC from autocovariance.
-        f = autocov_to_spwcgc(G,nobs);
-        
-        if ~isempty(f)
+        if ~isempty(G)
             
-            varargout{1} = permute(f, [3 1 2]);
+            f = autocov_to_spwcgc(G,nobs);
+            
+            if ~isempty(f)
+                
+                varargout{1} = permute(f, [3 1 2]);
+                
+            else
+                
+                varargout{1} = nan(nobs + 1, nchans, nchans);
+                
+            end
             
         else
             
             varargout{1} = nan(nobs + 1, nchans, nchans);
             
         end
+            
+            
+        
+        varargout{2} = moAIC;
+        
+        varargout{3} = info;
         
         if ~isempty(filename)
             
@@ -88,11 +102,7 @@ switch spec_flag
             
         end
         
-        varargout{2} = moAIC;
-        
-        varargout{3} = info;
-        
-    case 2
+    case 2 % Return both Granger and spectral Granger.
         
         % Get Granger from autocovariance.
         F = autocov_to_pwcgc(G);
@@ -121,15 +131,48 @@ switch spec_flag
         
         varargout{4} = f;
         
+        varargout{5} = moAIC;
+        
+        varargout{6} = info;
+        
         if ~isempty(filename)
             
             save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','F','pval','sig','f')
             
         end
         
-        varargout{5} = moAIC;
+    case 4 % Return cross-spectrum.
         
-        varargout{6} = info;
+        % Get cross-spectrum from autocovariance.
+        if ~isempty(G)
+            
+            [S, ~] = autocov_to_cpsd(G, nobs);
+            
+            if ~isempty(S)
+                
+                varargout{1} = permute(S, [3 1 2]);
+                
+            else
+                
+                varargout{1} = nan(nobs + 1, nchans, nchans);
+                
+            end
+            
+        else
+            
+            varargout{1} = nan(nobs + 1, nchans, nchans);
+            
+        end
+        
+        varargout{2} = moAIC;
+        
+        varargout{3} = info;
+        
+        if ~isempty(filename)
+            
+            save([filename,'_GC.mat'],'AIC','BIC','moAIC','moBIC','A','SIG','G','info','S')
+            
+        end
         
 end
 
