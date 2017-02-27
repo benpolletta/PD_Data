@@ -49,7 +49,7 @@ for s = 1:length(subject_mat_cell)
         for pd = 1:2
             
             analysis_name = make_sliding_window_analysis_name([subj_name, '_', pd_names{pd},...
-                '_band', num2str(band_index)],'mvgc_analysis',{[150 150],[2 2]},2);
+                '_band', num2str(band_index)], 'mvgc_analysis', {[150 150], [2 2]}, 2);
             
             load(analysis_name)
             
@@ -70,4 +70,4 @@ for s = 1:length(subject_mat_cell)
 end
 
 save(make_sliding_window_analysis_name([filename, '_pre_post_band', num2str(band_index)],...
-    'mvgc_analysis',{[150 150],[2 2]},2), 'GC')
+    'mvgc_analysis', {[150 150], [2 2]}, 2), 'GC')

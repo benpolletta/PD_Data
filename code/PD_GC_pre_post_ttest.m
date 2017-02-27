@@ -9,7 +9,7 @@ direction_labels = {'Striatum -> Motor Cortex'; 'Motor Cortex -> Striatum'};
 no_directions = length(direction_labels);
 
 GC = load(make_sliding_window_analysis_name([filename, '_pre_post_band', num2str(band_index)],...
-    'mvgc_analysis',{[150 150],[2 2]},2));
+    'mvgc_analysis', {[150 150], [2 2]}, 2));
 
 GC = GC.GC;
 
@@ -47,12 +47,12 @@ parfor f = 1:no_freqs
         
     end
     
-    p_vals(f, :, :) = temp;
+    p_vals(f, :, :) = reshape(temp, 1, 2, 2); % temp;
     
 end
 
 mat_name = make_sliding_window_analysis_name([filename, folder_indices{1}, '_pre_post_band', num2str(band_index)],...
-    'mvgc_analysis',{[150 150],[2 2]},2);
+    'mvgc_analysis', {[150 150], [2 2]}, 2);
 
 save([mat_name, '_ttest.mat'], 'p_vals')
 

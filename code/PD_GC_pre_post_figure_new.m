@@ -1,4 +1,4 @@
-function PD_GC_pre_post_figure(significance)
+function PD_GC_pre_post_figure_new(significance)
 
 filename = 'STR_w_M1';
 
@@ -8,7 +8,9 @@ if isempty(significance), significance = .025; end
 
 figure
 
-pd_names = {'Pre-Infusion', 'Post-Infusion'}; no_periods = length(pd_names);
+% pd_names = {'Post-Infusion - Pre-Infusion'}; % , 'Post-Infusion'}; 
+
+% no_periods = length(pd_names);
 
 % pd_linestyles = {'--', '-'};
 
@@ -41,8 +43,9 @@ folder_index_cell = make_folder_index_cell;
 
 no_folder_indices = length(folder_index_cell);
 
-group_titles = {{'{\bf All Data}';'{\fontsize{10}Partial Directed Coherence}';'{\fontsize{10}Mean \pm SE}'},...
-    {'{\bf M1+}';'{\fontsize{10}PDC (Mean \pm SE)}'}, {'{\bf M1-}';'{\fontsize{10}PDC (Mean \pm SE)}'}};
+group_titles = {{'{\bf All Data}';'{\fontsize{10}Partial Directed Coherence}';...
+    '{\fontsize{10}Post-Infusion - Pre-Infusion}';'{\fontsize{10}Mean \pm SE}'},...
+    {'{\bf M1+}';'{\fontsize{10}\Delta PDC (Mean \pm SE)}'}, {'{\bf M1-}';'{\fontsize{10}\Delta PDC (Mean \pm SE)}'}};
 
 for fi = 1:no_folder_indices
     
@@ -56,11 +59,15 @@ for fi = 1:no_folder_indices
     
     test = p_vals < significance;
     
-    GC_post_over_pre = squeeze(100*GC(:, :, :, folder_indices{2}, 2)./GC(:, :, :, folder_indices{2}, 1) - 100);
+    % GC_post_over_pre = squeeze(100*GC(:, :, :, folder_indices{2}, 2)./GC(:, :, :, folder_indices{2}, 1) - 100);
     
-    % GC_pre_from_post = squeeze(diff(GC(:, :, :, folder_indices{2}, :), [], 5));
+    % GC_post_over_pre(:, :, :, :, 2) = 0;
     
-    GC_plot = GC_post_over_pre; % GC = GC_pre_from_post; % GC = GC(:, :, :, folder_indices{2}, :); % 
+    GC_pre_from_post = squeeze(diff(GC(:, :, :, folder_indices{2}, :), [], 5));
+    
+    GC_pre_from_post(:, :, :, :, 2) = 0;
+    
+    GC_plot = GC_pre_from_post; % GC_plot = GC_post_over_pre; % GC_plot = GC(:, :, :, folder_indices{2}, :); % 
     
     GC_mean = squeeze(nanmean(GC_plot, 4));
     GC_se = squeeze(nanstd(GC_plot, [], 4)/sqrt(sum(folder_indices{2})));
@@ -70,22 +77,26 @@ for fi = 1:no_folder_indices
         
         ax(fi, direction) = subplot(no_folder_indices, no_directions, (fi - 1)*no_directions + direction);
         
-        boundedline(f(freq_indices), squeeze(GC_mean(direction_indices{direction}{:})),...
-            prep_for_boundedline(squeeze(GC_ci(direction_indices{direction}{:}))));
+        boundedline(f(freq_indices), diag((f(freq_indices)).^(2/3))*squeeze(GC_mean(direction_indices{direction}{:})),...
+            prep_for_boundedline(diag((f(freq_indices)).^(2/3))*squeeze(GC_ci(direction_indices{direction}{:}))));
         % squeeze(nanmean(GC_pre_from_post(freq_indices, :, direction), 2)),...
         % prep_for_boundedline(squeeze(nanstd(GC_pre_from_post(freq_indices, :, direction), [], 2)))); %
         
         axis tight
         
+        % ylim([0 .75]) % ylim([-1 1]*1000)
+        
         hold on
         
     end
 
-    linkaxes(ax(fi, :))
+    sync_axes(ax(fi, :)) % linkaxes(fliplr(ax(fi, :))), linkaxes(ax(fi, :), 'off')
     
     for direction = 1:no_directions
         
         subplot(no_folder_indices, no_directions, (fi - 1)*no_directions + direction)
+        
+        % plot(f(freq_indices), zeros(size(f(freq_indices))), 'k')
         
         add_stars(ax(fi, direction), f(freq_indices), test(freq_indices, :, direction), [1 0], [1 0 0; 1 .5 0])
         
@@ -99,11 +110,11 @@ for fi = 1:no_folder_indices
             
         end
         
-        if fi == 1 && direction == 1
-        
-            legend(pd_names)
-            
-        end
+        % if fi == 1 && direction == 1
+        % 
+        %     legend(pd_names)
+        % 
+        % end
         
         if direction == 1
         
