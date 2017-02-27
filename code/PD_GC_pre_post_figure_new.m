@@ -16,7 +16,7 @@ figure
 
 direction_indices = {{2, 1, ':'}, {1, 2, ':'}};
 
-direction_labels = {'\bf{Striatum -> Motor Cortex}'; '\bf{Motor Cortex -> Striatum}'};
+direction_labels = {'\bf{Striatum \rightarrow Motor Cortex}'; '\bf{Motor Cortex \rightarrow Striatum}'};
 
 no_directions = length(direction_labels);
 
@@ -76,6 +76,8 @@ for fi = 1:no_folder_indices
     for direction = 1:no_directions
         
         ax(fi, direction) = subplot(no_folder_indices, no_directions, (fi - 1)*no_directions + direction);
+    
+        % set(ax(fi, direction), 'NextPlot', 'add', 'ColorOrder', [0 0 0; 0 0 0])
         
         boundedline(f(freq_indices), diag((f(freq_indices)).^(2/3))*squeeze(GC_mean(direction_indices{direction}{:})),...
             prep_for_boundedline(diag((f(freq_indices)).^(2/3))*squeeze(GC_ci(direction_indices{direction}{:}))));
