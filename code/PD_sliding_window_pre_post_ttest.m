@@ -57,5 +57,5 @@ mat_name = make_sliding_window_analysis_name([filename, comparison_struct.compar
     '_pre_post_band', num2str(data_labels_struct.band_index)],...
     function_name, window_time_cell, 2, varargin{:});
 
-save([analysis_name, '_ttest.mat'], 'p_vals')
+save([mat_name, '_ttest.mat'], 'p_vals')
 

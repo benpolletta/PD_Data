@@ -52,12 +52,10 @@ for fi = 1:no_folder_indices
     folder_indices = folder_index_cell{fi};
     
     stats_name = [make_sliding_window_analysis_name([filename, folder_indices{1},...
-        '_pre_post_band', num2str(band_index)], 'mvgc_analysis', {[150 150],[2 2]},...
+        '_pre_post_band', num2str(band_index)], 'mvgc_analysis', {[150 150], [2 2]},...
         2, varargin{:}), '_ttest'];
     
     load(stats_name)
-    
-    test = p_vals < significance;
     
     % GC_post_over_pre = squeeze(100*GC(:, :, :, folder_indices{2}, 2)./GC(:, :, :, folder_indices{2}, 1) - 100);
     
@@ -99,8 +97,10 @@ for fi = 1:no_folder_indices
         subplot(no_folder_indices, no_directions, (fi - 1)*no_directions + direction)
         
         % plot(f(freq_indices), zeros(size(f(freq_indices))), 'k')
+    
+        test = squeeze(p_vals(direction_indices{direction}{:}) < significance);
         
-        add_stars(ax(fi, direction), f(freq_indices), test(freq_indices, :, direction), [1 0], [1 0 0; 1 .5 0])
+        add_stars(ax(fi, direction), f(freq_indices), test, [1 0], [1 0 0; 1 .5 0]) % test(freq_indices, :, direction), [1 0], [1 0 0; 1 .5 0])
         
         xlim([0 freq_limit])
         
