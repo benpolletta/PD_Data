@@ -88,9 +88,7 @@ switch spec_flag
             
             varargout{1} = nan(nobs + 1, nchans, nchans);
             
-        end
-            
-            
+        end  
         
         varargout{2} = moAIC;
         
