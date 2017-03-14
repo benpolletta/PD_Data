@@ -1,4 +1,4 @@
-function SW_xPlt = PD_sliding_window_pre_post_xPlt(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, unpack_output_flag, varargin)
+function PD_sliding_window_pre_post_xPlt_plot(function_name, sliding_window_cell, data_labels_struct, filename, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -38,17 +38,12 @@ load([make_sliding_window_analysis_name([filename, pd_label,...
 
 SW_xPlt.getaxisinfo
 
-function_handles = {@xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
-dimensions = {[1,2,4],0};                                       % Specifies which dimensions of xp each function handle
-                                                                % will operate on. Note that dimension "0" refers to the 
-                                                                % the contents of each element in xp.data (e.g. the matrix of
-                                                                % time series data). If specified, it must come last.
-function_arguments = {{},{}};	% This allows you to supply input arguments to each of the 
-                                % functions in function handles. For
-                                % now we'll leave this empty.
-                                                                
-% Run the plot. Note the "+" icons next to each plot allow zooming. 
-recursivePlot(SW_xPlt,function_handles,dimensions,function_arguments);
+SW_Recordings = squeeze(SW_xPlt.packDim(3, 2));
+
+function_handles = {@xp_subplot_grid3D,@xp_matrix_basicplot};
+dimensions = {[1,2,3],0};
+function_arguments = {{},{}};
+recursivePlot_2(SW_Recordings,function_handles,dimensions,function_arguments);
 
 end
 

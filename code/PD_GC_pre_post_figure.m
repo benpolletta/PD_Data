@@ -1,4 +1,4 @@
-function PD_GC_pre_post_figure(significance)
+function PD_GC_pre_post_figure(significance, run_stats_flag)
 
 filename = 'STR_w_M1';
 
@@ -67,6 +67,12 @@ for fi = 1:no_folder_indices
     
     sync_axes(ax(fi, :))
     
+    if run_stats_flag
+    
+        PD_GC_pre_post_ttest(filename, folder_indices, band_index)
+    
+    end
+        
     stats_name = [make_sliding_window_analysis_name([filename, folder_indices{1},...
         '_pre_post_band', num2str(band_index)], 'mvgc_analysis', {[150 150],[2 2]}, 2), '_ttest'];
     

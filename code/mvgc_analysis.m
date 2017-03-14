@@ -139,7 +139,7 @@ switch spec_flag
             
         end
         
-    case 4 % Return cross-spectrum.
+    case 3 % Return cross-spectrum.
         
         % Get cross-spectrum from autocovariance.
         if ~isempty(G)

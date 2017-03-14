@@ -51,6 +51,8 @@ for fi = 1:no_folder_indices
     
     folder_indices = folder_index_cell{fi};
     
+    % PD_GC_pre_post_ttest(filename, folder_indices, band_index)
+    
     stats_name = [make_sliding_window_analysis_name([filename, folder_indices{1},...
         '_pre_post_band', num2str(band_index)], 'mvgc_analysis', {[150 150], [2 2]},...
         2, varargin{:}), '_ttest'];

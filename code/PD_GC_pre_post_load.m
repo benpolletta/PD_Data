@@ -30,7 +30,7 @@ for s = 1:length(subject_mat_cell)
     
     chan_order = [1 2];
     
-    if ~strcmp(chan_labels{1}, 'Striatum');
+    if ~strcmp(subjects_struct.chan_labels{1}, 'Striatum');
         
         chan_order = fliplr(chan_order);
         
@@ -40,7 +40,7 @@ for s = 1:length(subject_mat_cell)
         
         folder_index = folder_index + 1;
         
-        folder = subjects_struct.folders{fo};
+        folder = subjects_struct.folders{fo}
         
         prefix = subjects_struct.prefixes{fo};
         
@@ -49,15 +49,19 @@ for s = 1:length(subject_mat_cell)
         for pd = 1:2
             
             analysis_name = make_sliding_window_analysis_name([subj_name, '_', pd_names{pd},...
-                '_band', num2str(band_index)], 'mvgc_analysis', {[150 150], [2 2]}, 2);
+                '_band', num2str(band_index)], 'mvgc_analysis', {[150 150], [2 2]}, 2); % , [], [], []);
             
             load(analysis_name)
+            
+            pd_names{pd}
             
             for direction = 1:2
                 
                 dir_indices = fliplr(chan_order);
                 
                 if direction == 2, dir_indices = fliplr(dir_indices); end
+                
+                dir_indices
             
                 GC(:, folder_index, pd, direction) = sw(:, dir_indices(1), dir_indices(2));
                 

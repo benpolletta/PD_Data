@@ -6,13 +6,15 @@ data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'da
 
 subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
 
-sliding_window_cell{1} = [10*500 10*500];
+filename = 'STR_w_M1';
+
+sliding_window_cell{1} = 150*[500 500];
 
 %% Granger causality analysis:
 
 sliding_window_cell{2} = [2 2];
 
-function_handle = @mvgc_analysis;
+function_handle = @mvgc_analysis; function_name = function_handle;
 
 varargin = {[], '', 1};
 
