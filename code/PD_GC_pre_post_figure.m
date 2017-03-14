@@ -130,9 +130,9 @@ folder_index_cell{1} = folder_indices;
 
 load('M1_groups')
 
-folder_index_cell{2} = M1_increased_index;
+folder_index_cell{2} = {M1_increased_index{1}, ~M1_not_increased_index{2}};
 
-folder_index_cell{3} = M1_not_increased_index;
+folder_index_cell{3} = {M1_not_increased_index{1}, ~M1_increased_index{2}};
 
 end
 

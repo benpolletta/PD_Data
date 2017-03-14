@@ -1,4 +1,4 @@
-function mvgc_determinism_test(number_iterations)
+function mvgc_determinism_test(subjects_mat_prefix, number_iterations)
 
 freqs = load('seven_bands.mat', 'freqs'); freqs = freqs.freqs;
 
@@ -8,15 +8,13 @@ bands = load('seven_bands.mat', 'bands'); bands = bands.bands;
 
 data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted');
 
-subjects_mat_name = 'st_m1_subjects.mat';
+subjects_mat_name = [subjects_mat_prefix, '_subjects.mat'];
 
-subjects_mat_prefix = 'st_m1';
+% subjects_mat_prefix = subjects_mat_name(1:(end - length('_subjects.mat')));
 
 subjects_struct = load(subjects_mat_name);
 
 striatal_channel = find(strcmp(subjects_struct.chan_labels, 'Striatum'));
-
-figure
 
 for fo = 1:length(subjects_struct.folders)
     
@@ -66,7 +64,7 @@ for fo = 1:length(subjects_struct.folders)
             
             [fi, moAICi, infoi] = mvgc_analysis(data_selected, [], '', 1);
             
-            size(fi), size(moAICi), size(infoi)
+            % size(fi), size(moAICi), size(infoi)
             
             f(:, :, :, i, pd) = fi;
             
