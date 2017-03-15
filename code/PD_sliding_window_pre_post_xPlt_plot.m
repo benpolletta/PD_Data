@@ -41,8 +41,8 @@ SW_xPlt.getaxisinfo
 SW_Recordings = squeeze(SW_xPlt.packDim(3, 2));
 
 function_handles = {@xp_subplot_grid3D,@xp_matrix_basicplot};
-dimensions = {[1,2,3],0};
 function_arguments = {{},{}};
+dimensions = {[1,2,3],0};
 recursivePlot_2(SW_Recordings,function_handles,dimensions,function_arguments);
 
 end

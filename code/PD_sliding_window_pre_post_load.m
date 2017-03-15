@@ -24,7 +24,7 @@ function SW = PD_sliding_window_pre_post_load(function_name, sliding_window_cell
 
 function_name = get_fname(function_name);
     
-window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
+window_time_cell = cellfun(@(x,y) x./y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
 
 pd_names = {'pre', 'post'}; no_periods = length(pd_names);
 
