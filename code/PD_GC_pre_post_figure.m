@@ -44,7 +44,7 @@ for fi = 1:no_folder_indices
     
     % GC_pre_from_post = squeeze(diff(GC(:, folder_indices{2}, :, :), [], 3));
     
-    GC_plot = GC(:, folder_indices{2}, :, :); % GC_plot = GC_pre_from_post; % 
+    GC_plot = abs(GC(:, folder_indices{2}, :, :)); % GC_plot = GC_pre_from_post; % 
     
     GC_mean = squeeze(nanmean(GC_plot, 2));
     GC_se = squeeze(nanstd(GC_plot, [], 2)/sqrt(sum(folder_indices{2})));

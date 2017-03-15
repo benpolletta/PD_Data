@@ -38,12 +38,23 @@ load([make_sliding_window_analysis_name([filename, pd_label,...
 
 SW_xPlt.getaxisinfo
 
-SW_Recordings = squeeze(SW_xPlt.packDim(3, 2));
+if ~isempty(SW_xPlt.axis.findAxes('Window_Dim_1'))
 
-function_handles = {@xp_subplot_grid3D,@xp_matrix_basicplot};
+    SW_Windows = squeeze(SW_xPlt.packDim('Window_Dim_1', 2));
+    
+    function_handles = {@xp_subplot_grid_adaptive,@xp_matrix_basicplot};
+    function_arguments = {{},{}};
+    dimensions = {1:size(SW_Windows),0};
+    recursivePlot(SW_Windows,function_handles,dimensions,function_arguments);
+    
+end
+
+SW_Recordings = squeeze(SW_xPlt.packDim('Recording', 2));
+
+function_handles = {@xp_subplot_grid_adaptive,@xp_matrix_basicplot};
 function_arguments = {{},{}};
-dimensions = {[1,2,3],0};
-recursivePlot_2(SW_Recordings,function_handles,dimensions,function_arguments);
+dimensions = {1:size(SW_Recordings),0};
+recursivePlot(SW_Recordings,function_handles,dimensions,function_arguments);
 
 end
 

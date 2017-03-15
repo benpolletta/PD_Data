@@ -42,7 +42,7 @@ varargin = {[], '', 1};
 % 
 % varargin = {[], '', 3};
 
-PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
+% PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
 
 % total_dims = sum(window_size > 1) + sum(output_size > 1);
 % 

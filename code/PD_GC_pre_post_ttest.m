@@ -11,7 +11,7 @@ no_directions = length(direction_labels);
 GC = load(make_sliding_window_analysis_name([filename, '_pre_post_band', num2str(band_index)],...
     'mvgc_analysis', {[150 150], [2 2]}, 2));
 
-GC = GC.GC;
+GC = abs(GC.GC);
 
 sampling_freq = 500;
 
