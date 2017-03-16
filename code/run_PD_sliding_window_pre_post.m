@@ -6,17 +6,27 @@ data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'da
 
 subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
 
+chan_labels = {'Striatum', 'M1'};
+
 filename = 'STR_w_M1';
 
 %% Granger causality analysis:
 
-sliding_window_cell = {10*500*[1 1], [2 2]};
+window_length = 10;
+
+sliding_window_cell = {window_length*500*[1 1], [2 2]};
 
 % window_size = cellfun(@(x,y) x./y, sliding_window_cell, data_labels_struct.sampling_freq);
 
 function_handle = @mvgc_analysis; function_name = function_handle;
 
 varargin = {[], '', 1};
+
+output_struct.unpack_flag = 1;
+
+output_struct.output_names = {'Freq. (Hz)', 'To', 'From'};
+
+output_struct.output_values = {250*(1:(window_length*500 + 1))/(window_length*500), chan_labels, chan_labels};
 
 % %% PMTM:
 % 

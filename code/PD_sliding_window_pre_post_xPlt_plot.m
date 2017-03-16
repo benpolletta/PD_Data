@@ -36,15 +36,19 @@ load([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
     window_time_cell, 2, varargin{:}), '_xPlt.mat'])
 
+SW_xPlt = abs(SW_xPlt);
+
 SW_xPlt.getaxisinfo
 
 if ~isempty(SW_xPlt.axis.findAxes('Window_Dim_1'))
 
     SW_Windows = squeeze(SW_xPlt.packDim('Window_Dim_1', 2));
     
-    function_handles = {@xp_subplot_grid_adaptive,@xp_matrix_basicplot};
-    function_arguments = {{},{}};
-    dimensions = {1:size(SW_Windows),0};
+    SW_Windows.getaxisinfo
+    
+    function_handles = {@xp_subplot_grid_adaptive,@xp_matrix};
+    function_arguments = {{{'Recording', 'Period', 'To', 'From'}},{}};
+    dimensions = {1:length(size(SW_Windows)),0};
     recursivePlot(SW_Windows,function_handles,dimensions,function_arguments);
     
 end
@@ -52,8 +56,8 @@ end
 SW_Recordings = squeeze(SW_xPlt.packDim('Recording', 2));
 
 function_handles = {@xp_subplot_grid_adaptive,@xp_matrix_basicplot};
-function_arguments = {{},{}};
-dimensions = {1:size(SW_Recordings),0};
+function_arguments = {{{'Windows', 'Period', 'To', 'From'}},{}};
+dimensions = {1:length(size(SW_Recordings)),0};
 recursivePlot(SW_Recordings,function_handles,dimensions,function_arguments);
 
 end

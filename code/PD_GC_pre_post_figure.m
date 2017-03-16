@@ -1,5 +1,8 @@
 function PD_GC_pre_post_figure(significance, run_stats_flag)
 
+if nargin < 2, run_stats_flag = []; end
+if isempty(run_stats_flag), run_stats_flag = 0; end
+
 filename = 'STR_w_M1';
 
 band_index = 4;
