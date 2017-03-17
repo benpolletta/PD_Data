@@ -1,4 +1,4 @@
-function SW = PD_sliding_window_pre_post_load(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin)
+function [SW, indices_cell] = PD_sliding_window_pre_post_load(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.

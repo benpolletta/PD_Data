@@ -86,7 +86,7 @@ dims_from_last = dims_from_last + 1;
 for wdim = 1:wdims
     
     SW_xPlt = unpackDim(SW_xPlt, length(SW_size) - dims_from_last, 1,...
-        axes_info_struct.window_names(wdims - wdim + 1), axes_info_struct.window_values{wdims - wdim + 1});
+        axes_info_struct.window_names{wdims - wdim + 1}, axes_info_struct.window_values{wdims - wdim + 1});
     
     dims_from_last = dims_from_last + 1;
     
@@ -123,7 +123,7 @@ save([make_sliding_window_analysis_name([filename, pd_label,...
 end
 
 function axes_info_struct = get_axes_info(function_name,...
-    sliding_window_cell, data_labels_struct, no_windows, output_size, varargin)
+    sliding_window_cell, data_labels_struct, window_size, output_size, varargin)
 
 axes_info_struct.output_names{1} = 'Freq. (Hz)';
 
@@ -156,15 +156,21 @@ switch function_name
                 
                 axes_info_struct.output_names([2 3]) = {'Channel To', 'Channel From'};
                 
+                axes_info_struct.output_values{[2 3]} = deal({'Striatum', 'M1'});
+                
             case 3
                 
                 if sliding_window_cell{2}(1) == 1
                     
                     axes_info_struct.window_names{2} = 'Channel';
+                
+                    axes_info_struct.window_values{2} = {'Striatum', 'M1'};
                     
                 elseif sliding_window_cell{2}(1) == 2
                     
-                    axes_info_struct.output_names{[2 3]} = {'Channel 1', 'Channel 2'};
+                    axes_info_struct.output_names([2 3]) = {'Channel 1', 'Channel 2'};
+                
+                    axes_info_struct.output_values([2 3]) = deal({'Striatum', 'M1'});
                     
                 end
                 
@@ -173,6 +179,8 @@ switch function_name
     case 'pmtm'
         
         axes_info_struct.window_names{2} = 'Channel';
+                
+        axes_info_struct.window_values{2} = {'Striatum', 'M1'};
         
 end
 
