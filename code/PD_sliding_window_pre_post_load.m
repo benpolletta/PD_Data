@@ -1,4 +1,4 @@
-function SW = PD_sliding_window_pre_post_load(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, indices_cell, filename, varargin)
+function SW = PD_sliding_window_pre_post_load(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -50,6 +50,9 @@ first_name = make_sliding_window_analysis_name([folders{1}, '/', prefixes{1}, '_
     '_band', num2str(data_labels_struct.band_index)], function_name, window_time_cell, 2, varargin{:});
 
 load(first_name, 'output_size', 'no_windows')
+
+indices_cell = make_PD_indices_cell(subjects_mat_cell,function_name,...
+    sliding_window_cell, no_windows, output_size, varargin{:});
 
 sw_size = [output_size, no_windows'];
 

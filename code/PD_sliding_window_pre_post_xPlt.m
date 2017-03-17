@@ -1,4 +1,4 @@
-function SW_xPlt = PD_sliding_window_pre_post_xPlt(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, output_struct, varargin)
+function SW_xPlt = PD_sliding_window_pre_post_xPlt(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -40,7 +40,18 @@ SW_xPlt = xPlt;
 
 SW_xPlt = SW_xPlt.importData({SW});
 
-% SW_xPlt = SW_xPlt.fixAxes;
+no_windows = cellfun(@(x) length(x), window_time);
+
+no_windows(no_windows == 1) = [];
+
+wdims = length(no_windows);
+    
+output_size(output_size == 1) = [];
+
+odims = length(output_size);
+
+axes_info_struct = get_axes_info(function_name,...
+    sliding_window_cell, data_labels_struct, no_windows, output_size, varargin{:});
 
 dims_from_last = 0;
 
@@ -72,15 +83,10 @@ dims_from_last = dims_from_last + 1;
 
 %% Unpacking window dimensions.
 
-total_windows = cellfun(@(x) length(x), window_time);
-
-total_windows(total_windows == 1) = [];
-
-wdims = length(total_windows);
-
 for wdim = 1:wdims
     
-    SW_xPlt = unpackDim(SW_xPlt, length(SW_size) - dims_from_last, 1, ['Window_Dim_' num2str(wdims - wdim + 1)], window_time{wdims - wdim + 1});
+    SW_xPlt = unpackDim(SW_xPlt, length(SW_size) - dims_from_last, 1,...
+        axes_info_struct.window_names(wdims - wdim + 1), axes_info_struct.window_values{wdims - wdim + 1});
     
     dims_from_last = dims_from_last + 1;
     
@@ -88,34 +94,25 @@ end
     
 %% Unpacking output dimensions.
 
-if output_struct.unpack_flag
+for odim = 1:(odims - 1)
     
-    output_size(output_size == 1) = [];
+    SW_xPlt = unpackDim(SW_xPlt, length(SW_size) - dims_from_last, 1,...
+        axes_info_struct.output_names{odims - odim + 1}, axes_info_struct.output_values{odims - odim + 1});
     
-    output_struct = init_output_axis(output_size, output_struct);
-    
-    odims = length(output_size);
-    
-    for odim = 1:(odims - 1)
-        
-        SW_xPlt = unpackDim(SW_xPlt, length(SW_size) - dims_from_last, 1, output_struct.output_names{odims - odim + 1}, output_struct.output_values{odims - odim + 1});
-        
-        dims_from_last = dims_from_last + 1;
-        
-    end
-    
-    remaining_axis = nDDictAxis;
-    
-    remaining_axis.name = output_struct.output_names{1};
-    remaining_axis.values = output_struct.output_values{1};
-    
-    meta = SW_xPlt.meta;
-    
-    meta.matrix_dim_1 = remaining_axis;
-    
-    SW_xPlt = importMeta(SW_xPlt, meta);
+    dims_from_last = dims_from_last + 1;
     
 end
+
+remaining_axis = nDDictAxis;
+
+remaining_axis.name = axes_info_struct.output_names{1};
+remaining_axis.values = axes_info_struct.output_values{1};
+
+meta = SW_xPlt.meta;
+
+meta.matrix_dim_1 = remaining_axis;
+
+SW_xPlt = importMeta(SW_xPlt, meta);
 
 SW_xPlt = squeeze(SW_xPlt);
 
@@ -125,35 +122,59 @@ save([make_sliding_window_analysis_name([filename, pd_label,...
 
 end
 
-function output_struct = init_output_axis(output_size, output_struct)
-    
-    if ~isfield(output_struct, 'output_names'), output_struct.output_names = []; end
-    
-    if isempty(output_struct.output_names)
-       
-        for odim = 1:length(output_size)
-            
-           output_names{odim} = ['Output_Dim_' num2str(odim)];
-            
-        end
-        
-        output_struct.output_names = output_names;
-        
-    end
+function axes_info_struct = get_axes_info(function_name,...
+    sliding_window_cell, data_labels_struct, no_windows, output_size, varargin)
 
-    if ~isfield(output_struct, 'output_values'), output_struct.output_values = []; end
+axes_info_struct.output_names{1} = 'Freq. (Hz)';
+
+axes_info_struct.output_values{1} = data_labels_struct.sampling_freq{1}*...
+    (1:sliding_window_cell{1}(1))/(2*sliding_window_cell{1}(1));
+
+for odim = 2:length(output_size)
     
-    if isempty(output_struct.output_values)
-       
-        for odim = 1:length(output_size)
+    axes_info_struct.output_names{odim} = ['Output_Dim_' num2str(odim)];
+    
+    axes_info_struct.output_values{odim} = 1:output_size(odim);
+    
+end
+
+for wdim = 1:length(window_size)
+    
+    axes_info_struct.window_names{wdim} = ['Window_Dim_' num2str(wdim)];
+    
+    axes_info_struct.window_values{wdim} = 1:window_size(wdim);
+    
+end
+
+switch function_name
+    
+    case 'mvgc_analysis'
+        
+        switch varargin{end}
             
-           output_values{odim} = 1:output_size(odim);
-            
+            case 1
+                
+                axes_info_struct.output_names([2 3]) = {'Channel To', 'Channel From'};
+                
+            case 3
+                
+                if sliding_window_cell{2}(1) == 1
+                    
+                    axes_info_struct.window_names{2} = 'Channel';
+                    
+                elseif sliding_window_cell{2}(1) == 2
+                    
+                    axes_info_struct.output_names{[2 3]} = {'Channel 1', 'Channel 2'};
+                    
+                end
+                
         end
         
-        output_struct.output_values = output_values;
+    case 'pmtm'
         
-    end
+        axes_info_struct.window_names{2} = 'Channel';
+        
+end
 
 end
 
