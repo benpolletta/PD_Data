@@ -156,21 +156,31 @@ switch function_name
                 
                 axes_info_struct.output_names([2 3]) = {'Channel To', 'Channel From'};
                 
-                axes_info_struct.output_values{[2 3]} = deal({'Striatum', 'M1'});
+                axes_info_struct.output_values([2 3]) = deal({{'Striatum', 'M1'}});
                 
             case 3
                 
                 if sliding_window_cell{2}(1) == 1
                     
-                    axes_info_struct.window_names{2} = 'Channel';
-                
-                    axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+                    if sliding_window_cell{1}(1) == 150*500
+                        
+                        axes_info_struct.window_names{1} = 'Channel';
+                        
+                        axes_info_struct.window_values{1} = {'Striatum', 'M1'};
+                        
+                    else
+                        
+                        axes_info_struct.window_names{2} = 'Channel';
+                        
+                        axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+                        
+                    end
                     
                 elseif sliding_window_cell{2}(1) == 2
                     
                     axes_info_struct.output_names([2 3]) = {'Channel 1', 'Channel 2'};
                 
-                    axes_info_struct.output_values([2 3]) = deal({'Striatum', 'M1'});
+                    axes_info_struct.output_values([2 3]) = deal({{'Striatum', 'M1'}});
                     
                 end
                 
@@ -178,9 +188,19 @@ switch function_name
         
     case 'pmtm'
         
-        axes_info_struct.window_names{2} = 'Channel';
-                
-        axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+        if sliding_window_cell{1}(1) == 150*500
+            
+            axes_info_struct.window_names{1} = 'Channel';
+            
+            axes_info_struct.window_values{1} = {'Striatum', 'M1'};
+            
+        else
+            
+            axes_info_struct.window_names{2} = 'Channel';
+            
+            axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+            
+        end
         
 end
 
