@@ -1,5 +1,7 @@
 function [varargout] = mvgc_analysis(X,momax,filename,spec_flag)
 
+for c = 1:size(X, 2), X(:, c) = detrend(X(:, c)); end
+
 if nargin < 4 || isempty(spec_flag)
     
     spec_flag = 1;
@@ -148,7 +150,11 @@ switch spec_flag
             
             if ~isempty(S)
                 
-                varargout{1} = permute(S, [3 1 2]);
+                S = permute(S, [3 1 2]);
+                
+                % for i = 1:size(S, 2), for j = 1:size(S, 3), S(:, i, j) = S(:, i, j)/(sum(S(:, i, j))); end, end
+                
+                varargout{1} = S;
                 
             else
                 

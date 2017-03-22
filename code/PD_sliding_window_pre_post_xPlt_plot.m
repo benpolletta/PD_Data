@@ -1,4 +1,4 @@
-function PD_sliding_window_pre_post_xPlt_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, varargin)
+function PD_sliding_window_pre_post_xPlt_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -15,7 +15,7 @@ function PD_sliding_window_pre_post_xPlt_plot(function_name, sliding_window_cell
 %       sampling_freq.     
 %     filename (string): name of collected analysis (e.g., 'STR_w_M1').
 
-%% Loading data & putting into xPlt.
+%% Loading data.
 function_name = get_fname(function_name);
     
 window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
@@ -40,33 +40,75 @@ SW_xPlt.getaxisinfo
 
 frequencies = SW_xPlt.meta.matrix_dim_1.values;
 
+%% Normalizing.
+
+switch norm
+    
+    case 'frequency'
+        
+        freq_mult = diag(frequencies.^(2/3));
+        
+        SW_xPlt.data = cellfun(@(x) freq_mult*x, SW_xPlt.data, 'UniformOutput', 0);
+        
+    case 'baseline'
+
+        SW_Baseline = load([make_sliding_window_analysis_name([filename, '_baseline_band',...
+            num2str(data_labels_struct.band_index)], function_name,...
+            window_time_cell, 2, varargin{:}), '_xPlt.mat']);
+        
+        SW_Baseline = abs(SW_Baseline.SW_xPlt);
+        
+        if ~isempty(SW_Baseline.findaxis('Window_Dim_1'))
+            
+            SW_Baseline = mean_over_axis(SW_Baseline, 'Window_Dim_1');
+            
+        end
+        
+        SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Period')).values, 'Period');
+        
+        if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
+            
+            SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1');
+            
+        end
+        
+        SW_xPlt.data = cellfun(@(x, y) 100*(x./y - 1), SW_xPlt.data, SW_Baseline.data, 'UniformOutput', 0);
+        
+    case 'totalpower'
+        
+        SW_xPlt.data = cellfun(@(x) x/sum(x), SW_xPlt.data, 'UniformOutput', 0);
+        
+    case ''
+            
+end
+
+%% Downsampling and restricting frequency.
+
 if sliding_window_cell{1}(1) > 1000
     
     ds_factor = sliding_window_cell{1}(1)/1000;
     
     ds_factors = factor(ds_factor);
     
-    for i = 1:length(ds_factors)
+    for f = 1:length(ds_factors)
 
-        SW_xPlt.data = cellfun(@(x) decimate(x, ds_factors(i)), SW_xPlt.data, 'UniformOutput', 0);
+        SW_xPlt.data = cellfun(@(x) decimate(x, ds_factors(f)), SW_xPlt.data, 'UniformOutput', 0);
         
-        frequencies = decimate(frequencies, ds_factors(i));
+        frequencies = decimate(frequencies, ds_factors(f));
         
     end
-    
-    % SW_xPlt.data = cellfun(@(x) decimate(x, 10^mod(log(ds_factor)/log(10), 1)), SW_xPlt.data, 'UniformOutput', 0);
-    % 
-    % frequencies = decimate(frequencies, 10^mod(log(ds_factor)/log(10), 1));
     
 end
 
 freq_limit = 50; freq_indicator = frequencies <= freq_limit;
 
-freq_mult = diag(frequencies(freq_indicator).^(2/3));
+frequencies = frequencies(freq_indicator);
 
-SW_xPlt.data = cellfun(@(x) freq_mult*x(freq_indicator), SW_xPlt.data, 'UniformOutput', 0);
+SW_xPlt.meta.matrix_dim_1.values = frequencies;
 
-SW_xPlt.meta.matrix_dim_1.values = frequencies(freq_indicator);
+SW_xPlt.data = cellfun(@(x) x(freq_indicator), SW_xPlt.data, 'UniformOutput', 0);
+
+%% Loading & looping over groups.
 
 load('M1_groups')
 
@@ -78,9 +120,9 @@ groups_plotted = {All_index, M1_increased_index, M1_not_increased_index}; % {All
 
 for group = 1:length(groups_plotted)
     
-    group_name = make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
+    group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:});
+    window_time_cell, 2, varargin{:}), norm];
     
     SW_group = SW_xPlt.packDim('Recording', 2);
     
@@ -90,10 +132,10 @@ for group = 1:length(groups_plotted)
     
     SW_group = SW_group.unpackDim(2);
     
-    SW_group.axis(findAxes(SW_group.axis,'Recording')).values = ... % SW_xPlt = SW_xPlt.importAxisValues(SW_xPlt, 'Recording', {folders(groups_plotted{group}{2})});
+    SW_group.axis(findaxis(SW_group,'Recording')).values = ... % SW_xPlt = SW_xPlt.importAxisValues(SW_xPlt, 'Recording', {folders(groups_plotted{group}{2})});
         folders(groups_plotted{group}{2});
 
-    if ~isempty(SW_group.axis.findAxes('Window_Dim_1'))
+    if ~isempty(SW_group.findaxis('Window_Dim_1'))
         %% Plotting if there are sliding windows.
         
         close('all')
@@ -177,4 +219,3 @@ for group = 1:length(groups_plotted)
 end
 
 end
-

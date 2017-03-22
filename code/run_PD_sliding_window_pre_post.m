@@ -10,58 +10,82 @@ chan_labels = {'Striatum', 'M1'};
 
 filename = 'STR_w_M1';
 
-window_length = 150;
+if ~exist('window_length', 'var'), window_length = 150; end
 
-sliding_window_cell{1} = window_length*500*[1 1];
+sliding_window_cell{1} = window_length*data_labels_struct.sampling_freq{1}*[1 1];
 
-%% Granger causality analysis:
+%% Specific stuff.
 
-sliding_window_cell{2} = [2 2];
+if ~exist('analysis', 'var'), analysis = 'granger'; end
 
-function_handle = @mvgc_analysis; function_name = function_handle;
+switch analysis
+    
+    case 'granger'
+        
+        % Granger causality analysis:
+        
+        sliding_window_cell{2} = [2 2];
+        
+        function_handle = @mvgc_analysis; function_name = function_handle;
+        
+        varargin = {[], '', 1};
+        
+    case 'pmtm'
+        
+        % PMTM:
+        
+        sliding_window_cell{2} = [1 1];
+        
+        function_handle = @pmtm_detrend;
+        
+        varargin = {window_length, [], data_labels_struct.sampling_freq{1}};
+        
+    case 'arspec'
+        
+        % AR spectrum:
+        
+        sliding_window_cell{2} = [1 1]; % {[500 500], [1 1]}; %
+        
+        function_handle = @mvgc_analysis; function_name = get_fname(function_handle);
+        
+        varargin = {[], '', 3};
+        
+    case 'arxspec'
+        
+        % AR cross-spectrum:
+        
+        sliding_window_cell{2} = [2 2]; % = {[150*500 150*500], [2 2]};
+        
+        function_handle = @mvgc_analysis;
+        
+        varargin = {[], '', 3};
+        
+end
 
-varargin = {[], '', 1};
+%% Running analysis.
 
-% %% PMTM:
-% 
-% sliding_window_cell{2} = [1 1];
-% 
-% function_handle = @pmtm;
-% 
-% varargin = {150, [], 500};
-
-% %% AR spectrum:
-% 
-% sliding_window_cell{2} = [1 1]; % {[500 500], [1 1]}; % 
-% 
-% function_handle = @mvgc_analysis; function_name = get_fname(function_handle);
-% 
-% varargin = {[], '', 3};
-
-% %% AR cross-spectrum:
-% 
-% sliding_window_cell{2} = [2 2]; % = {[150*500 150*500], [2 2]};
-% 
-% function_handle = @mvgc_analysis;
-% 
-% varargin = {[], '', 3};
-
-% %% Running analysis.
-% 
-% PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
+PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
 
 PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
 
-% %% Loading & concatenating analysis.
-% 
-% [SW, indices_cell] = PD_sliding_window_pre_post_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
-% 
-% %% Importing into xPlt.
-% 
-% SW_xPlt = PD_sliding_window_pre_post_xPlt(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
-% 
-% SW_xPlt.getaxisinfo
+%% Loading & concatenating analysis.
+
+[SW, indices_cell] = PD_sliding_window_pre_post_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
+
+%% Importing into xPlt.
+
+SW_xPlt = PD_sliding_window_pre_post_xPlt(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
+
+SW_xPlt.getaxisinfo
     
-% %% Plotting.
-% 
-% PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, varargin{:})
+SW_xPlt = PD_sliding_window_load(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline'}, varargin{:});
+
+SW_xPlt.getaxisinfo
+
+%% Plotting.
+
+if ~exist('norm', 'var'), norm = 'baseline'; end
+
+PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
+
+% PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, varargin{:})
