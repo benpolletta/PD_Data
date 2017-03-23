@@ -49,7 +49,19 @@ switch function_name
         
     case 'pmtm'
         
-        if sliding_window_cell{1}(1) == 150
+        if sliding_window_cell{1}(1) == 150*500
+            
+            channel_dims = window_dims(1);
+            
+        else
+                    
+            channel_dims = window_dims(2);
+        
+        end
+        
+    case 'pmtm_detrend'
+        
+        if sliding_window_cell{1}(1) == 150*500
             
             channel_dims = window_dims(1);
             

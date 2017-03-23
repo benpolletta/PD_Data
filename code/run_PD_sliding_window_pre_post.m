@@ -60,6 +60,14 @@ switch analysis
         
         varargin = {[], '', 3};
         
+    case 'pac'
+        
+        sliding_window_cell{2} = [1 1]; % = {[150*500 150*500], [2 2]};
+        
+        function_handle = @PAC;
+        
+        varargin = {data_labels_struct.sampling_freq{1}, [.25:.25:10 11:30], [15:30 32.5:2.5:80 85:5:200]};
+        
 end
 
 %% Running analysis.
@@ -68,24 +76,24 @@ PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_ce
 
 PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
 
-%% Loading & concatenating analysis.
-
-[SW, indices_cell] = PD_sliding_window_pre_post_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
-
-%% Importing into xPlt.
-
-SW_xPlt = PD_sliding_window_pre_post_xPlt(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
-
-SW_xPlt.getaxisinfo
-    
-SW_xPlt = PD_sliding_window_load(function_name, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline'}, varargin{:});
-
-SW_xPlt.getaxisinfo
-
-%% Plotting.
-
-if ~exist('norm', 'var'), norm = 'baseline'; end
-
-PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
+% %% Loading & concatenating analysis.
+% 
+% [SW, indices_cell] = PD_sliding_window_pre_post_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
+% 
+% %% Importing into xPlt.
+% 
+% SW_xPlt = PD_sliding_window_pre_post_xPlt(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
+% 
+% SW_xPlt.getaxisinfo
+%     
+% SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline'}, varargin{:});
+% 
+% SW_xPlt.getaxisinfo
+% 
+% %% Plotting.
+% 
+% if ~exist('norm', 'var'), norm = 'baseline'; end
+% 
+% PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
 
 % PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, varargin{:})

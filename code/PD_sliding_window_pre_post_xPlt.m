@@ -202,6 +202,22 @@ switch function_name
             
         end
         
+    case 'pmtm_detrend'
+        
+        if sliding_window_cell{1}(1) == 150*500
+            
+            axes_info_struct.window_names{1} = 'Channel';
+            
+            axes_info_struct.window_values{1} = {'Striatum', 'M1'};
+            
+        else
+            
+            axes_info_struct.window_names{2} = 'Channel';
+            
+            axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+            
+        end
+        
 end
 
 end

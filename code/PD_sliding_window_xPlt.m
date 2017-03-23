@@ -51,7 +51,7 @@ output_size(output_size == 1) = [];
 odims = length(output_size);
 
 axes_info_struct = get_axes_info(function_name, sliding_window_cell,...
-    subjects_mat_struct.chan_labels, data_labels_struct, no_windows, output_size, varargin{:});
+    subjects_mat_struct.chan_labels, data_labels_struct, pd_names, no_windows, output_size, varargin{:});
 
 dims_from_last = 0;
 
@@ -97,7 +97,7 @@ save([make_sliding_window_analysis_name([filename, pd_label,...
 end
 
 function axes_info_struct = get_axes_info(function_name, sliding_window_cell,...
-    chan_labels, data_labels_struct, window_size, output_size, varargin)
+    chan_labels, data_labels_struct, pd_names, window_size, output_size, varargin)
 
 axes_info_struct.output_names{1} = 'Freq. (Hz)';
 
@@ -136,7 +136,7 @@ switch function_name
                 
                 if sliding_window_cell{2}(1) == 1
                     
-                    if sliding_window_cell{1}(1) == 150*500
+                    if sliding_window_cell{1}(1) == 150*500 && strcmp(pd_names, 'baseline')
                         
                         axes_info_struct.window_names{1} = 'Channel';
                         
@@ -162,7 +162,23 @@ switch function_name
         
     case 'pmtm'
         
-        if sliding_window_cell{1}(1) == 150*500
+        if sliding_window_cell{1}(1) == 150*500 && ~strcmp(pd_names, 'baseline')
+            
+            axes_info_struct.window_names{1} = 'Channel';
+            
+            axes_info_struct.window_values{1} = chan_labels;
+            
+        else
+            
+            axes_info_struct.window_names{2} = 'Channel';
+            
+            axes_info_struct.window_values{2} = chan_labels;
+            
+        end
+        
+    case 'pmtm_detrend'
+        
+        if sliding_window_cell{1}(1) == 150*500 && ~strcmp(pd_names, 'baseline')
             
             axes_info_struct.window_names{1} = 'Channel';
             
