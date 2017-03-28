@@ -34,7 +34,7 @@ load([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
     window_time_cell, 2, varargin{:}), '_xPlt.mat'])
 
-SW_xPlt = abs(SW_xPlt);
+SW_xPlt = xp_abs(SW_xPlt);
 
 SW_xPlt.getaxisinfo
 
@@ -56,7 +56,7 @@ switch norm
             num2str(data_labels_struct.band_index)], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
-        SW_Baseline = abs(SW_Baseline.SW_xPlt);
+        SW_Baseline = xp_abs(SW_Baseline.SW_xPlt);
         
         if ~isempty(SW_Baseline.findaxis('Window_Dim_1'))
             
@@ -64,15 +64,29 @@ switch norm
             
         end
         
-        SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Period')).values, 'Period');
+        % SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Period')).values, 'Period');
         
         if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
             
-            SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1');
+            SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
             
         end
         
-        SW_xPlt.data = cellfun(@(x, y) 100*(x./y - 1), SW_xPlt.data, SW_Baseline.data, 'UniformOutput', 0);
+        SW_Baseline = SW_Baseline.unpackDim(2, SW_xPlt.findaxis('Period'), 'Period', {'baseline'});
+        
+        SW_Baseline.getaxisinfo
+        
+        SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
+        
+        SW_BaselineMerged.getaxisinfo
+        
+        SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline');
+        
+        SW_xPlt = SW_xPlt.axissubset('Period', 'p');
+        
+        SW_xPlt.getaxisinfo
+        
+        % SW_xPlt.data = cellfun(@(x, y) 100*(x./y - 1), SW_xPlt.data, SW_Baseline.data, 'UniformOutput', 0);
         
     case 'totalpower'
         
@@ -122,7 +136,7 @@ for group = 1:length(groups_plotted)
     
     group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:}), norm];
+    window_time_cell, 2, varargin{:}), '_', norm];
     
     SW_group = SW_xPlt.packDim('Recording', 2);
     

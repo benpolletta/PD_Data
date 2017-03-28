@@ -83,7 +83,7 @@ for s = 1:length(subjects_mat_cell)
         for period = 1:no_periods
             
             sw_xPlt = PD_sliding_window_xPlt(function_name, sliding_window_cell,...
-                subjects_struct, data_labels_struct, subj_name, pd_names, varargin{:});
+                subjects_struct, data_labels_struct, subj_name, pd_names(period), varargin{:});
             
             sw_xPlt.axis(end + 1).name = 'Recording';
             sw_xPlt.axis(end).values = {folder};
@@ -106,6 +106,8 @@ for s = 1:length(subjects_mat_cell)
     end
     
 end
+
+SW_xPlt = squeeze(SW_xPlt);
 
 save([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...

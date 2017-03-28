@@ -128,7 +128,7 @@ function axes_info_struct = get_axes_info(function_name,...
 axes_info_struct.output_names{1} = 'Freq. (Hz)';
 
 axes_info_struct.output_values{1} = data_labels_struct.sampling_freq{1}*...
-    (1:sliding_window_cell{1}(1))/(2*sliding_window_cell{1}(1));
+    (1:output_size(1))/(2*output_size(1));
 
 for odim = 2:length(output_size)
     
@@ -156,7 +156,7 @@ switch function_name
                 
                 axes_info_struct.output_names([2 3]) = {'Channel To', 'Channel From'};
                 
-                axes_info_struct.output_values([2 3]) = deal({{'Striatum', 'M1'}});
+                axes_info_struct.output_values([2 3]) = deal({{'Striatum', 'Motor Ctx.'}});
                 
             case 3
                 
@@ -166,13 +166,13 @@ switch function_name
                         
                         axes_info_struct.window_names{1} = 'Channel';
                         
-                        axes_info_struct.window_values{1} = {'Striatum', 'M1'};
+                        axes_info_struct.window_values{1} = {'Striatum', 'Motor Ctx.'};
                         
                     else
                         
                         axes_info_struct.window_names{2} = 'Channel';
                         
-                        axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+                        axes_info_struct.window_values{2} = {'Striatum', 'Motor Ctx.'};
                         
                     end
                     
@@ -180,7 +180,7 @@ switch function_name
                     
                     axes_info_struct.output_names([2 3]) = {'Channel 1', 'Channel 2'};
                 
-                    axes_info_struct.output_values([2 3]) = deal({{'Striatum', 'M1'}});
+                    axes_info_struct.output_values([2 3]) = deal({{'Striatum', 'Motor Ctx.'}});
                     
                 end
                 
@@ -192,13 +192,13 @@ switch function_name
             
             axes_info_struct.window_names{1} = 'Channel';
             
-            axes_info_struct.window_values{1} = {'Striatum', 'M1'};
+            axes_info_struct.window_values{1} = {'Striatum', 'Motor Ctx.'};
             
         else
             
             axes_info_struct.window_names{2} = 'Channel';
             
-            axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+            axes_info_struct.window_values{2} = {'Striatum', 'Motor Ctx.'};
             
         end
         
@@ -208,13 +208,13 @@ switch function_name
             
             axes_info_struct.window_names{1} = 'Channel';
             
-            axes_info_struct.window_values{1} = {'Striatum', 'M1'};
+            axes_info_struct.window_values{1} = {'Striatum', 'Motor Ctx.'};
             
         else
             
             axes_info_struct.window_names{2} = 'Channel';
             
-            axes_info_struct.window_values{2} = {'Striatum', 'M1'};
+            axes_info_struct.window_values{2} = {'Striatum', 'Motor Ctx.'};
             
         end
         

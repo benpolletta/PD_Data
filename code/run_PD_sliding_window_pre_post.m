@@ -79,21 +79,21 @@ PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_ce
 % %% Loading & concatenating analysis.
 % 
 % [SW, indices_cell] = PD_sliding_window_pre_post_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
-% 
-% %% Importing into xPlt.
-% 
-% SW_xPlt = PD_sliding_window_pre_post_xPlt(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, varargin{:});
-% 
-% SW_xPlt.getaxisinfo
-%     
-% SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline'}, varargin{:});
-% 
-% SW_xPlt.getaxisinfo
-% 
-% %% Plotting.
-% 
-% if ~exist('norm', 'var'), norm = 'baseline'; end
-% 
-% PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
+
+%% Importing into xPlt.
+
+SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'pre', 'post'}, varargin{:});
+
+SW_xPlt.getaxisinfo
+    
+SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline'}, varargin{:});
+
+SW_xPlt.getaxisinfo
+
+%% Plotting.
+
+if ~exist('norm', 'var'), norm = 'baseline'; end
+
+PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
 
 % PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, varargin{:})

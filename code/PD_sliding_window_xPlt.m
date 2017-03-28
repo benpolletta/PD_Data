@@ -102,7 +102,7 @@ function axes_info_struct = get_axes_info(function_name, sliding_window_cell,...
 axes_info_struct.output_names{1} = 'Freq. (Hz)';
 
 axes_info_struct.output_values{1} = data_labels_struct.sampling_freq{1}*...
-    (1:sliding_window_cell{1}(1))/(2*sliding_window_cell{1}(1));
+    (0:(output_size(1) - 1))/(2*output_size(1));
 
 for odim = 2:length(output_size)
     
@@ -136,7 +136,7 @@ switch function_name
                 
                 if sliding_window_cell{2}(1) == 1
                     
-                    if sliding_window_cell{1}(1) == 150*500 && strcmp(pd_names, 'baseline')
+                    if sliding_window_cell{1}(1) == 150*500 && ~strcmp(pd_names, 'baseline')
                         
                         axes_info_struct.window_names{1} = 'Channel';
                         
