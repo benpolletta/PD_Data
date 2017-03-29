@@ -51,10 +51,10 @@ no_folders = sum(subject_mat_folders);
 first_name = make_sliding_window_analysis_name([folders{1}, '/', prefixes{1}, '_', pd_names{1},...
     '_band', num2str(data_labels_struct.band_index)], function_name, window_time_cell, 2, varargin{:});
 
-load(first_name, 'output_size', 'no_windows')
+load([first_name, '.mat'], 'output_size', 'no_windows')
 
-indices_cell = make_PD_indices_cell(subjects_mat_cell,function_name,...
-    sliding_window_cell, no_windows, output_size, varargin{:});
+% indices_cell = make_PD_indices_cell(subjects_mat_cell,function_name,...
+%     sliding_window_cell, no_windows, output_size, varargin{:});
 
 sw_size = [output_size, no_windows'];
 
@@ -62,7 +62,7 @@ sw_size(sw_size == 1) = [];
 
 sw_size_cell = num2cell(sw_size);
 
-SW = nan(sw_size_cell{:}, no_folders, no_periods);
+% SW = nan(sw_size_cell{:}, no_folders, no_periods);
 
 folder_index = 0;
 
