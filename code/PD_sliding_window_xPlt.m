@@ -40,6 +40,8 @@ sw_xPlt = xPlt;
 
 sw_xPlt = sw_xPlt.importData({sw});
 
+meta = sw_xPlt.meta;
+
 no_windows = cellfun(@(x) length(x), window_time);
 
 no_windows(no_windows == 1) = [];
@@ -59,8 +61,21 @@ dims_from_last = 0;
 
 for wdim = 1:wdims
     
-    sw_xPlt = unpackDim(sw_xPlt, length(sw_size) - dims_from_last, 1,...
-        axes_info_struct.window_names{wdims - wdim + 1}, axes_info_struct.window_values{wdims - wdim + 1});
+%     if no_windows(wdim) < 100
+        
+        sw_xPlt = unpackDim(sw_xPlt, length(sw_size) - dims_from_last, 1,...
+            axes_info_struct.window_names{wdims - wdim + 1}, axes_info_struct.window_values{wdims - wdim + 1});
+        
+%     else
+%         
+%         remaining_axis = nDDictAxis;
+%         
+%         remaining_axis.name = axes_info_struct.window_names{wdim};
+%         remaining_axis.values = axes_info_struct.window_values{wdim};
+%         
+%         meta.(['matrix_dim_', num2str(odims + wdim)]) = remaining_axis;
+%         
+%     end
     
     dims_from_last = dims_from_last + 1;
     
@@ -68,7 +83,7 @@ end
     
 %% Unpacking output dimensions.
 
-for odim = 1:(odims - axes_info_struct.leave_packed_dim)
+for odim = 1:(odims - axes_info_struct.leave_packed_odim)
     
     sw_xPlt = unpackDim(sw_xPlt, length(sw_size) - dims_from_last, 1,...
         axes_info_struct.output_names{odims - odim + 1}, axes_info_struct.output_values{odims - odim + 1});
@@ -77,9 +92,7 @@ for odim = 1:(odims - axes_info_struct.leave_packed_dim)
     
 end
 
-meta = sw_xPlt.meta;
-
-for odim = 1:axes_info_struct.leave_packed_dim
+for odim = 1:axes_info_struct.leave_packed_odim
     
     remaining_axis = nDDictAxis;
     
@@ -121,7 +134,7 @@ if strcmp(function_name, 'PAC')
     
     axes_info_struct.output_values{2} = varargin{2};
     
-    axes_info_struct.leave_packed_dim = 2;
+    axes_info_struct.leave_packed_odim = 2;
     
 else
     
@@ -130,7 +143,7 @@ else
     axes_info_struct.output_values{1} = data_labels_struct.sampling_freq{1}*...
         (0:(output_size(1) - 1))/(2*output_size(1));
     
-    axes_info_struct.leave_packed_dim = 1;
+    axes_info_struct.leave_packed_odim = 1;
     
 end
 
@@ -139,6 +152,12 @@ for wdim = 1:length(window_size)
     axes_info_struct.window_names{wdim} = ['Window_Dim_' num2str(wdim)];
     
     axes_info_struct.window_values{wdim} = 1:window_size(wdim);
+    
+end
+
+if strcmp(pd_names{:}, 'pre_shuffles') || strcmp(pd_names{:}, 'post_shuffles')
+
+    axes_info_struct.window_names{wdim} = 'Shuffles';
     
 end
 

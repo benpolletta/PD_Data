@@ -30,6 +30,9 @@ switch analysis
         
         varargin = {[], '', 1};
         
+        shuffle_struct = init_struct({'no_shuffles', 'combine_pairs', 'varargin'},...
+            {1000, @combine_dimension, {2, [1 2]}});
+        
     case 'pmtm'
         
         % PMTM:
@@ -68,6 +71,9 @@ switch analysis
         
         varargin = {data_labels_struct.sampling_freq{1}, [.25:.25:10 11:30], [15:30 32.5:2.5:80 85:5:200]};
         
+        shuffle_struct = init_struct({'no_shuffles', 'combine_pairs', 'varargin'},...
+            {1000, @pass_input, {}});
+        
 end
 
 %% Running analysis.
@@ -75,6 +81,8 @@ end
 PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
 
 PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
+
+PD_sliding_window_pre_post_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, shuffle_struct, varargin{:})
 
 % %% Loading & concatenating analysis.
 % 
