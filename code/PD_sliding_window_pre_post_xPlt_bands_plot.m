@@ -1,4 +1,4 @@
-function PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, varargin)
+function PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -34,19 +34,40 @@ load([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
     window_time_cell, 2, varargin{:}), '_xPlt.mat'])
 
-SW_xPlt = abs(SW_xPlt);
-
 SW_xPlt.getaxisinfo
 
 SW_Bands = SW_xPlt;
 
-frequencies = SW_xPlt.meta.matrix_dim_1.values;
+if strcmp(function_name, 'PAC')
+    
+    for i = 1:2,
+        
+        frequencies{i} = SW_xPlt.meta.(['matrix_dim_', num2str(i)]).values;
+        
+    end
+    
+else
 
-load('seven_bands')
+    SW_xPlt = xp_abs(SW_xPlt);
+    
+    frequencies = SW_xPlt.meta.matrix_dim_1.values;
+    
+end
+
+%% Normalizing.
+
+SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm, varargin{:});
+
+size_dim2 = cellfun(@(x) size(x, 2), SW_xPlt.data);
+
+%% Getting max. over bands.
+
+% load('seven_bands'), bands(3, 2) = 15; bands(end, :) = [];
+bands = [1 4; 4 8; 8 14; 15 30; 31 60; 60 100; 120 180];
+
+[~, band_labels] = band_max(SW_xPlt.data{1}, frequencies, bands(1:end, :));
    
-SW_Bands.data = cellfun(@(x) band_max(x, frequencies, bands), SW_xPlt.data, 'UniformOutput', 0);
-
-for b = 1:size(bands, 1), band_labels{b} = sprintf('%d-%d Hz', bands(b, :)); end
+SW_Bands.data = cellfun(@(x) band_max(x, frequencies, bands(1:end, :)), SW_xPlt.data, 'UniformOutput', 0);
 
 SW_Bands.meta.matrix_dim_1.name = '';
 SW_Bands.meta.matrix_dim_1.values = band_labels;
@@ -61,9 +82,9 @@ groups_plotted = {All_index, M1_increased_index, M1_not_increased_index}; % {All
 
 for group = 1:length(groups_plotted)
     
-    group_name = make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
-    '_band', num2str(data_labels_struct.band_index), '_BP'], function_name,...
-    window_time_cell, 2, varargin{:});
+    group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
+    '_band', num2str(data_labels_struct.band_index), '_BP_', num2str(size(bands,1)), 'bands'], function_name,...
+    window_time_cell, 2, varargin{:}), '_', norm];
     
     SW_group = SW_Bands.packDim('Recording', 2);
     
@@ -75,6 +96,8 @@ for group = 1:length(groups_plotted)
     
     SW_group.axis(findAxes(SW_group.axis,'Recording')).values = ... % SW_xPlt = SW_xPlt.importAxisValues(SW_xPlt, 'Recording', {folders(groups_plotted{group}{2})});
         folders(groups_plotted{group}{2});
+    
+    % if ~any(size_dim2(:) > 1)
 
     if ~isempty(SW_group.axis.findAxes('Window_Dim_1'))
         %% Plotting if there are sliding windows.
@@ -87,7 +110,7 @@ for group = 1:length(groups_plotted)
         
         SW_WindowsPacked.getaxisinfo
         
-        function_handles = {@xp_subplot_grid_adaptive,@xp_matrix_imagesc};
+        function_handles = {@xp_tight_subplot_adaptive,@xp_matrix_imagesc};
         function_arguments = {{{'Recording', 'Period', 'Channel'}},{}};
         dimensions = {1:length(size(SW_WindowsPacked)),0};
         recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
@@ -100,8 +123,8 @@ for group = 1:length(groups_plotted)
         
         %% % % Pre-post comparison over windows, plotted by recording. % % %
         
-        function_handles = {@xp_subplot_grid_adaptive,@xp_compare_barplot_2D};
-        function_arguments = {{},{@ttest, significance}};
+        function_handles = {@xp_tight_subplot_adaptive,@xp_compare_barplot_2D};
+        function_arguments = {{},{@ttest, significance, [], 1}};
         dimensions = {{'Recording', 'Channel'},{'Period'}};
         recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
         
@@ -113,9 +136,7 @@ for group = 1:length(groups_plotted)
         
         %% % % Pre-post comparison of mean across windows, over recordings. % % %
         
-        SW_WindowMean = SW_WindowsPacked;
-        
-        SW_WindowMean.data = cellfun(@(x) mean(x, 2), SW_WindowMean.data, 'UniformOutput', 0);
+        SW_WindowMean = mean_over_axis(SW_group, 'Window_Dim_1');
         
         SW_WindowMean = squeeze(SW_WindowMean.packDim('Recording', 2));
         
@@ -135,7 +156,7 @@ for group = 1:length(groups_plotted)
         
         SW_RecordingsPacked = squeeze(SW_group.packDim('Recording', 2));
         
-        function_handles = {@xp_subplot_grid_adaptive,@xp_matrix_barplot};
+        function_handles = {@xp_tight_subplot_adaptive,@xp_matrix_barplot};
         function_arguments = {{{'Period', 'Channel'}},{}};
         dimensions = {1:length(size(SW_RecordingsPacked)),0};
         recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
@@ -148,8 +169,8 @@ for group = 1:length(groups_plotted)
         
         %% % % Pre-post comparisons over recordings. % % %
         
-        function_handles = {@xp_subplot_grid_adaptive,@xp_compare_barplot_2D};
-        function_arguments = {{},{@ttest, significance}};
+        function_handles = {@xp_tight_subplot_adaptive,@xp_compare_barplot_2D};
+        function_arguments = {{},{@ttest, significance, [], 1}};
         dimensions = {{'Channel'},{'Period'}};
         recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
         
@@ -157,23 +178,70 @@ for group = 1:length(groups_plotted)
         
     end
     
+    % else
+    
+    
 end
 
 end
 
-function bm = band_max(data, frequencies, bands)
+function [bm, band_labels] = band_max(data, frequencies, bands)
+    
+no_bands = size(bands, 1);
 
-for b = 1:size(bands, 1)
+if isnumeric(frequencies)
     
-    band_indicator = frequencies >= bands(b, 1) & frequencies <= bands(b, 2);
+    bm = nan(no_bands, 1); band_labels = {};
     
-    [bm(b, 1), index] = max(data(band_indicator));
+    for b = 1:no_bands
+        
+        band_labels{b} = sprintf('%d-%d Hz', bands(b, :));
+        
+        band_indicator = frequencies >= bands(b, 1) & frequencies <= bands(b, 2);
+        
+        bm(b, 1) = max(data(band_indicator));
+        
+    end
     
-    % band_frequencies =  frequencies(band_indicator);
-    %
-    % bm(b, 2) = band_frequencies(index);
+elseif iscell(frequencies)
+    
+    freq_mat_1 = repmat(frequencies{1}', 1, length(frequencies{2}));
+    
+    freq_mat_2 = repmat(frequencies{2}, length(frequencies{1}), 1);
+    
+    bm = nan(no_bands); band_labels = {};
+    
+    bm_pair_index = 1; bm_indices = nan(no_bands, 2);
+    
+    for b2 = 1:no_bands
+        
+        band_indicator_2 = freq_mat_2 >= bands(b2, 1) & freq_mat_2 <= bands(b2, 2);
+        
+        for b1 = 1:no_bands
+            
+            band_indicator_1 = freq_mat_1 >= bands(b1, 1) & freq_mat_1 <= bands(b1, 2);
+            
+            band_indicator = band_indicator_1 & band_indicator_2;
+            
+            if ~isempty(data(band_indicator))
+                
+                bm(b1, b2) = max(data(band_indicator));
+                
+                band_labels{bm_pair_index} = sprintf('%d-%dx%d-%d', bands(b1, :), bands(b2, :));
+                
+                bm_pair_index = bm_pair_index + 1;
+                
+            end
+            
+        end
+        
+    end
+    
+    bm = bm(:);
+    
+    bm(isnan(bm)) = [];
     
 end
-    
+
 end
 
