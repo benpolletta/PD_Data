@@ -1,4 +1,4 @@
-function sw_xPlt = PD_sliding_window_xPlt(function_name, sliding_window_cell, subjects_mat_struct, data_labels_struct, filename, pd_names, varargin)
+function [sw_xPlt, axes_info_struct] = PD_sliding_window_xPlt(function_name, sliding_window_cell, subjects_mat_struct, data_labels_struct, filename, pd_names, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -42,7 +42,7 @@ sw_xPlt = sw_xPlt.importData({sw});
 
 meta = sw_xPlt.meta;
 
-no_windows = cellfun(@(x) length(x), window_time);
+if ~exist('no_windows', 'var'), no_windows = cellfun(@(x) length(x), window_time); end
 
 no_windows(no_windows == 1) = [];
 
@@ -59,28 +59,34 @@ dims_from_last = 0;
 
 %% Unpacking window dimensions.
 
-for wdim = 1:wdims
+leave_packed_wdim = [];
+
+for wdim = wdims:-1:1
     
-%     if no_windows(wdim) < 100
+    if no_windows(wdim) < 100
         
         sw_xPlt = unpackDim(sw_xPlt, length(sw_size) - dims_from_last, 1,...
-            axes_info_struct.window_names{wdims - wdim + 1}, axes_info_struct.window_values{wdims - wdim + 1});
+            axes_info_struct.window_names{wdim}, axes_info_struct.window_values{wdim});
         
-%     else
-%         
-%         remaining_axis = nDDictAxis;
-%         
-%         remaining_axis.name = axes_info_struct.window_names{wdim};
-%         remaining_axis.values = axes_info_struct.window_values{wdim};
-%         
-%         meta.(['matrix_dim_', num2str(odims + wdim)]) = remaining_axis;
-%         
-%     end
+    else
+        
+        remaining_axis = nDDictAxis;
+        
+        remaining_axis.name = axes_info_struct.window_names{wdim};
+        remaining_axis.values = axes_info_struct.window_values{wdim};
+        
+        meta.(['matrix_dim_', num2str(odims + wdim)]) = remaining_axis;
+        
+        leave_packed_wdim(end + 1) = wdim;
+        
+    end
     
     dims_from_last = dims_from_last + 1;
     
 end
     
+if ~isempty(leave_packed_wdim), axes_info_struct.leave_packed_wdim = leave_packed_wdim; end
+
 %% Unpacking output dimensions.
 
 for odim = 1:(odims - axes_info_struct.leave_packed_odim)
@@ -109,7 +115,7 @@ sw_xPlt = squeeze(sw_xPlt);
 
 save([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:}), '_xPlt.mat'], 'sw_xPlt')
+    window_time_cell, 2, varargin{:}), '_xPlt.mat'], 'sw_xPlt', 'axes_info_struct')
 
 end
 
@@ -155,9 +161,9 @@ for wdim = 1:length(window_size)
     
 end
 
-if strcmp(pd_names{:}, 'pre_shuffles') || strcmp(pd_names{:}, 'post_shuffles')
+if ~isempty(regexp(pd_names{:}, 'shuffle', 'once'))
 
-    axes_info_struct.window_names{wdim} = 'Shuffles';
+    axes_info_struct.window_names{1} = 'Shuffles';
     
 end
 

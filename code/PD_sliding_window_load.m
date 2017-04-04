@@ -55,12 +55,12 @@ load([first_name, '.mat'], 'output_size', 'no_windows')
 
 % indices_cell = make_PD_indices_cell(subjects_mat_cell,function_name,...
 %     sliding_window_cell, no_windows, output_size, varargin{:});
-
-sw_size = [output_size, no_windows'];
-
-sw_size(sw_size == 1) = [];
-
-sw_size_cell = num2cell(sw_size);
+% 
+% sw_size = [output_size, no_windows'];
+% 
+% sw_size(sw_size == 1) = [];
+% 
+% sw_size_cell = num2cell(sw_size);
 
 % SW = nan(sw_size_cell{:}, no_folders, no_periods);
 
@@ -82,8 +82,16 @@ for s = 1:length(subjects_mat_cell)
         
         for period = 1:no_periods
             
-            sw_xPlt = PD_sliding_window_xPlt(function_name, sliding_window_cell,...
+            [sw_xPlt, axes_info_struct] = PD_sliding_window_xPlt(function_name, sliding_window_cell,...
                 subjects_struct, data_labels_struct, subj_name, pd_names(period), varargin{:});
+            
+            % if ~isempty(regexp(pd_names{period}, 'shuffles', 'once')) && strcmp(function_name, 'PAC')
+            % 
+            %     sw_xPlt.data = cellfun(@(x) reshape(x, [size(x, 1), size(x, 2), size(x,3)/2, 2]), sw_xPlt.data, 'UniformOutput', false);
+            % 
+            %     sw_xPlt = unpackDim(sw_xPlt, 4, 2, 'Channel', {'Motor Ctx.', 'Striatum'});
+            % 
+            % end
             
             sw_xPlt.axis(end + 1).name = 'Recording';
             sw_xPlt.axis(end).values = {folder};
@@ -107,8 +115,27 @@ for s = 1:length(subjects_mat_cell)
     
 end
 
+data_dims = cellfun(@(x) length(size(x)), SW_xPlt.data);
+
+max_data_dim = max(data_dims(:));
+
+for d = (axes_info_struct.leave_packed_odim + 1):max_data_dim
+   
+    if isfield(SW_xPlt.meta, ['matrix_dim_', num2str(d)])
+       
+        if ~strcmp(SW_xPlt.meta.(['matrix_dim_', num2str(d)]).name, 'Shuffles')
+        
+            SW_xPlt = unpackDim(SW_xPlt, d, d, SW_xPlt.meta.(['matrix_dim_', num2str(d)]).name,...
+                SW_xPlt.meta.(['matrix_dim_', num2str(d)]).values);
+        
+        end
+            
+    end
+    
+end
+
 SW_xPlt = squeeze(SW_xPlt);
 
 save([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:}), '_xPlt.mat'], 'SW_xPlt')
+    window_time_cell, 2, varargin{:}), '_xPlt.mat'], 'SW_xPlt', 'axes_info_struct')
