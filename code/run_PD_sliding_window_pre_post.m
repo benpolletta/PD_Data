@@ -30,8 +30,8 @@ switch analysis
         
         varargin = {[], '', 1};
         
-        shuffle_struct = init_struct({'no_shuffles', 'combine_pairs', 'varargin'},...
-            {1000, @combine_dimension, {2, [1 2]}});
+        shuffle_struct = init_struct({'shuffle_dims', 'no_shuffles', 'combine_pairs', 'varargin'},...
+            {1, 1000, @combine_dimension, {2, [1 2]}});
         
     case 'pmtm'
         
@@ -71,8 +71,8 @@ switch analysis
         
         varargin = {data_labels_struct.sampling_freq{1}, [.25:.25:10 11:30], [15:30 32.5:2.5:80 85:5:200]};
         
-        shuffle_struct = init_struct({'no_shuffles', 'combine_pairs', 'varargin'},...
-            {1000, @pass_input, {}});
+        shuffle_struct = init_struct({'shuffle_dims', 'no_shuffles', 'combine_pairs', 'varargin'},...
+            {1, 1000, @pass_input, {}});
         
 end
 
@@ -83,6 +83,8 @@ PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_ce
 PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
 
 PD_sliding_window_pre_post_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, shuffle_struct, varargin{:})
+
+PD_sliding_window_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, {'baseline'}, shuffle_struct, varargin{:})
 
 % %% Loading & concatenating analysis.
 % 
@@ -95,6 +97,14 @@ SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_
 SW_xPlt.getaxisinfo
     
 SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline'}, varargin{:});
+
+SW_xPlt.getaxisinfo
+    
+SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'pre_shuffles', 'post_shuffles'}, varargin{:});
+
+SW_xPlt.getaxisinfo
+    
+SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline_shuffles'}, varargin{:});
 
 SW_xPlt.getaxisinfo
 
