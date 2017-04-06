@@ -85,13 +85,13 @@ for s = 1:length(subjects_mat_cell)
             [sw_xPlt, axes_info_struct] = PD_sliding_window_xPlt(function_name, sliding_window_cell,...
                 subjects_struct, data_labels_struct, subj_name, pd_names(period), varargin{:});
             
-            % if ~isempty(regexp(pd_names{period}, 'shuffles', 'once')) && strcmp(function_name, 'PAC')
-            % 
-            %     sw_xPlt.data = cellfun(@(x) reshape(x, [size(x, 1), size(x, 2), size(x,3)/2, 2]), sw_xPlt.data, 'UniformOutput', false);
-            % 
-            %     sw_xPlt = unpackDim(sw_xPlt, 4, 2, 'Channel', {'Motor Ctx.', 'Striatum'});
-            % 
-            % end
+            shuffle_axis = sw_xPlt.findaxis('Shuffles');
+            
+            if ~isempty(shuffle_axis) && length(sw_xPlt.axis(shuffle_axis).values) > 100
+            
+                sw_xPlt = squeeze(sw_xPlt.packDim('Shuffles', axes_info_struct.odims + 1));
+            
+            end
             
             sw_xPlt.axis(end + 1).name = 'Recording';
             sw_xPlt.axis(end).values = {folder};
@@ -100,7 +100,7 @@ for s = 1:length(subjects_mat_cell)
             sw_xPlt.axis(end).values = {pd_names{period}};
             
             if exist('SW_xPlt', 'var')
-            
+                
                 SW_xPlt = SW_xPlt.merge(sw_xPlt);
                 
             else
