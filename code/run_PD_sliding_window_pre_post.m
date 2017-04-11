@@ -63,6 +63,9 @@ switch analysis
         
         varargin = {[], '', 3};
         
+        shuffle_struct = init_struct({'shuffle_dims', 'no_shuffles', 'combine_pairs', 'varargin'},...
+            {1, 1000, @combine_dimension, {2, [1 2]}});
+        
     case 'pac'
         
         sliding_window_cell{2} = [1 1]; % = {[150*500 150*500], [2 2]};
@@ -76,6 +79,8 @@ switch analysis
         
 end
 
+function_name = get_fname(function_handle);
+
 %% Running analysis.
 
 PD_sliding_window_pre_post(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, varargin{:})
@@ -84,7 +89,7 @@ PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_ce
 
 PD_sliding_window_pre_post_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, shuffle_struct, varargin{:})
 
-PD_sliding_window_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, {'baseline'}, shuffle_struct, varargin{:})
+% PD_sliding_window_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, {'baseline'}, shuffle_struct, varargin{:})
 
 % %% Loading & concatenating analysis.
 % 
@@ -104,9 +109,9 @@ SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_
 
 SW_xPlt.getaxisinfo
     
-SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline_shuffles'}, varargin{:});
-
-SW_xPlt.getaxisinfo
+% SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline_shuffles'}, varargin{:});
+% 
+% SW_xPlt.getaxisinfo
 
 %% Plotting.
 
@@ -114,4 +119,4 @@ if ~exist('norm', 'var'), norm = 'baseline'; end
 
 PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
 
-% PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, varargin{:})
+% PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
