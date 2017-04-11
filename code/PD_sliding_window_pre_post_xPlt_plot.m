@@ -122,6 +122,8 @@ for group = 1:length(groups_plotted)
             
             close('all')
             
+            SW_WindowMean = mean_over_axis(SW_group, 'Window_Dim_1');
+            
             %% % % False color image of all windows by recording. % % %
             
             SW_WindowsPacked = squeeze(SW_group.packDim('Window_Dim_1', 2));
@@ -146,17 +148,13 @@ for group = 1:length(groups_plotted)
             dimensions = {{'Recording', 'Channel'},{'Period'}};
             recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
             
-            save_all_figs([group_name, '_windows_compared_by_subject'])
+            save_all_figs([group_name, '_windows_by_subject_compared_p', num2str(significance)])
             
             close('all')
             
             % waitforbuttonpress
             
             %% % % Pre-post comparison of mean across windows, over recordings. % % %
-            
-            SW_WindowMean = SW_WindowsPacked;
-            
-            SW_WindowMean.data = cellfun(@(x) mean(x, 2), SW_WindowMean.data, 'UniformOutput', 0);
             
             SW_WindowMean = squeeze(SW_WindowMean.packDim('Recording', 2));
             
@@ -165,7 +163,7 @@ for group = 1:length(groups_plotted)
             dimensions = {{'Channel'},{'Period'}};
             recursivePlot(SW_WindowMean,function_handles,dimensions,function_arguments);
             
-            save_all_figs([group_name, '_windows_compared'])
+            save_all_figs([group_name, '_windows_compared_p', num2str(significance)])
             
         else
             %% Plotting if there are no sliding windows.
@@ -194,7 +192,7 @@ for group = 1:length(groups_plotted)
             dimensions = {{'Channel'},{'Period'}};
             recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
             
-            save_all_figs([group_name, '_recordings_compared'])
+            save_all_figs([group_name, '_recordings_compared_p', num2str(significance)])
             
         end
         
@@ -212,8 +210,8 @@ for group = 1:length(groups_plotted)
             SW_WindowMean.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_matrix_imagesc};
-            function_arguments = {{[], [], [], 'row'},{1}};
-            dimensions = {{'Recording', 'Period', 'Channel'},{1,1}};
+            function_arguments = {{[], [], [], 'row'},{1,1}};
+            dimensions = {{'Recording', 'Period', 'Channel'},{}};
             recursivePlot(SW_WindowMean,function_handles,dimensions,function_arguments);
             
             save_all_figs([group_name, '_window_mean_by_subject'])
@@ -227,17 +225,17 @@ for group = 1:length(groups_plotted)
             SW_WindowsPacked.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_compare_3D};
-            function_arguments = {{},{@ttest,.1,1,'pcolor'}};
+            function_arguments = {{},{@ttest,significance,1,'pcolor'}};
             dimensions = {{'Recording', 'Channel'},{'Period'}};
             recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments)
             
-            save_all_figs([group_name, '_comparisons_by_subject'])
+            save_all_figs([group_name, '_by_subject_compared_p', num2str(significance)])
             
             close('all')
             
             %% % % Mean across recordings. % % %
             
-            SW_RecordingMean = mean_over_axis(SW_WindowMean, 'Recording');
+            SW_RecordingMean = mean_over_axis(SW_WindowMean, 'Recording', @nanmedian);
             
             SW_RecordingMean.getaxisinfo
             
@@ -257,11 +255,11 @@ for group = 1:length(groups_plotted)
             SW_RecordingsPacked.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_compare_3D};
-            function_arguments = {{},{@ttest,.1,1,'pcolor'}};
+            function_arguments = {{},{@ttest,significance,1,'pcolor'}};
             dimensions = {{'Channel'},{'Period'}};
             recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments)
             
-            save_all_figs([group_name, '_comparisons'])
+            save_all_figs([group_name, '_compared_p', num2str(significance)])
             
             close('all')
             
@@ -283,7 +281,7 @@ for group = 1:length(groups_plotted)
             
             %% % % Pre-post comparisons over recordings. % % %
             
-            SW_RecordingMean = mean_over_axis(SW_group, 'Recording');
+            SW_RecordingMean = mean_over_axis(SW_group, 'Recording', @nanmedian);
             
             SW_RecordingMean.getaxisinfo
             
