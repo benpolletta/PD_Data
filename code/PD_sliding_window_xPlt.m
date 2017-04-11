@@ -122,6 +122,8 @@ end
 function axes_info_struct = get_axes_info(function_name, sliding_window_cell,...
     chan_labels, data_labels_struct, pd_names, window_size, output_size, varargin)
 
+axes_info_struct.odims = length(output_size); axes_info_struct.wdims = length(window_size);
+
 for odim = 1:length(output_size)
     
     axes_info_struct.output_names{odim} = ['Output_Dim_' num2str(odim)];
