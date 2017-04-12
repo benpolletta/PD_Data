@@ -1,4 +1,4 @@
-function PD_sliding_window_pre_post_xPlt_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm, varargin)
+function PD_sliding_window_pre_post_xPlt_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm_struct, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -21,6 +21,10 @@ function_name = get_fname(function_name);
 window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
 
 pd_names = {'pre', 'post'}; no_periods = length(pd_names);
+
+norm_label = ['_', norm_struct.mode];
+
+if isfield(norm_struct, 'type'), norm_label = [norm_label, '_', norm_struct.type]; end
 
 pd_label = '';
 
@@ -50,7 +54,7 @@ end
 
 %% Normalizing.
 
-SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm, varargin{:});
+SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm_struct, varargin{:});
 
 size_dim2 = cellfun(@(x) size(x, 2), SW_xPlt.data);
     
@@ -98,7 +102,7 @@ for group = 1:length(groups_plotted)
     
     group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:}), '_', norm];
+    window_time_cell, 2, varargin{:}), norm_label];
   
     recording_pack_dim = SW_xPlt.lastNonSingletonDim + 1;
 
