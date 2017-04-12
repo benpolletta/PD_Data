@@ -1,10 +1,10 @@
-function SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm, varargin)
+function SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm_struct, varargin)
 
 function_name = get_fname(function_name);
     
 window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
 
-switch norm
+switch norm_struct.mode
     
     case ''   
     %% No normalization.
@@ -24,50 +24,8 @@ switch norm
     case 'baseline'
     %% Normalization by mean baseline value.
 
-        SW_Baseline = load([make_sliding_window_analysis_name([filename, '_baseline_band',...
-            num2str(data_labels_struct.band_index)], function_name,...
-            window_time_cell, 2, varargin{:}), '_xPlt.mat']);
-        
-        SW_Baseline = SW_Baseline.SW_xPlt;
-        
-        if ~strcmp(function_name, 'PAC')
-            
-            SW_Baseline = xp_abs(SW_Baseline);
-        
-        end
-        
-        if ~isempty(SW_Baseline.findaxis('Window_Dim_1'))
-            
-            SW_Baseline = mean_over_axis(SW_Baseline, 'Window_Dim_1');
-            
-        end
-        
-        % SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Period')).values, 'Period');
-        
-        if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
-            
-            SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            
-        end
-  
-        if isempty(SW_Baseline.findaxis('Period'))
-            
-            period_unpack_dim = SW_Baseline.lastNonSingletonDim + 1;
-            
-            SW_Baseline = SW_Baseline.unpackDim(period_unpack_dim, SW_xPlt.findaxis('Period'), 'Period', {'baseline'});
-            
-        end
-        
-        SW_Baseline = SW_Baseline.alignAxes(SW_xPlt);
-        
-        SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
-        
-        SW_BaselineMerged.getaxisinfo
-        
-        SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline');
-        
-        SW_xPlt = SW_xPlt.axissubset('Period', 'p');
-        
+        SW_xPlt = PD_sliding_window_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, {'pre', 'post'}, norm_struct, {'baseline'}, varargin{:});
+
         SW_xPlt.getaxisinfo
         
         % SW_xPlt.data = cellfun(@(x, y) 100*(x./y - 1), SW_xPlt.data, SW_Baseline.data, 'UniformOutput', 0);
@@ -75,211 +33,59 @@ switch norm
     case 'shuffle'
     %% Normalization by shuffled surrogate data.
 
-        SW_Shuffle = load([make_sliding_window_analysis_name([filename, '_pre_shuffles_post_shuffles_band',...
-            num2str(data_labels_struct.band_index)], function_name,...
-            window_time_cell, 2, varargin{:}), '_xPlt.mat']);
-        
-        axes_info_struct = SW_Shuffle.axes_info_struct;
-        
-        SW_Shuffle = SW_Shuffle.SW_xPlt;
-        
-        if ~strcmp(function_name, 'PAC')
-            
-            SW_Shuffle = xp_abs(SW_Shuffle);
-            
-        end
-        
-        if ~isempty(SW_Shuffle.findaxis('Shuffles'))
-            
-            SW_ShuffleMean = mean_over_axis(SW_ShuffleMean, 'Shuffles');
-            SW_ShuffleSTD = mean_over_axis(SW_ShuffleSTD, 'Shuffles', @nanstd, []);
-            
-        else
-            
-            [SW_ShuffleMean, SW_ShuffleSTD] = deal(SW_Shuffle);
-            
-            SW_ShuffleMean.data = cellfun(@(x) nanmean(x, axes_info_struct.odims + 1), SW_Shuffle.data, 'UniformOutput', false);
-            SW_ShuffleSTD.data = cellfun(@(x) nanstd(x, [], axes_info_struct.odims + 1), SW_Shuffle.data, 'UniformOutput', false);
-            
-            SW_ShuffleMean.meta = rmfield(SW_ShuffleMean.meta, ['matrix_dim_', num2str(axes_info_struct.odims + 1)]);
-            SW_ShuffleSTD.meta = rmfield(SW_ShuffleSTD.meta, ['matrix_dim_', num2str(axes_info_struct.odims + 1)]);
-            
-        end
-        
-        if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
-            
-            SW_ShuffleMean = SW_ShuffleMean.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            SW_ShuffleSTD = SW_ShuffleSTD.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            
-        end
-  
-        shuffle_period_dim = SW_ShuffleMean.findaxis('Period');
-        
-        SW_ShuffleMean.axis(shuffle_period_dim).values = SW_xPlt.axis(SW_xPlt.findaxis('Period')).values;
-        SW_ShuffleSTD.axis(shuffle_period_dim).values = SW_xPlt.axis(SW_xPlt.findaxis('Period')).values;
-        
-        data_type_axis = nDDictAxis;
-        
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Surrogate'};
-        
-        SW_ShuffleMean.axis(end + 1) = data_type_axis;
-        SW_ShuffleSTD.axis(end + 1) = data_type_axis;
-        
-        data_type_axis = nDDictAxis;
-        
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Observation'};
-        
-        SW_xPlt.axis(end + 1) = data_type_axis;
-        
-        SW_ShuffleMean = SW_ShuffleMean.alignAxes(SW_xPlt);
-        
-        SW_ShuffleMeanMerged = SW_xPlt.merge(SW_ShuffleMean);
-        
-        SW_xPlt = norm_axis_by_value(SW_ShuffleMeanMerged, 'Data_Type', 'Surrogate', 'subtract');
-        
-        SW_xPlt = SW_xPlt.axissubset('Data_Type', 'Observation');
-        
-        SW_ShuffleSTD = SW_ShuffleSTD.alignAxes(SW_xPlt);
-        
-        SW_ShuffleSTDMerged = SW_xPlt.merge(SW_ShuffleSTD);
-        
-        SW_xPlt = norm_axis_by_value(SW_ShuffleSTDMerged, 'Data_Type', 'Surrogate', 'divide');
-        
-        SW_xPlt = SW_xPlt.axissubset('Data_Type', 'Observation');
-        
-        SW_xPlt.getaxisinfo
-        
-    case 'shuffle_subtracted'
-    %% Normalization by shuffled surrogate data.
-
-        SW_Shuffle = load([make_sliding_window_analysis_name([filename, '_pre_shuffles_post_shuffles_band',...
-            num2str(data_labels_struct.band_index)], function_name,...
-            window_time_cell, 2, varargin{:}), '_xPlt.mat']);
-        
-        axes_info_struct = SW_Shuffle.axes_info_struct;
-        
-        SW_Shuffle = SW_Shuffle.SW_xPlt;
-        
-        if ~strcmp(function_name, 'PAC')
-            
-            SW_Shuffle = xp_abs(SW_Shuffle);
-            
-        end
-        
-        if ~isempty(SW_Shuffle.findaxis('Shuffles'))
-            
-            SW_ShuffleMean = mean_over_axis(SW_ShuffleMean, 'Shuffles');
-            
-        else
-            
-            SW_ShuffleMean = SW_Shuffle;
-            
-            SW_ShuffleMean.data = cellfun(@(x) nanmean(x, axes_info_struct.odims + 1), SW_Shuffle.data, 'UniformOutput', false);
-            
-            SW_ShuffleMean.meta = rmfield(SW_ShuffleMean.meta, ['matrix_dim_', num2str(axes_info_struct.odims + 1)]);
-            
-        end
-        
-        if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
-            
-            % wd1_axis = SW_xPlt.findaxis('Window_Dim_1');
-            % window_pack_dim = SW_xPlt.lastNonSingletonDim + 1;
-            % SW_xPlt = SW_xPlt.packDim('Window_Dim_1', SW_xPlt.lastNonSingletonDim + 1);
-            % SW_xPlt = SW_xPlt.unpackDim(window_pack_dim, wd1_axis);
-            
-            SW_ShuffleMean = SW_ShuffleMean.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            
-        end
-  
-        shuffle_period_dim = SW_ShuffleMean.findaxis('Period');
-        data_period_dim = SW_xPlt.findaxis('Period');
-        
-        if ~isempty(data_period_dim) && ~isempty(shuffle_period_dim)
-            
-            SW_ShuffleMean.axis(shuffle_period_dim).values = SW_xPlt.axis(SW_xPlt.findaxis('Period')).values;
-            
-        else
-            
-            if isempty(shuffle_period_dim)
-                
-                period_unpack_dim = SW_ShuffleMean.lastNonSingletonDim + 1;
-                
-                SW_ShuffleMean = SW_ShuffleMean.unpackDim(period_unpack_dim, data_period_dim, 'Period', pd_names);
-                
-            end
-            
-            if isempty(data_period_dim)
-                
-                period_unpack_dim = SW_xPlt.lastNonSingletonDim + 1;
-                
-                SW_xPlt = SW_xPlt.unpackDim(period_unpack_dim, shuffle_period_dim, 'Period', pd_names);
-                
-            end
-            
-        end
-        
-        data_type_axis = nDDictAxis;
-        
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Surrogate'};
-        
-        SW_ShuffleMean.axis(end + 1) = data_type_axis;
-        
-        data_type_axis = nDDictAxis;
-        
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Observation'};
-        
-        SW_xPlt.axis(end + 1) = data_type_axis;
-        
-        SW_ShuffleMean = SW_ShuffleMean.alignAxes(SW_xPlt);
-        
-        SW_ShuffleMeanMerged = SW_xPlt.merge(SW_ShuffleMean);
-        
-        SW_xPlt = norm_axis_by_value(SW_ShuffleMeanMerged, 'Data_Type', 'Surrogate', 'subtract');
-        
-        SW_xPlt = SW_xPlt.axissubset('Data_Type', 'Observation');
+        SW_xPlt = PD_sliding_window_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, {'pre', 'post'}, norm_struct, {'pre_shuffles', 'post_shuffles'}, varargin{:});
         
         SW_xPlt.getaxisinfo
         
     case 'shuffle_baseline'
     %% Normalization by shuffled data followed by normalization by (shuffle-normalized) baseline data.
+        
+        shuffle_prepost_struct = struct('mode', 'shuffle', 'type', norm_struct.type{1});
 
-        SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, 'shuffle', varargin{:});
+        SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, shuffle_prepost_struct, varargin{:});
         
         SW_xPlt.getaxisinfo
 
-        SW_Baseline = load([make_sliding_window_analysis_name([filename, '_baseline_band',...
+        SW_Baseline_struct = load([make_sliding_window_analysis_name([filename, '_baseline_band',...
             num2str(data_labels_struct.band_index)], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
-        SW_Baseline = SW_Baseline.SW_xPlt;
+        shuffle_baseline_struct = struct('mode', 'shuffle', 'type', norm_struct.type{2});
         
-        SW_Baseline = PD_sliding_window_normalize(SW_Baseline, function_name, sliding_window_cell, data_labels_struct, filename, {'baseline'}, 'shuffle', {}, varargin{:});
+        SW_Baseline_struct.SW_xPlt = PD_sliding_window_normalize(SW_Baseline_struct.SW_xPlt,...
+            function_name, sliding_window_cell, data_labels_struct, filename, {'baseline'}, shuffle_baseline_struct, {}, varargin{:});
         
-        if ~strcmp(function_name, 'PAC')
-            
-            SW_Baseline = xp_abs(SW_Baseline);
+        collapse_struct = struct('function', @nanmean, 'varargin', {});
         
-        end
-        
-        if ~isempty(SW_Baseline.findaxis('Window_Dim_1'))
-            
-            SW_Baseline = mean_over_axis(SW_Baseline, 'Window_Dim_1');
-            
-        end
-        
-        if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
-            
-            SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            
-        end
-        
-        SW_Baseline = SW_Baseline.alignAxes(SW_xPlt);
+        SW_Baseline = PD_xPlt_prep_for_norm(SW_Baseline_struct, SW_xPlt, function_name, {'baseline'}, collapse_struct);
         
         SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
         
-        % SW_BaselineMerged.getaxisinfo
+        switch norm_struct.type{3}
+            
+            case ''
         
-        SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline', 'subtract');
+                SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline');
+                
+            case 'subtract'
+        
+                SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline', 'subtract');
+                
+            case 'zscore'
+        
+                SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline', 'subtract');
+        
+                SW_xPlt = SW_xPlt.axissubset('Period', 'p');
+                
+                collapse_struct = struct('function', @nanstd, 'varargin', []);
+                
+                SW_Baseline = PD_xPlt_prep_for_norm(SW_Baseline_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
+                
+                SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
+                
+                SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline', 'divide');
+                
+        end
         
         SW_xPlt = SW_xPlt.axissubset('Period', 'p');
         
@@ -287,73 +93,72 @@ switch norm
         
     case 'baseline_shuffle'
     %% Normalization by baseline data followed by normalization by (baseline-normalized) shuffle data.
+        
+        baseline_prepost_struct = struct('mode', 'baseline', 'type', norm_struct.type{1});
 
-        SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, 'baseline', varargin{:});
+        SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, baseline_prepost_struct, varargin{:});
         
         SW_xPlt.getaxisinfo
 
-        SW_Shuffle = load([make_sliding_window_analysis_name([filename, '_pre_shuffles_post_shuffles_band',...
+        SW_Shuffle_struct = load([make_sliding_window_analysis_name([filename, '_pre_shuffles_post_shuffles_band',...
             num2str(data_labels_struct.band_index)], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
-        axes_info_struct = SW_Shuffle.axes_info_struct;
+        baseline_shuffle_struct = struct('mode', 'shuffle', 'type', norm_struct.type{2});
         
-        SW_Shuffle = SW_Shuffle.SW_xPlt;
+        SW_Shuffle_struct.SW_xPlt = PD_sliding_window_normalize(SW_Shuffle_struct.SW_xPlt,...
+            function_name, sliding_window_cell, data_labels_struct, filename, {'pre_shuffles', 'post_shuffles'}, baseline_shuffle_struct, {'baseline_shuffles'}, varargin{:});
         
-        SW_Shuffle = SW_Shuffle.unpackDim(axes_info_struct.odims + 1, [], 'Window_Dim_1');
+        collapse_struct = struct('function', @nanmean, 'varargin', {});
         
-        SW_Shuffle = PD_sliding_window_normalize(SW_Shuffle, function_name, sliding_window_cell, data_labels_struct, filename, {'pre_shuffles', 'post_shuffles'}, 'baseline', {'baseline_shuffles'}, varargin{:});
+        SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, {'baseline'}, collapse_struct);
         
-        if ~strcmp(function_name, 'PAC')
+        surrogate_data_type_axis = nDDictAxis;
+        
+        surrogate_data_type_axis.name = 'Data_Type'; surrogate_data_type_axis.values = {'Surrogate'};
+        
+        SW_Shuffle.axis(end + 1) = surrogate_data_type_axis;
+        
+        observed_data_type_axis = nDDictAxis;
+        
+        observed_data_type_axis.name = 'Data_Type'; observed_data_type_axis.values = {'Observation'};
+        
+        SW_xPlt.axis(end + 1) = observed_data_type_axis;
+        
+        SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
+        
+        switch norm_struct.type
             
-            SW_Shuffle = xp_abs(SW_Shuffle);
-            
+            case ''
+        
+                SW_xPlt = norm_axis_by_value(SW_ShuffleMerged, 'Data_Type', 'Surrogate');
+                
+            case 'subtract'
+        
+                SW_xPlt = norm_axis_by_value(SW_ShuffleMerged, 'Data_Type', 'Surrogate', 'subtract');
+                
+            case 'zscore'
+        
+                SW_xPlt = norm_axis_by_value(SW_ShuffleMerged, 'Data_Type', 'Surrogate', 'subtract');
+        
+                SW_xPlt = SW_xPlt.axissubset('Data_Type', 'Observation');
+                
+                collapse_struct = struct('function', @nanstd, 'varargin', []);
+                
+                SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
+        
+                SW_Shuffle.axis(end + 1) = surrogate_data_type_axis;
+                
+                SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
+                
+                SW_xPlt = norm_axis_by_value(SW_ShuffleMerged, 'Data_Type', 'Surrogate', 'divide');
+                
         end
-        
-        SW_ShuffleMean = mean_over_axis(SW_Shuffle, 'Window_Dim_1');
-        SW_ShuffleSTD = mean_over_axis(SW_Shuffle, 'Window_Dim_1', @nanstd, []);
-        
-        if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
-            
-            SW_ShuffleMean = SW_ShuffleMean.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            SW_ShuffleSTD = SW_ShuffleSTD.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
-            
-        end
-  
-        shuffle_period_dim = SW_ShuffleMean.findaxis('Period');
-        
-        SW_ShuffleMean.axis(shuffle_period_dim).values = SW_xPlt.axis(SW_xPlt.findaxis('Period')).values;
-        SW_ShuffleSTD.axis(shuffle_period_dim).values = SW_xPlt.axis(SW_xPlt.findaxis('Period')).values;
-        
-        data_type_axis = nDDictAxis;
-        
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Surrogate'};
-        
-        SW_ShuffleMean.axis(end + 1) = data_type_axis;
-        SW_ShuffleSTD.axis(end + 1) = data_type_axis;
-        
-        data_type_axis = nDDictAxis;
-        
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Observation'};
-        
-        SW_xPlt.axis(end + 1) = data_type_axis;
-        
-        SW_ShuffleMean = SW_ShuffleMean.alignAxes(SW_xPlt);
-        
-        SW_ShuffleMeanMerged = SW_xPlt.merge(SW_ShuffleMean);
-        
-        SW_xPlt = norm_axis_by_value(SW_ShuffleMeanMerged, 'Data_Type', 'Surrogate', 'subtract');
-        
-        SW_xPlt = SW_xPlt.axissubset('Data_Type', 'Observation');
-        
-        SW_ShuffleSTD = SW_ShuffleSTD.alignAxes(SW_xPlt);
-        
-        SW_ShuffleSTDMerged = SW_xPlt.merge(SW_ShuffleSTD);
-        
-        SW_xPlt = norm_axis_by_value(SW_ShuffleSTDMerged, 'Data_Type', 'Surrogate', 'divide');
         
         SW_xPlt = SW_xPlt.axissubset('Data_Type', 'Observation');
         
         SW_xPlt.getaxisinfo
             
+end
+
 end
