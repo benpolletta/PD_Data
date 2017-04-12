@@ -127,7 +127,7 @@ switch norm_struct.mode
         
         SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
         
-        switch norm_struct.type
+        switch norm_struct.type{3}
             
             case ''
         
