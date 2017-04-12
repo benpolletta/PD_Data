@@ -131,17 +131,17 @@ switch norm_struct.mode
         
         SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
         
-        data_type_axis = nDDictAxis;
+        surrogate_data_type_axis = nDDictAxis;
         
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Surrogate'};
+        surrogate_data_type_axis.name = 'Data_Type'; surrogate_data_type_axis.values = {'Surrogate'};
         
-        SW_Shuffle.axis(end + 1) = data_type_axis;
+        SW_Shuffle.axis(end + 1) = surrogate_data_type_axis;
         
-        data_type_axis = nDDictAxis;
+        observed_data_type_axis = nDDictAxis;
         
-        data_type_axis.name = 'Data_Type'; data_type_axis.values = {'Observation'};
+        observed_data_type_axis.name = 'Data_Type'; observed_data_type_axis.values = {'Observation'};
         
-        SW_xPlt.axis(end + 1) = data_type_axis;
+        SW_xPlt.axis(end + 1) = observed_data_type_axis;
         
         SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
         
@@ -163,9 +163,11 @@ switch norm_struct.mode
                 
                 collapse_struct = struct('function', @nanstd, 'varargin', []);
                 
-                SW_Baseline = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
+                SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
+        
+                SW_Shuffle.axis(end + 1) = surrogate_data_type_axis;
                 
-                SW_ShuffleMerged = SW_xPlt.merge(SW_Baseline);
+                SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
                 
                 SW_xPlt = norm_axis_by_value(SW_ShuffleMerged, 'Data_Type', 'Surrogate', 'divide');
                 
