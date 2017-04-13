@@ -22,9 +22,9 @@ window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.s
 
 pd_names = {'pre', 'post'}; no_periods = length(pd_names);
 
-norm_label = ['_', norm_struct.mode];
+norm_label = ['_', norm_struct.who];
 
-if isfield(norm_struct, 'type'), norm_label = [norm_label, '_', norm_struct.type]; end
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
 
 pd_label = '';
 
@@ -126,8 +126,6 @@ for group = 1:length(groups_plotted)
             
             close('all')
             
-            SW_WindowMean = mean_over_axis(SW_group, 'Window_Dim_1');
-            
             %% % % False color image of all windows by recording. % % %
             
             SW_WindowsPacked = squeeze(SW_group.packDim('Window_Dim_1', 2));
@@ -139,7 +137,7 @@ for group = 1:length(groups_plotted)
             dimensions = {1:length(size(SW_WindowsPacked)),0};
             recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
             
-            save_all_figs([group_name, '_windows'])
+            save_all_figs([group_name, '_windows_by_subject'])
             
             close('all')
             
@@ -152,7 +150,7 @@ for group = 1:length(groups_plotted)
             dimensions = {{'Recording', 'Channel'},{'Period'}};
             recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
             
-            save_all_figs([group_name, '_windows_by_subject_compared_p', num2str(significance)])
+            save_all_figs([group_name, '_windowmeans_by_subject_compared_p', num2str(significance)])
             
             close('all')
             
@@ -160,14 +158,18 @@ for group = 1:length(groups_plotted)
             
             %% % % Pre-post comparison of mean across windows, over recordings. % % %
             
-            SW_WindowMean = squeeze(SW_WindowMean.packDim('Recording', 2));
+            SW_RecordingsPacked = mean_over_axis(SW_group, 'Window_Dim_1');
             
-            SW_WindowMean.getaxisinfo
+            SW_RecordingsPacked = squeeze(SW_RecordingsPacked.packDim('Recording', 2));
+            
+            SW_RecordingsPacked.getaxisinfo
             
             dimensions = {{'Channel'},{'Period'}};
-            recursivePlot(SW_WindowMean,function_handles,dimensions,function_arguments);
+            recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
             
-            save_all_figs([group_name, '_windows_compared_p', num2str(significance)])
+            save_all_figs([group_name, '_windowmeans_compared_p', num2str(significance)])
+            
+            save([group_name, '_windowmean.mat'], 'SW_RecordingsPacked')
             
         else
             %% Plotting if there are no sliding windows.
@@ -197,6 +199,8 @@ for group = 1:length(groups_plotted)
             recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
             
             save_all_figs([group_name, '_recordings_compared_p', num2str(significance)])
+            
+            save([group_name, '_recordingspacked.mat'], 'SW_RecordingsPacked')
             
         end
         
@@ -265,6 +269,8 @@ for group = 1:length(groups_plotted)
             
             save_all_figs([group_name, '_compared_p', num2str(significance)])
             
+            save([group_name, '_recordingspacked.mat'], 'SW_RecordingsPacked')
+            
             close('all')
             
         else
@@ -293,6 +299,8 @@ for group = 1:length(groups_plotted)
             recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
             
             save_all_figs([group_name, '_subject_mean'])
+            
+            save([group_name, '_recordingspacked.mat'], 'SW_RecordingsPacked')
             
         end
         
