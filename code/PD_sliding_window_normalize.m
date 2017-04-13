@@ -4,7 +4,7 @@ function_name = get_fname(function_name);
     
 window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
 
-switch norm_struct.mode
+switch norm_struct.who
     
     case ''   
     %% No normalization.
@@ -64,7 +64,7 @@ switch norm_struct.mode
         
         SW_BaselineMerged.getaxisinfo
         
-        switch norm_struct.type
+        switch norm_struct.how
             
             case ''
         
@@ -145,7 +145,7 @@ switch norm_struct.mode
         
         SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
         
-        switch norm_struct.type
+        switch norm_struct.how
             
             case ''
         

@@ -4,7 +4,7 @@ function_name = get_fname(function_name);
     
 window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
 
-switch norm_struct.mode
+switch norm_struct.who
     
     case ''   
     %% No normalization.
@@ -40,7 +40,7 @@ switch norm_struct.mode
     case 'shuffle_baseline'
     %% Normalization by shuffled data followed by normalization by (shuffle-normalized) baseline data.
         
-        shuffle_prepost_struct = struct('mode', 'shuffle', 'type', norm_struct.type{1});
+        shuffle_prepost_struct = struct('who', 'shuffle', 'how', norm_struct.how{1});
 
         SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, shuffle_prepost_struct, varargin{:});
         
@@ -50,7 +50,7 @@ switch norm_struct.mode
             num2str(data_labels_struct.band_index)], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
-        shuffle_baseline_struct = struct('mode', 'shuffle', 'type', norm_struct.type{2});
+        shuffle_baseline_struct = struct('who', 'shuffle', 'how', norm_struct.how{1});
         
         SW_Baseline_struct.SW_xPlt = PD_sliding_window_normalize(SW_Baseline_struct.SW_xPlt,...
             function_name, sliding_window_cell, data_labels_struct, filename, {'baseline'}, shuffle_baseline_struct, {}, varargin{:});
@@ -61,7 +61,7 @@ switch norm_struct.mode
         
         SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
         
-        switch norm_struct.type{3}
+        switch norm_struct.how{2}
             
             case ''
         
@@ -94,7 +94,7 @@ switch norm_struct.mode
     case 'baseline_shuffle'
     %% Normalization by baseline data followed by normalization by (baseline-normalized) shuffle data.
         
-        baseline_prepost_struct = struct('mode', 'baseline', 'type', norm_struct.type{1});
+        baseline_prepost_struct = struct('who', 'baseline', 'how', norm_struct.how{1});
 
         SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, baseline_prepost_struct, varargin{:});
         
@@ -104,7 +104,7 @@ switch norm_struct.mode
             num2str(data_labels_struct.band_index)], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
-        baseline_shuffle_struct = struct('mode', 'shuffle', 'type', norm_struct.type{2});
+        baseline_shuffle_struct = struct('who', 'shuffle', 'how', norm_struct.how{1});
         
         SW_Shuffle_struct.SW_xPlt = PD_sliding_window_normalize(SW_Shuffle_struct.SW_xPlt,...
             function_name, sliding_window_cell, data_labels_struct, filename, {'pre_shuffles', 'post_shuffles'}, baseline_shuffle_struct, {'baseline_shuffles'}, varargin{:});
@@ -127,7 +127,7 @@ switch norm_struct.mode
         
         SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
         
-        switch norm_struct.type{3}
+        switch norm_struct.how{2}
             
             case ''
         
