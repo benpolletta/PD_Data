@@ -1,6 +1,6 @@
-function power_post_vs_pre_stats(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, freqs, no_cycles, bands, band_indices, window_length)
+function power_post_vs_pre_stats(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, in_freqs, in_no_cycles, in_bands, band_indices, window_length)
 
-[~, ~, bands, BP_suffix] = init_freqs(freqs, no_cycles, bands);
+[~, ~, bands, BP_suffix] = init_freqs(in_freqs, in_no_cycles, in_bands);
 
 BP_suffix = [BP_suffix, peak_suffix];
 
@@ -38,7 +38,7 @@ else
     
 end
 
-window_step = 30;
+window_step = min(30, window_length);
 
 load([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
