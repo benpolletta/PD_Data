@@ -1,4 +1,12 @@
-function increase_summary = power_post_vs_pre_summary(subject_mat_cell, save_name, channel_labels, peak_suffix, norm, freqs, no_cycles, bands, band_indices, window_length)
+function increase_summary = power_post_vs_pre_summary(subject_mat_cell, save_name, channel_labels, peak_suffix, norm, freqs, no_cycles, bands, band_indices, window_length, significance, box_length, box_minimum)
+
+if nargin < 11, significance = []; end
+if nargin < 12, box_length = []; end
+if nargin < 13, box_minimum = []; end
+
+if isempty(box_length), box_length = 1; end
+if isempty(box_minimum), box_minimum = 1; end
+if isempty(significance), significance = .05; end
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -31,6 +39,18 @@ else
     win_flag = ['_win', num2str(window_length)];
     
 end
+    
+if box_length == 1 && box_minimum == 1
+    
+    box_flag = '';
+    
+else
+    
+    box_flag = sprintf('_%gover%d', box_minimum, box_length);
+    
+end
+
+if significance == .05, sig_flag = ''; else sig_flag = sprintf('_p%g', significance); end
 
 no_bands = size(bands, 1);
 
@@ -66,6 +86,8 @@ blocks = cell(no_blocks, 1);
 
 folder_index = 0;
 
+boxcar = ones(box_length, 1)/(box_minimum*box_length);
+
 for s = 1:length(subject_mat_cell)
     
     load(subject_mat_cell{s})
@@ -94,7 +116,11 @@ for s = 1:length(subject_mat_cell)
                 
                 load([subj_name, BP_suffix, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_stats.mat'])
                 
+                test_win = double(p_win < significance);
+                
                 for ch = 1:no_chans
+                    
+                    test_win(:, 2, chan_order(ch)) = conv(test_win(:, 2, chan_order(ch)), boxcar, 'same') >= 1;
                     
                     increase_blocks = index_to_blocks(test_win(:, 2, chan_order(ch)));
                     
@@ -136,6 +162,10 @@ for s = 1:length(subject_mat_cell)
                         
                         increase_summary(:, folder_index, block) = [increase_length; increase_start; increase_end]/60;
                         
+                    else
+                        
+                        increase_summary(:, folder_index, block) = [0; nan; nan];
+                        
                     end
                     
                 end
@@ -150,46 +180,50 @@ end
 
 increase_summary = permute(increase_summary, [3 2 1]);
 
-save([save_name, BP_suffix, norm, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_summary.mat'], 'increase_summary')
+save([save_name, BP_suffix, norm, win_flag, '_', short_band_labels{b}, box_flag, sig_flag, '_power_post_vs_pre_summary.mat'], 'increase_summary')
 
 figure
 
 for stat = 1:no_stats
     
-    h = subplot(2, no_stats, stat);
-        
-    set(h, 'NextPlot', 'add', 'ColorOrder', distinguishable_colors(no_folders), 'FontSize', 14)
-    
     non_nan_indices = any(~isnan(increase_summary(:, :, stat)));
-
-    plot((1:no_blocks)', increase_summary(:, non_nan_indices, stat), 'LineWidth', 2)
     
-    hold on
-    
-    for block = 1:no_blocks
-    
-        plot(block, increase_summary(block, non_nan_indices, stat)', 'o', 'MarkerSize', 8, 'LineWidth', 1)
+    if any(non_nan_indices)
+        
+        h = subplot(2, no_stats, stat);
+        
+        set(h, 'NextPlot', 'add', 'ColorOrder', distinguishable_colors(no_folders), 'FontSize', 14)
+        
+        plot((1:no_blocks)', increase_summary(:, :, stat), 'LineWidth', 2)
+        
+        hold on
+        
+        for block = 1:no_blocks
+            
+            plot(block, increase_summary(block, :, stat)', 'o', 'MarkerSize', 8, 'LineWidth', 1)
+            
+        end
+        
+        set(gca, 'XLim', [.5 no_stats + .5], 'XTick', 1:no_stats, 'XTickLabel', {channel_labels{:}, 'Overlap'}, 'FontSize', 14)
+        
+        ylabel('Time (min.)')
+        
+        title(stat_labels{stat})
+        
+        subplot(2, no_stats, no_stats + stat)
+        
+        h = barwitherr(nanstd(increase_summary(:, :, stat)'), nanmean(increase_summary(:, :, stat)'));
+        
+        set(h, 'FaceColor', [.5 .5 .5])
+        
+        set(gca, 'XLim', [.25 no_stats + .75], 'XTickLabel', {channel_labels{:}, 'Overlap'}, 'FontSize', 14)
+        
+        ylabel('Time (min.)')
         
     end
     
-    set(gca, 'XLim', [.5 no_stats + .5], 'XTick', 1:no_stats, 'XTickLabel', {channel_labels{:}, 'Overlap'}, 'FontSize', 14)
-    
-    ylabel('Time (min.)')
-    
-    title(stat_labels{stat})
-    
-    subplot(2, no_stats, no_stats + stat)
-    
-    h = barwitherr(nanstd(increase_summary(:, :, stat)'), nanmean(increase_summary(:, :, stat)'));
-    
-    set(h, 'FaceColor', [.5 .5 .5])
-    
-    set(gca, 'XLim', [.25 no_stats + .75], 'XTickLabel', {channel_labels{:}, 'Overlap'}, 'FontSize', 14)
-    
-    ylabel('Time (min.)')
-    
 end
 
-save_as_pdf(gcf, [save_name, BP_suffix, norm, win_flag, '_', short_band_labels{b}, '_power_post_vs_pre_summary'])
+save_as_pdf(gcf, [save_name, BP_suffix, norm, win_flag, '_', short_band_labels{b}, box_flag, sig_flag, '_power_post_vs_pre_summary'])
 
 end
