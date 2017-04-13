@@ -1,4 +1,4 @@
-function PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm, varargin)
+function PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm_struct, varargin)
     
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -30,6 +30,10 @@ for period = 1:no_periods
     
 end
 
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+
 load([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
     window_time_cell, 2, varargin{:}), '_xPlt.mat'])
@@ -56,14 +60,14 @@ end
 
 %% Normalizing.
 
-SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm, varargin{:});
+SW_xPlt = PD_sliding_window_pre_post_normalize(SW_xPlt, function_name, sliding_window_cell, data_labels_struct, filename, norm_struct, varargin{:});
 
 size_dim2 = cellfun(@(x) size(x, 2), SW_xPlt.data);
 
 %% Getting max. over bands.
 
-% load('seven_bands'), bands(3, 2) = 15; bands(end, :) = [];
-bands = [1 4; 4 8; 8 14; 15 30; 31 60; 60 100; 120 180];
+load('seven_bands'), bands(3, 2) = 14; % bands(end, :) = [];
+% bands = [1 4; 4 8; 8 14; 15 22; 23 30; 31 60; 60 100; 120 180];
 
 [~, band_labels] = band_max(SW_xPlt.data{1}, frequencies, bands(1:end, :));
    
@@ -84,7 +88,7 @@ for group = 1:length(groups_plotted)
     
     group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
     '_band', num2str(data_labels_struct.band_index), '_BP_', num2str(size(bands,1)), 'bands'], function_name,...
-    window_time_cell, 2, varargin{:}), '_', norm];
+    window_time_cell, 2, varargin{:}), norm_label];
     
     SW_group = SW_Bands.packDim('Recording', 2);
     
@@ -128,7 +132,7 @@ for group = 1:length(groups_plotted)
         dimensions = {{'Recording', 'Channel'},{'Period'}};
         recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
         
-        save_all_figs([group_name, '_windows_compared_by_subject'])
+        save_all_figs([group_name, '_windows_by_subject_compared_p', num2str(significance)])
         
         close('all')
         
@@ -136,16 +140,18 @@ for group = 1:length(groups_plotted)
         
         %% % % Pre-post comparison of mean across windows, over recordings. % % %
         
-        SW_WindowMean = mean_over_axis(SW_group, 'Window_Dim_1');
+        SW_RecordingsPacked = mean_over_axis(SW_group, 'Window_Dim_1');
         
-        SW_WindowMean = squeeze(SW_WindowMean.packDim('Recording', 2));
+        SW_RecordingsPacked = squeeze(SW_RecordingsPacked.packDim('Recording', 2));
         
-        SW_WindowMean.getaxisinfo
+        SW_RecordingsPacked.getaxisinfo
         
         dimensions = {{'Channel'},{'Period'}};
-        recursivePlot(SW_WindowMean,function_handles,dimensions,function_arguments);
+        recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
         
-        save_all_figs([group_name, '_windows_compared'])
+        save_all_figs([group_name, '_windows_compared_p', num2str(significance)])
+        
+        save([group_name, '_recordingspacked.mat'], 'SW_RecordingsPacked')
         
     else
         %% Plotting if there are no sliding windows.
@@ -174,7 +180,9 @@ for group = 1:length(groups_plotted)
         dimensions = {{'Channel'},{'Period'}};
         recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
         
-        save_all_figs([group_name, '_recordings_compared'])
+        save_all_figs([group_name, '_recordings_compared_p', num2str(significance)])
+        
+        save([group_name, '_recordingspacked.mat'], 'SW_RecordingsPacked')
         
     end
     
