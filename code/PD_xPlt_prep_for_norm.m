@@ -48,8 +48,6 @@ function SW_norm = PD_xPlt_prep_for_norm(SW_norm_struct, SW_xPlt, function_name,
             
             SW_norm = SW_norm.unpackDim(axes_info_struct.odims + 1, [], 'Window_Dim_1');
             
-            SW_norm.meta = rmfield(SW_norm.meta, ['matrix_dim_', num2str(axes_info_struct.odims + 1)]);
-            
         end
         
     end
