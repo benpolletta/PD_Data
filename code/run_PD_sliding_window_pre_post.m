@@ -89,7 +89,7 @@ PD_sliding_window_baseline(function_handle, sliding_window_cell, subjects_mat_ce
 
 PD_sliding_window_pre_post_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, shuffle_struct, varargin{:})
 
-% PD_sliding_window_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, {'baseline'}, shuffle_struct, varargin{:})
+PD_sliding_window_shuffle(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, {'baseline'}, shuffle_struct, varargin{:})
 
 % %% Loading & concatenating analysis.
 % 
@@ -109,14 +109,26 @@ SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_
 
 SW_xPlt.getaxisinfo
     
-% SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline_shuffles'}, varargin{:});
-% 
-% SW_xPlt.getaxisinfo
+SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_mat_cell, data_labels_struct, filename, {'baseline_shuffles'}, varargin{:});
+
+SW_xPlt.getaxisinfo
 
 %% Plotting.
 
-if ~exist('norm', 'var'), norm = 'baseline'; end
+whos = {'baseline', 'shuffle'};
 
-PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
+hows = {'', 'subtract', 'zscore'};
 
-% PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, norm, varargin{:})
+for w = 1:length(whos)
+    
+    for h = 1:length(hows)
+
+        norm_struct = struct('who', whos{w}, 'how', hows{h});
+
+        PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
+
+        PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
+        
+    end
+    
+end
