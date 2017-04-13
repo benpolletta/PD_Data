@@ -237,6 +237,128 @@ for ch = 1:2
     
 end
 
+%% Plotting with xPlt.
+
+analysis = 'granger'; window_length = 10;
+
+load('seven_bands')
+
+data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted');
+
+subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
+
+filename = 'STR_w_M1';
+
+sliding_window_cell{1} = window_length*data_labels_struct.sampling_freq{1}*[1 1];
+
+function_name = get_fname(function_name);
+    
+window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
+
+pd_names = {'pre', 'post'}; no_periods = length(pd_names);
+
+pd_label = '';
+
+for period = 1:no_periods
+    
+    pd_label = [pd_label, '_', pd_names{period}];
+    
+end
+
+load([make_sliding_window_analysis_name([filename, pd_label,...
+    '_band', num2str(data_labels_struct.band_index)], function_name,...
+    window_time_cell, 2, varargin{:}), '_xPlt.mat'])
+
+SW_xPlt = xp_abs(SW_xPlt);
+
+SW_xPlt.getaxisinfo
+
+frequencies = SW_xPlt.meta.matrix_dim_1.values;
+
+SW_Baseline = load([make_sliding_window_analysis_name([filename, '_baseline_band',...
+    num2str(data_labels_struct.band_index)], function_name,...
+    window_time_cell, 2, varargin{:}), '_xPlt.mat']);
+
+SW_Baseline = xp_abs(SW_Baseline.SW_xPlt);
+
+if ~isempty(SW_Baseline.findaxis('Window_Dim_1'))
+    
+    SW_Baseline = mean_over_axis(SW_Baseline, 'Window_Dim_1');
+    
+end
+
+if ~isempty(SW_xPlt.findaxis('Window_Dim_1'))
+    
+    SW_Baseline = SW_Baseline.repmat(SW_xPlt.axis(SW_xPlt.findaxis('Window_Dim_1')).values, 'Window_Dim_1', SW_xPlt.findaxis('Window_Dim_1'));
+    
+end
+
+period_unpack_dim = SW_Baseline.lastNonSingletonDim + 1;
+
+SW_Baseline = SW_Baseline.unpackDim(period_unpack_dim, SW_xPlt.findaxis('Period'), 'Period', {'baseline'});
+
+SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
+
+SW_xPlt = norm_axis_by_value(SW_BaselineMerged, 'Period', 'baseline');
+
+SW_xPlt = SW_xPlt.axissubset('Period', 'p');
+
+if sliding_window_cell{1}(1) > 1000 && isint(sliding_window_cell{1}(1)/1000)
+    
+    ds_factor = sliding_window_cell{1}(1)/1000;
+    
+    ds_factors = factor(ds_factor);
+    
+    for f = 1:length(ds_factors)
+        
+        SW_xPlt.data = cellfun(@(x) decimate(x, ds_factors(f)), SW_xPlt.data, 'UniformOutput', 0);
+        
+        frequencies = decimate(frequencies, ds_factors(f));
+        
+    end
+    
+end
+
+freq_limit = 50; freq_indicator = frequencies <= freq_limit;
+
+frequencies = frequencies(freq_indicator);
+
+SW_xPlt.meta.matrix_dim_1.values = frequencies;
+
+SW_xPlt.data = cellfun(@(x) x(freq_indicator), SW_xPlt.data, 'UniformOutput', 0);
+
+load('M1_groups')
+
+M1_increased_index{2} = M1_increased_index{2} & All_index{2};
+
+M1_not_increased_index{2} = M1_not_increased_index{2} & All_index{2};
+
+groups_plotted = {M1_increased_index, M1_not_increased_index}; % {All_index}; 
+
+for group = 1:length(groups_plotted)
+    
+    group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
+    '_band', num2str(data_labels_struct.band_index)], function_name,...
+    window_time_cell, 2, varargin{:}), '_', norm];
+
+    SW_group = SW_xPlt;
+    
+    SW_group = SW_group.axissubset('Recording', find(groups_plotted{group}{2}));
+    
+    SW_WindowMean = mean_over_axis(SW_group, 'Window_Dim_1');
+
+    SW_RecordingMean = mean_over_axis(SW_WindowMean, 'Recording');
+        
+        subplot(3, 2, 2*(ch - 1) + group)
+        
+        xp_compare_3D(
+        
+end
+    
+    
+
+%% Saving figure.
+
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 9.1], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 9.1])
 
 print(gcf, '-painters', '-dpdf', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.pdf'])
