@@ -145,9 +145,9 @@ switch norm_struct.who
                 
                 collapse_struct = struct('function', @nanstd, 'varargin', []);
                 
+                SW_Shuffle_struct.SW_xPlt.axis(end + 1) = surrogate_data_type_axis;
+                
                 SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
-        
-                SW_Shuffle.axis(end + 1) = surrogate_data_type_axis;
                 
                 SW_ShuffleMerged = SW_xPlt.merge(SW_Shuffle);
                 
