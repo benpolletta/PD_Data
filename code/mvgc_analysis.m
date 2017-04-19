@@ -121,9 +121,9 @@ switch spec_flag
             
         else
             
-            F = nan(size(X,1)); pval = nan(size(X,1)); sig = nan(size(X,1));
+            F = nan(nchans); pval = nan(nchans); sig = nan(nchans);
             
-            f = nan(size(X,1), size(X,1), size(X,2)+1);
+            f = nan(nchans, nchans, nobs + 1);
             
         end
         
