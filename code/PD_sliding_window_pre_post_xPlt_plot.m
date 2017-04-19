@@ -24,7 +24,23 @@ pd_names = {'pre', 'post'}; no_periods = length(pd_names);
 
 norm_label = ['_', norm_struct.who];
 
-if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+if isfield(norm_struct, 'how')
+    
+    if isstring(norm_struct.how)
+        
+        if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end
+        
+    elseif iscellstr(norm_struct.how)
+        
+        if any(cellfun(@(x) ~isempty(x), norm_struct.how))
+            
+            for c = 1:length(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how{c}]; end
+            
+        end
+        
+    end
+    
+end
 
 pd_label = '';
 
@@ -62,9 +78,9 @@ if ~any(size_dim2(:) > 1)
     
     %% Downsampling and restricting frequency.
     
-    if sliding_window_cell{1}(1) > 1000 && isint(sliding_window_cell{1}(1)/1000)
+    if sliding_window_cell{1}(1) > data_labels_struct.sampling_freq{1}/2 && isint(sliding_window_cell{1}(1)/(data_labels_struct.sampling_freq{1}/2))
         
-        ds_factor = sliding_window_cell{1}(1)/1000;
+        ds_factor = 2*sliding_window_cell{1}(1)/data_labels_struct.sampling_freq{1};
         
         ds_factors = factor(ds_factor);
         
@@ -72,9 +88,11 @@ if ~any(size_dim2(:) > 1)
             
             SW_xPlt.data = cellfun(@(x) decimate(x, ds_factors(f)), SW_xPlt.data, 'UniformOutput', 0);
             
-            frequencies = decimate(frequencies, ds_factors(f));
+            % frequencies = decimate(frequencies, ds_factors(f));
             
         end
+        
+        frequencies = frequencies(1:ds_factor:end);
         
     end
     
@@ -169,7 +187,7 @@ for group = 1:length(groups_plotted)
             
             save_all_figs([group_name, '_windowmeans_compared_p', num2str(significance)])
             
-            save([group_name, '_windowmean.mat'], 'SW_RecordingsPacked')
+            save([group_name, '_recordingspacked.mat'], 'SW_RecordingsPacked')
             
         else
             %% Plotting if there are no sliding windows.
