@@ -24,7 +24,7 @@ chan_labels = {'Striatum', 'M1'};
 
 filename = 'STR_w_M1';
 
-if isempty(window_length), window_length = 150; end
+if isempty(window_length), window_length = 10; end
 
 sliding_window_cell{1} = window_length*data_labels_struct.sampling_freq{1}*[1 1];
 
@@ -181,7 +181,9 @@ if plot_flag(2)
     
             for h1 = 1:length(hows)
     
-                norm_struct = struct('who', whos{w}, 'how', {hows{h}, hows{h1}});
+                norm_struct = struct('who', whos{w});
+                
+                norm_struct.how = {hows{h}, hows{h1}};
     
                 PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
     
