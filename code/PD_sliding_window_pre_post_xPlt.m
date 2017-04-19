@@ -128,7 +128,7 @@ function axes_info_struct = get_axes_info(function_name,...
 axes_info_struct.output_names{1} = 'Freq. (Hz)';
 
 axes_info_struct.output_values{1} = data_labels_struct.sampling_freq{1}*...
-    (1:output_size(1))/(2*output_size(1));
+    ((1:output_size(1)) - 1)/(2*(output_size(1) - 1));
 
 for odim = 2:length(output_size)
     

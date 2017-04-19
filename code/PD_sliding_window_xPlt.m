@@ -149,7 +149,7 @@ else
     axes_info_struct.output_names{1} = 'Freq. (Hz)';
     
     axes_info_struct.output_values{1} = data_labels_struct.sampling_freq{1}*...
-        (0:(output_size(1) - 1))/(2*output_size(1));
+        (0:(output_size(1) - 1))/(2*(output_size(1) - 1));
     
     axes_info_struct.leave_packed_odim = 1;
     
