@@ -79,7 +79,7 @@ switch norm_struct.who
                 
                 collapse_struct = struct('function', @nanstd, 'varargin', []);
                 
-                SW_Baseline = PD_xPlt_prep_for_norm(SW_Baseline_struct, SW_xPlt, function_name, norm_pd_names, collapse_struct);
+                SW_Baseline = PD_xPlt_prep_for_norm(SW_Baseline_struct, SW_xPlt, function_name, {'baseline'}, collapse_struct);
                 
                 SW_BaselineMerged = SW_xPlt.merge(SW_Baseline);
                 
