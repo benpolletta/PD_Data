@@ -19,20 +19,21 @@ function SW_norm = PD_xPlt_prep_for_norm(SW_norm_struct, SW_xPlt, function_name,
         
         if ~isempty(data_period_dim) && ~isempty(norm_period_dim)
             
-            SW_norm.axis(norm_period_dim).values = SW_xPlt.axis(SW_xPlt.findaxis('Period')).values;
+            SW_norm.axis(norm_period_dim).values = SW_xPlt.axis(data_period_dim).values;
             
         end
         
     end
     
-    if isempty(norm_period_dim)
+    if isempty(norm_period_dim) && ~isempty(data_period_dim)
         
-        SW_norm = SW_norm.repmat(pd_names, 'Period', data_period_dim);
+        SW_norm = SW_norm.repmat(SW_xPlt.axis(data_period_dim).values, 'Period', data_period_dim);
         
     end
     
-    if isempty(data_period_dim)
+    if isempty(data_period_dim) && ~isempty(norm_period_dim)
         
+        SW_norm.axis(norm_period_dim).values = pd_names;
         SW_xPlt = SW_xPlt.repmat(pd_names, 'Period', norm_period_dim);
         
     end
