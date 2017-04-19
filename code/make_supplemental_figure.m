@@ -66,7 +66,9 @@ subj_index = find(folder_chi);
 
 mean_bp_max_start = mean(bp_max_start(subj_index, :, :));
 
-std_bp_max_start = std(bp_max_start(subj_index, :, :)); 
+std_bp_max_start = std(bp_max_start(subj_index, :, :));
+
+no_measures_plotted = 5;
 
 for b = 1:no_bands
 
@@ -74,7 +76,7 @@ for b = 1:no_bands
 
     fprintf('St. Dev. Start of Max. High %s Hz Density = %f\n', band_labels{b}, std_bp_max_start(:, 2, b))
    
-    subplot(no_bands, 3, (b - 1)*3 + 1)
+    subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 1)
     
     folder_index = 1;
     
@@ -130,8 +132,6 @@ for b = 1:no_bands
     
 end
 
-no_chans = length(chan_labels);
-
 %% Plotting spectra.
 
 chan_prefixes = {'M1'}; no_chans = length(chan_prefixes);
@@ -144,7 +144,7 @@ for b = 1:no_bands
         
         All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
         
-        subplot(no_bands, 2 + no_chans, (b - 1)*(2 + no_chans) + 1 + ch)
+        subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 1 + ch)
         
         boundedline((1:200)', All_mean_mean, prep_for_boundedline(All_mean_ci))
         
@@ -190,7 +190,7 @@ for b = 1:no_bands
     
     All_mean_ci = norminv(1 - p_val, 0, 1)*All_mean_se;
     
-    subplot(no_bands, 2 + no_chans, (b - 1)*(2 + no_chans) + 2 + no_chans)
+    subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 3)
     
     boundedline((1:200)', All_mean_mean, prep_for_boundedline(All_mean_ci))
     
@@ -225,6 +225,69 @@ for b = 1:no_bands
     end
     
 end
+
+%% Plotting GC.
+    
+pd_names = {'pre', 'post'}; no_periods = length(pd_names);
+
+pd_label = '';
+
+for period = 1:no_periods
+    
+    pd_label = [pd_label, '_', pd_names{period}];
+    
+end
+
+if nargin < 6, norm_struct = []; end
+if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
+
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+
+channel_labels = {'Striatum', 'Motor Ctx.'};
+
+for b = 1:no_bands
+    
+    analysis = 'granger'; window_length = 10; band_index = b;
+    
+    initialize_PD_sliding_window_pre_post
+    
+    window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
+
+    band_name = [make_sliding_window_analysis_name([filename, pd_label,...
+    '_band', num2str(data_labels_struct.band_index)], function_name,...
+    window_time_cell, 2, varargin{:}), norm_label];
+            
+    load([band_name, '_recordingspacked.mat'])
+    
+    channel_loc = [2 1];
+    
+    for direction = 1:2
+        
+        channel_loc = fliplr(channel_loc);
+        
+        direction_title = sprintf('%s->%s', chan_labels{channel_loc});
+        
+        SW_direction = SW_RecordingsPacked.axissubset('Channel From', channel_labels{channel_loc(1)});
+        SW_direction = SW_direction.axissubset('Channel To', channel_labels{channel_loc(2)});
+    
+        subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 3 + direction);
+        
+        xp_compare_2D(squeeze(SW_direction), @ttest, 2*p_val, [], 1)
+        
+        legend off
+        
+        if b == 1
+        
+            title(direction_title, 'FontSize', 10)
+            
+        end
+    
+    end
+        
+end
+
     
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 18.2 9.1*1.5], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 18.2 9.1*1.5])
 
