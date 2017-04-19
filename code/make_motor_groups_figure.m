@@ -1,4 +1,4 @@
-function make_motor_groups_figure(freq_limit, p_val, test_flag, bands, band_index)
+function make_motor_groups_figure(freq_limit, p_val, test_flag, bands, band_index, norm_struct)
 
 load('STR_M1_subjects.mat', 'pd_labels', 'folders')
 
@@ -8,7 +8,7 @@ group_titles = {'M1+'; 'M1-'};
 
 channel_prefixes = {'STR_w_M1', 'M1'};
 
-chan_labels = {'Striatal', 'M1'};
+chan_labels = {'Striatal', 'M1'}; channel_labels = {'Striatum', 'Motor Ctx.'};
 
 no_chans = length(chan_labels);
 
@@ -44,7 +44,9 @@ for group = 1:2
     
 end
 
-ax = nan(3, 2);
+no_measures_plotted = 6;
+
+ax = nan(no_measures_plotted, 2);
 
 %% Plotting PLV by group.
 
@@ -54,7 +56,7 @@ for group = 1:2 % Plotting mean and CI.
     
     PLV_mean = All_mean_mean; PLV_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
     
-    ax(3, group) = subplot(3, 2, 4 + group); % 3*(group - 1) + 3) % 
+    ax(no_measures_plotted, group) = subplot(no_measures_plotted, 2, 4 + group); % no_measures_plotted*(group - 1) + no_measures_plotted) % 
     
     boundedline((1:freq_limit)', PLV_mean(1:freq_limit, 1:no_pds_plotted), prep_for_boundedline(PLV_ci(1:freq_limit, 1:no_pds_plotted)))
     
@@ -64,9 +66,9 @@ for group = 1:2 % Plotting mean and CI.
     
 end
 
-linkaxes(ax(3, :))
+linkaxes(ax(no_measures_plotted, :))
 
-% y_extremes(3, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
+% y_extremes(no_measures_plotted, :) = [min(y_lims(:, 1)) max(y_lims(:, 2))];
 
 for group = 1:2 % Plotting stats.
     
@@ -105,13 +107,15 @@ for group = 1:2 % Plotting stats.
     % 
     % [sig_lower, sig_higher] = find_sig(PLV_mean(:, 1:2), PLV_ci(:, 1:2));
     
-    subplot(3, 2, 4 + group) % 3*(group - 1) + 3) %
+    subplot(no_measures_plotted, 2, 4 + group) % no_measures_plotted*(group - 1) + no_measures_plotted) %
     
-    % ylim(y_extremes(3, :))
+    % ylim(y_extremes(no_measures_plotted, :))
+        
+    add_stars(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, [1 0 0])
     
     % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
     
-    add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
+    % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
     
     % add_stars_one_line(gca, (1:freq_limit)', logical(sig_lower(1:freq_limit)), 0, [1 .5 0])
     % 
@@ -127,7 +131,7 @@ for group = 1:2 % Plotting stats.
     
     set(gca, 'FontSize', 10)
     
-    xlabel('Freq. (Hz)', 'FontSize', 10)
+    % xlabel('Freq. (Hz)', 'FontSize', 10)
     
     if group == 1
     
@@ -150,7 +154,7 @@ for ch = 1:2
         
         All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
         
-        ax(ch, group) = subplot(3, 2, 2*(ch - 1) + group); % 3*(group - 1) + ch) %
+        ax(ch, group) = subplot(no_measures_plotted, 2, 2*(ch - 1) + group); % no_measures_plotted*(group - 1) + ch) %
         
         boundedline((1:freq_limit)', All_mean_mean(1:freq_limit, :), prep_for_boundedline(All_mean_ci(1:freq_limit, :)))
         
@@ -194,13 +198,15 @@ for ch = 1:2
         
         % test = p_vals < p_val;
         
-        subplot(3, 2, 2*(ch - 1) + group) % 3*(group - 1) + ch) %
+        subplot(no_measures_plotted, 2, 2*(ch - 1) + group) % no_measures_plotted*(group - 1) + ch) %
         
         % ylim(y_extremes(ch, :))
         
         % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 1)), 0, colors(:, :, 1))
         
-        add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2))
+        % add_stars_one_line(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, colors(:, :, 2))
+        
+        add_stars(gca, (1:freq_limit)', logical(test(:, :, 2)), 1, [1 0 0])
         
         % % Calculating non-overlap of CIs.
         % load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_', group_flags{group}, '_ch1_data_for_plot.mat'])
@@ -237,21 +243,11 @@ for ch = 1:2
     
 end
 
-%% Plotting with xPlt.
+%% Plotting Granger with xPlt.
 
 analysis = 'granger'; window_length = 10;
 
-load('seven_bands')
-
-data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted');
-
-subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
-
-filename = 'STR_w_M1';
-
-sliding_window_cell{1} = window_length*data_labels_struct.sampling_freq{1}*[1 1];
-
-function_name = get_fname(function_name);
+initialize_PD_sliding_window_pre_post
     
 window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
 
@@ -265,11 +261,80 @@ for period = 1:no_periods
     
 end
 
-load([make_sliding_window_analysis_name([filename, pd_label,...
-    '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:}), '_xPlt.mat'])
+if nargin < 6, norm_struct = []; end
+if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
 
-load('M1_groups')
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+
+M1_increased_index{2} = M1_increased_index{2} & All_index{2};
+
+M1_not_increased_index{2} = M1_not_increased_index{2} & All_index{2};
+
+groups_plotted = {M1_increased_index, M1_not_increased_index}; % {All_index}; 
+
+for group = 1:length(groups_plotted)
+        
+    group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
+    '_band', num2str(data_labels_struct.band_index)], function_name,...
+    window_time_cell, 2, varargin{:}), norm_label];
+            
+    load([group_name, '_recordingspacked.mat'])
+    
+    channel_loc = [2 1];
+    
+    for direction = 1:2
+        
+        channel_loc = fliplr(channel_loc);
+        
+        direction_title = sprintf('%s->%s', chan_labels{channel_loc});
+        
+        SW_direction = SW_RecordingsPacked.axissubset('Channel From', channel_labels{channel_loc(1)});
+        SW_direction = SW_direction.axissubset('Channel To', channel_labels{channel_loc(2)});
+    
+        ax(4 + direction, group) = subplot(no_measures_plotted, 2, 2*(4 + direction - 1) + group);
+        
+        xp_compare_2D(squeeze(SW_direction), str2func(test_flag), 2*p_val, [], 1)
+        
+        legend off
+        
+        if group == 1
+        
+            ylabel(direction_title, 'FontSize', 10)
+            
+        end
+    
+    end
+        
+end
+
+sync_axes(ax(5, :)), sync_axes(ax(6, :))
+
+%% Plotting Cross Spectrum with xPlt.
+
+analysis = 'arxspec'; window_length = 10;
+
+initialize_PD_sliding_window_pre_post
+    
+window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
+
+pd_names = {'pre', 'post'}; no_periods = length(pd_names);
+
+pd_label = '';
+
+for period = 1:no_periods
+    
+    pd_label = [pd_label, '_', pd_names{period}];
+    
+end
+
+if nargin < 6, norm_struct = []; end
+if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
+
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
 
 M1_increased_index{2} = M1_increased_index{2} & All_index{2};
 
@@ -279,27 +344,30 @@ groups_plotted = {M1_increased_index, M1_not_increased_index}; % {All_index};
 
 for group = 1:length(groups_plotted)
     
-    ax(ch, group) = subplot(3, 2, 2*(ch - 1) + group);
-        
     group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
-    '_band', num2str(data_labels_struct.band_index)], function_name,...
-    window_time_cell, 2, varargin{:}), norm_label];
-            
+        '_band', num2str(data_labels_struct.band_index)], function_name,...
+        window_time_cell, 2, varargin{:}), norm_label];
+    
     load([group_name, '_recordingspacked.mat'])
     
-    SW_StoM = SW_RecordingsPacked.axissubset('Channel From', 'Striatum');
-    SW_StoM = SW_RecordingsPacked.axissubset('Channel To', 'Motor Ctx.');
+    SW_direction = SW_RecordingsPacked.axissubset('Channel 1', channel_labels{1});
+    SW_direction = SW_direction.axissubset('Channel 2', channel_labels{2});
     
-    SW_MtoS = SW_RecordingsPacked.axissubset('Channel From', 'Motor Ctx.');
-    SW_MtoS = SW_RecordingsPacked.axissubset('Channel To', 'Striatum');
-        
-    subplot(3, 2, 2*(ch - 1) + group)
+    ax(4, group) = subplot(no_measures_plotted, 2, 2*3 + group);
     
-    xp_compare_2D()
+    xp_compare_2D(squeeze(SW_direction), str2func(test_flag), 2*p_val, [], 1)
+    
+    legend off
+    
+    if group == 1
         
+        ylabel('Cross-Spectrum', 'FontSize', 10)
+        
+    end
+    
 end
-    
-    
+
+sync_axes(ax(4, :))
 
 %% Saving figure.
 
