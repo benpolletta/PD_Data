@@ -32,7 +32,25 @@ end
 
 norm_label = ['_', norm_struct.who];
 
-if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how')
+    
+    if isstring(norm_struct.how)
+        
+        if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end
+        
+    elseif iscellstr(norm_struct.how)
+        
+        if any(cellfun(@(x) ~isempty(x), norm_struct.how))
+            
+            for c = 1:length(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how{c}]; end
+            
+        end
+        
+    end
+    
+end
 
 load([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
