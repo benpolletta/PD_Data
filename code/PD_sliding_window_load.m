@@ -134,7 +134,7 @@ for d = (axes_info_struct.leave_packed_odim + 1):max_data_dim
     
 end
 
-SW_xPlt = squeeze(SW_xPlt);
+SW_xPlt = SW_xPlt;
 
 save([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
