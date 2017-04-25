@@ -17,7 +17,8 @@ function SW_norm = PD_xPlt_prep_for_norm(SW_norm_struct, SW_xPlt, function_name,
     
     if any(cellfun(@(x) ~isempty(x), regexp(pd_names, 'shuffle', 'once')))
         
-        if ~isempty(data_period_dim) && ~isempty(norm_period_dim)
+        if ~isempty(data_period_dim) && ~isempty(norm_period_dim) &&...
+                length(SW_norm.axis(norm_period_dim).values) == length(SW_xPlt.axis(data_period_dim).values)
             
             SW_norm.axis(norm_period_dim).values = SW_xPlt.axis(data_period_dim).values;
             
