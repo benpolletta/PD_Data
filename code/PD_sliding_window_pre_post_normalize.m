@@ -104,7 +104,7 @@ switch norm_struct.who
             num2str(data_labels_struct.band_index)], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
-        baseline_shuffle_struct = struct('who', 'shuffle', 'how', norm_struct.how{1});
+        baseline_shuffle_struct = struct('who', 'baseline', 'how', norm_struct.how{1});
         
         SW_Shuffle_struct.SW_xPlt = PD_sliding_window_normalize(SW_Shuffle_struct.SW_xPlt,...
             function_name, sliding_window_cell, data_labels_struct, filename, {'pre_shuffles', 'post_shuffles'}, baseline_shuffle_struct, {'baseline_shuffles'}, varargin{:});

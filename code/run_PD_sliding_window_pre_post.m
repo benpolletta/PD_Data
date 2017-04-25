@@ -121,7 +121,7 @@ whos = {'baseline', 'shuffle'};
 
 hows = {'', 'subtract', 'zscore'};
 
-for w = 2:length(whos)
+for w = 1:length(whos)
     
     for h = 1:length(hows)
 
