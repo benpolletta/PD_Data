@@ -96,7 +96,7 @@ if ~any(size_dim2(:) > 1)
         
     end
     
-    freq_limit = 50; freq_indicator = frequencies <= freq_limit;
+    freq_limit = 200; freq_indicator = frequencies <= freq_limit;
     
     frequencies = frequencies(freq_indicator);
     
