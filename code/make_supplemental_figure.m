@@ -68,7 +68,7 @@ mean_bp_max_start = mean(bp_max_start(subj_index, :, :));
 
 std_bp_max_start = std(bp_max_start(subj_index, :, :));
 
-no_measures_plotted = 5;
+no_measures_plotted = 6;
 
 for b = 1:no_bands
 
@@ -170,7 +170,7 @@ for b = 1:no_bands
         
         if b == 1
             
-            title(short_chan_labels{ch}, 'FontSize', 10)
+            title([short_chan_labels{ch}, ' Spectrum'], 'FontSize', 10)
             
         elseif b == no_bands
         
@@ -226,7 +226,61 @@ for b = 1:no_bands
     
 end
 
-%% Plotting GC.
+%% Plotting Cross-Spectrum.
+    
+pd_names = {'pre', 'post'}; no_periods = length(pd_names);
+
+pd_label = '';
+
+for period = 1:no_periods
+    
+    pd_label = [pd_label, '_', pd_names{period}];
+    
+end
+
+if nargin < 6, norm_struct = []; end
+if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
+
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+
+channel_labels = {'Striatum', 'Motor Ctx.'};
+
+for b = 1:no_bands
+    
+    analysis = 'arxspec'; window_length = 10; band_index = b;
+    
+    initialize_PD_sliding_window_pre_post
+    
+    window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
+    
+    band_name = [make_sliding_window_analysis_name([filename, pd_label,...
+        '_band', num2str(data_labels_struct.band_index)], function_name,...
+        window_time_cell, 2, varargin{:}), norm_label];
+    
+    load([band_name, '_recordingspacked.mat'])
+    
+    mytitle = 'Cross Spectrum';
+    
+    SW_cross = SW_RecordingsPacked.axissubset('Channel 1', channel_labels{1});
+    SW_cross = SW_cross.axissubset('Channel 2', channel_labels{2});
+    
+    subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 4);
+    
+    xp_compare_2D(squeeze(SW_cross), @ttest, 2*p_val, [], 1)
+    
+    legend off
+    
+    if b == 1
+        
+        title(mytitle, 'FontSize', 10)
+        
+    end
+    
+end
+
+%% Plotting Granger Causality.
     
 pd_names = {'pre', 'post'}; no_periods = length(pd_names);
 
@@ -267,12 +321,12 @@ for b = 1:no_bands
         
         channel_loc = fliplr(channel_loc);
         
-        direction_title = sprintf('%s->%s', chan_labels{channel_loc});
+        direction_title = sprintf('PDC, %s->%s', chan_labels{channel_loc});
         
         SW_direction = SW_RecordingsPacked.axissubset('Channel From', channel_labels{channel_loc(1)});
         SW_direction = SW_direction.axissubset('Channel To', channel_labels{channel_loc(2)});
     
-        subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 3 + direction);
+        subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 4 + direction);
         
         xp_compare_2D(squeeze(SW_direction), @ttest, 2*p_val, [], 1)
         
@@ -288,8 +342,9 @@ for b = 1:no_bands
         
 end
 
-    
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 18.2 9.1*1.5], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 18.2 9.1*1.5])
+
+saveas(gcf, 'supplementary_figure.fig')
 
 print(gcf, '-painters', '-dpdf', '-r600', 'supplementary_figure.pdf')
 
