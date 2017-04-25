@@ -2,7 +2,9 @@
 
 load('seven_bands')
 
-data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted')
+if ~exist('band_index', 'var'), band_index = 4; end
+
+data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted', 'band_index', band_index)
 
 subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
 
@@ -113,13 +115,13 @@ SW_xPlt = PD_sliding_window_load(function_handle, sliding_window_cell, subjects_
 
 SW_xPlt.getaxisinfo
 
-%% Plotting.
+%% Plotting normalization by baseline or by shuffles.
 
 whos = {'baseline', 'shuffle'};
 
 hows = {'', 'subtract', 'zscore'};
 
-for w = 1:length(whos)
+for w = 2:length(whos)
     
     for h = 1:length(hows)
 
@@ -128,6 +130,36 @@ for w = 1:length(whos)
         PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
 
         PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
+       
+        for h1 = 1:length(hows)
+            
+            norm_struct = struct('who', whos{w}, 'how', {hows{h}, hows{h1}});
+            
+        end
+        
+    end
+    
+end
+
+%% Plotting sequential normalization by baseline and by shuffles.
+
+whos = {'shuffle_baseline', 'baseline_shuffle'};
+
+hows = {'', 'subtract', 'zscore'};
+
+for w = 1:length(whos)
+    
+    for h = 1:length(hows)
+       
+        for h1 = 1:length(hows)
+            
+            norm_struct = struct('who', whos{w}, 'how', {hows{h}, hows{h1}});
+            
+            PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
+            
+            PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
+            
+        end
         
     end
     
