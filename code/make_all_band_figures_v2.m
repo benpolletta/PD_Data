@@ -171,6 +171,66 @@ for b = 1:no_bands
     
 end
 
+%% Plotting GC.
+
+analysis = 'granger'; window_length = 10;
+
+initialize_PD_sliding_window_pre_post
+    
+window_time_cell = cellfun(@(x,y) x/y, sliding_window_cell, data_labels_struct.sampling_freq, 'UniformOutput', 0);
+
+pd_names = {'pre', 'post'}; no_periods = length(pd_names);
+
+pd_label = '';
+
+for period = 1:no_periods
+    
+    pd_label = [pd_label, '_', pd_names{period}];
+    
+end
+
+if nargin < 6, norm_struct = []; end
+if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
+
+norm_label = ['_', norm_struct.who];
+
+if isfield(norm_struct, 'how'), if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end, end
+
+for b = 1:no_bands
+        
+    band_name = [make_sliding_window_analysis_name([filename, pd_label,...
+    '_band', num2str(data_labels_struct.band_index)], function_name,...
+    window_time_cell, 2, varargin{:}), norm_label];
+            
+    load([group_name, '_recordingspacked.mat'])
+    
+    channel_loc = [2 1];
+    
+    for direction = 1:2
+        
+        channel_loc = fliplr(channel_loc);
+        
+        direction_title = sprintf('%s->%s', chan_labels{channel_loc});
+        
+        SW_direction = SW_RecordingsPacked.axissubset('Channel From', channel_labels{channel_loc(1)});
+        SW_direction = SW_direction.axissubset('Channel To', channel_labels{channel_loc(2)});
+    
+        ax(4 + direction, group) = subplot(no_measures_plotted, 2, 2*(4 + direction - 1) + group);
+        
+        xp_compare_2D(squeeze(SW_direction), str2func(test_flag), 2*p_val, [], 1)
+        
+        legend off
+        
+        if group == 1
+        
+            ylabel(direction_title, 'FontSize', 10)
+            
+        end
+    
+    end
+        
+end
+
 save_as_eps(gcf, [group_prefix, '_', missing{1}, '_all_bands_v2'])
 
 save_as_pdf(gcf, [group_prefix, '_', missing{1}, '_all_bands_v2'])
