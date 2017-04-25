@@ -282,6 +282,11 @@ for group = 1:length(groups_plotted)
             
     load([group_name, '_recordingspacked.mat'])
     
+    frequencies = SW_RecordingsPacked.meta.matrix_dim_1.values;
+    freq_index = frequencies <= freq_limit;
+    SW_RecordingsPacked.data = cellfun(@(x) x(freq_index, :), SW_RecordingsPacked.data, 'UniformOutput', false);
+    SW_RecordingsPacked.meta.matrix_dim_1.values = frequencies(freq_index);
+    
     channel_loc = [2 1];
     
     for direction = 1:2
@@ -350,6 +355,11 @@ for group = 1:length(groups_plotted)
     
     load([group_name, '_recordingspacked.mat'])
     
+    frequencies = SW_RecordingsPacked.meta.matrix_dim_1.values;
+    freq_index = frequencies <= freq_limit;
+    SW_RecordingsPacked.data = cellfun(@(x) x(freq_index, :), SW_RecordingsPacked.data, 'UniformOutput', false);
+    SW_RecordingsPacked.meta.matrix_dim_1.values = frequencies(freq_index);
+    
     SW_direction = SW_RecordingsPacked.axissubset('Channel 1', channel_labels{1});
     SW_direction = SW_direction.axissubset('Channel 2', channel_labels{2});
     
@@ -371,13 +381,15 @@ sync_axes(ax(4, :))
 
 %% Saving figure.
 
+name = [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d_%sHz', band_flag, freq_limit, band_labels{band_index}), p_tag, '_', test_flag, '.pdf'];
+
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 9.1], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 9.1])
 
-print(gcf, '-painters', '-dpdf', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.pdf'])
+print(gcf, '-painters', '-dpdf', '-r600', [name, '.pdf'])
 
-print(gcf, '-painters', '-depsc', '-r600', [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.eps'])
+print(gcf, '-painters', '-depsc', '-r600', [name, '.eps'])
 
-saveas(gcf, [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d', band_flag, freq_limit), p_tag, '_', test_flag, '.fig'])
+saveas(gcf, [name, '.fig'])
 
 end
 
