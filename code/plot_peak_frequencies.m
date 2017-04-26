@@ -78,7 +78,7 @@ for group = 1:length(groups_plotted)
     titles = strrep(titles, ' ', '_');
     
     for fig = 1:length(titles)
-        save_as_pdf(fig, ['scatter_', group_name, titles{fig}(1:(end - 1))])
+        save_as_pdf(fig, ['scatter', group_name, '_', titles{fig}(1:(end - 1))])
     end
     
     close('all')
@@ -93,7 +93,7 @@ for group = 1:length(groups_plotted)
     titles = strrep(titles, ' ', '_');
     
     for fig = 1:length(titles)
-        save_as_pdf(fig, ['compare_', group_name, titles{fig}(1:(end - 1))])
+        save_as_pdf(fig, ['compare', group_name,  '_', titles{fig}(1:(end - 1))])
     end
     
 end
