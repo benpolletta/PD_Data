@@ -134,7 +134,13 @@ for d = (axes_info_struct.leave_packed_odim + 1):max_data_dim
     
 end
 
-SW_xPlt = SW_xPlt;
+if ~isempty(SW_xPlt.findaxis('Dim 1'))
+    
+    empty_axis = SW_xPlt.findaxis('Dim 1');
+    SW_xPlt = SW_xPlt.permute([1:(empty_axis - 1) (empty_axis + 1):ndims(SW_xPlt) empty_axis]);
+    SW_xPlt.axis(end) = [];
+    
+end
 
 save([make_sliding_window_analysis_name([filename, pd_label,...
     '_band', num2str(data_labels_struct.band_index)], function_name,...
