@@ -12,7 +12,7 @@ chan_labels = {'Striatum', 'M1'};
 
 filename = 'STR_w_M1';
 
-if ~exist('window_length', 'var'), window_length = 150; end
+if ~exist('window_length', 'var'), window_length = 10; end
 
 sliding_window_cell{1} = window_length*data_labels_struct.sampling_freq{1}*[1 1];
 
