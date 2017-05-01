@@ -300,7 +300,7 @@ for group = 1:length(groups_plotted)
     
         ax(4 + direction, group) = subplot(no_measures_plotted, 2, 2*(4 + direction - 1) + group);
         
-        xp_compare_2D(squeeze(SW_direction), str2func(test_flag), 2*p_val, [], 1)
+        xp_comparison_plot_2D(squeeze(SW_direction), str2func(test_flag), 2*p_val, [], 1)
         
         legend off
         
@@ -360,12 +360,12 @@ for group = 1:length(groups_plotted)
     SW_RecordingsPacked.data = cellfun(@(x) x(freq_index, :), SW_RecordingsPacked.data, 'UniformOutput', false);
     SW_RecordingsPacked.meta.matrix_dim_1.values = frequencies(freq_index);
     
-    SW_direction = SW_RecordingsPacked.axissubset('Channel 1', channel_labels{1});
-    SW_direction = SW_direction.axissubset('Channel 2', channel_labels{2});
+    SW_cross = SW_RecordingsPacked.axissubset('Channel 1', channel_labels{1});
+    SW_cross = SW_cross.axissubset('Channel 2', channel_labels{2});
     
     ax(4, group) = subplot(no_measures_plotted, 2, 2*3 + group);
     
-    xp_compare_2D(squeeze(SW_direction), str2func(test_flag), 2*p_val, [], 1)
+    xp_comparison_plot_2D(squeeze(SW_cross), str2func(test_flag), 2*p_val, [], 1)
     
     legend off
     
