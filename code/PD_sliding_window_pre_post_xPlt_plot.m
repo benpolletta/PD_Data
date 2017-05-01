@@ -251,7 +251,7 @@ for group = 1:length(groups_plotted)
             SW_WindowsPacked.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_compare_3D};
-            function_arguments = {{},{@ttest,significance,1,'pcolor'}};
+            function_arguments = {{},{@ranksum,significance,1,'pcolor'}};
             dimensions = {{'Recording', 'Channel'},{'Period'}};
             recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments)
             
@@ -281,7 +281,7 @@ for group = 1:length(groups_plotted)
             SW_RecordingsPacked.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_compare_3D};
-            function_arguments = {{},{@ttest,significance,1,'pcolor'}};
+            function_arguments = {{},{@ranksum,significance,1,'pcolor'}};
             dimensions = {{'Channel'},{'Period'}};
             recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments)
             
