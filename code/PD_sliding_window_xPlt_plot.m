@@ -177,7 +177,7 @@ for group = 1:length(groups_plotted)
             
             %% % % Pre-post comparison over windows, plotted by recording. % % %
             
-            function_handles = {@xp_tight_subplot_adaptive,@xp_compare_2D};
+            function_handles = {@xp_tight_subplot_adaptive,@xp_comparison_plot_2D};
             function_arguments = {{},{@ttest, significance, [], 1}};
             dimensions = {{'Recording', 'Channel'},{'Period'}};
             recursivePlot(SW_WindowsPacked,function_handles,dimensions,function_arguments);
@@ -223,7 +223,7 @@ for group = 1:length(groups_plotted)
             
             %% % % Pre-post comparisons over recordings. % % %
             
-            function_handles = {@xp_tight_subplot_adaptive,@xp_compare_2D};
+            function_handles = {@xp_tight_subplot_adaptive,@xp_comparison_plot_2D};
             function_arguments = {{},{@ttest, significance, [], 1}};
             dimensions = {{'Channel'},{'Period'}};
             recursivePlot(SW_RecordingsPacked,function_handles,dimensions,function_arguments);
