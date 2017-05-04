@@ -236,7 +236,7 @@ for group = 1:length(groups_plotted)
             SW_WindowMean.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_matrix_imagesc};
-            function_arguments = {{[], [], [], 'row'},{1,1}};
+            function_arguments = {{[], [], [], 'row'},{struct('transpose_on', 1, 'do_colorbar', 1)}};
             dimensions = {{'Recording', 'Period', 'Channel'},{}};
             recursivePlot(SW_WindowMean,function_handles,dimensions,function_arguments);
             
@@ -266,7 +266,7 @@ for group = 1:length(groups_plotted)
             SW_RecordingMean.getaxisinfo
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_matrix_imagesc};
-            function_arguments = {{[], [], [], 'row'},{1,1}};
+            function_arguments = {{[], [], [], 'row'},{struct('transpose_on', 1, 'do_colorbar', 1)}};
             dimensions = {{'Channel','Period'},{}};
             recursivePlot(SW_RecordingMean,function_handles,dimensions,function_arguments);
             
@@ -299,7 +299,7 @@ for group = 1:length(groups_plotted)
             %% % % Plots by recording. % % %
             
             function_handles = {@xp_tight_subplot_adaptive,@xp_matrix_imagesc};
-            function_arguments = {{[], [], [], 'row'},{1,1}};
+            function_arguments = {{[], [], [], 'row'},{struct('transpose_on', 1, 'do_colorbar', 1)}};
             dimensions = {{'Recording', 'Period', 'Channel'},{}};
             recursivePlot(SW_group,function_handles,dimensions,function_arguments);
             
