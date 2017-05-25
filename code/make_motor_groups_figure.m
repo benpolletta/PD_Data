@@ -381,9 +381,9 @@ sync_axes(ax(4, :))
 
 %% Saving figure.
 
-name = [sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d_%sHz', band_flag, freq_limit, band_labels{band_index}), p_tag, '_', test_flag, '.pdf'];
+name = sprintf('STR_M1_kmeans_by_motor_groups_%s_f%d_%sHz_%s_%s', band_flag, freq_limit, band_labels{band_index}, p_tag, test_flag);
 
-set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 9.1], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 9.1])
+set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 18.2], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 18.2])
 
 print(gcf, '-painters', '-dpdf', '-r600', [name, '.pdf'])
 
