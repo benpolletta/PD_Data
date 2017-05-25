@@ -25,16 +25,20 @@ pd_names = {'pre', 'post'}; no_periods = length(pd_names);
 norm_label = ['_', norm_struct.who];
 
 if isfield(norm_struct, 'how')
-    
-    if isstring(norm_struct.how)
         
-        if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end
+    if ~isempty(norm_struct.how)
         
-    elseif iscellstr(norm_struct.how)
-        
-        if any(cellfun(@(x) ~isempty(x), norm_struct.how))
+        if ischar(norm_struct.how)
             
-            for c = 1:length(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how{c}]; end
+            norm_label = [norm_label, '_', norm_struct.how];
+            
+        elseif iscellstr(norm_struct.how)
+            
+            if any(cellfun(@(x) ~isempty(x), norm_struct.how))
+                
+                for c = 1:length(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how{c}]; end
+                
+            end
             
         end
         

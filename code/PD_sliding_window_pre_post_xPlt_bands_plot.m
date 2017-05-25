@@ -1,4 +1,4 @@
-w_function PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm_struct, varargin)
+function PD_sliding_window_pre_post_xPlt_bands_plot(function_name, sliding_window_cell, data_labels_struct, filename, significance, norm_struct, varargin)
 
 % Loads sliding window analysis on carbachol data at times of highest
 % striatal beta band density, pre- and post-infusion.
@@ -32,24 +32,26 @@ end
 
 norm_label = ['_', norm_struct.who];
 
-norm_label = ['_', norm_struct.who];
-
 if isfield(norm_struct, 'how')
-
-    if isstring(norm_struct.how)
-
-        if ~isempty(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how]; end
-
-    elseif iscellstr(norm_struct.how)
-
-        if any(cellfun(@(x) ~isempty(x), norm_struct.how))
-
-            for c = 1:length(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how{c}]; end
-
+        
+    if ~isempty(norm_struct.how)
+        
+        if ischar(norm_struct.how)
+            
+            norm_label = [norm_label, '_', norm_struct.how];
+            
+        elseif iscellstr(norm_struct.how)
+            
+            if any(cellfun(@(x) ~isempty(x), norm_struct.how))
+                
+                for c = 1:length(norm_struct.how), norm_label = [norm_label, '_', norm_struct.how{c}]; end
+                
+            end
+            
         end
-
+        
     end
-
+    
 end
 
 load([make_sliding_window_analysis_name([filename, pd_label,...
