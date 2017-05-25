@@ -106,12 +106,16 @@ switch norm_struct.who
         
         baseline_shuffle_struct = struct('who', 'baseline', 'how', norm_struct.how{1});
         
+        SW_Shuffle_struct.SW_xPlt = SW_Shuffle_struct.SW_xPlt.unpackDim(SW_Shuffle_struct.axes_info_struct.odims + 1, [], 'Window_Dim_1');
+        
         SW_Shuffle_struct.SW_xPlt = PD_sliding_window_normalize(SW_Shuffle_struct.SW_xPlt,...
             function_name, sliding_window_cell, data_labels_struct, filename, {'pre_shuffles', 'post_shuffles'}, baseline_shuffle_struct, {'baseline_shuffles'}, varargin{:});
         
+        SW_Shuffle_struct.SW_xPlt = SW_Shuffle_struct.SW_xPlt.packDim('Window_Dim_1', SW_Shuffle_struct.axes_info_struct.odims + 1);
+        
         collapse_struct = struct('function', @nanmean, 'varargin', {});
         
-        SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, {'baseline'}, collapse_struct);
+        SW_Shuffle = PD_xPlt_prep_for_norm(SW_Shuffle_struct, SW_xPlt, function_name, {'pre_shuffles', 'post_shuffles'}, collapse_struct);
         
         surrogate_data_type_axis = nDDictAxis;
         

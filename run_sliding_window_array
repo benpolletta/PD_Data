@@ -1,15 +1,15 @@
 #!/bin/sh -l
 
-#$ -pe mpi_16_tasks_per_node 16
+# #$ -pe mpi_16_tasks_per_node 16
 
-#$ -l h_rt=48:00:00
+# #$ -l h_rt=48:00:00
 
-#$ -t 1-5
-bands=(1 2 3 5 6)
+#$ -t 1-2
+bands=(3 5)
 # bands=$1
 index=$(($SGE_TASK_ID-1))
 band=${bands[$index]}
 
-echo "Executing run_sliding_window "$band" ""'pac'"" ""[1 1 1 1]"" ""1"" ""[1 1]"""
-/projectnb/crc-nak/brpp/PD_Data/run_sliding_window $band "'pac'" "[1 1 1 1]" "1" "[1 1]" 
+echo "Executing run_sliding_window "$band" ""'granger'"" ""[0 0 0 0]"" ""1"" ""[1 1]"""
+/projectnb/crc-nak/brpp/PD_Data/run_sliding_window $band "'granger'" "[0 0 0 0]" "1" "[1 1]" 
 # run_sliding_window band "$2" "$3" "$4" "$5"
