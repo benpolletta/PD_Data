@@ -28,7 +28,7 @@ switch analysis
         
         sliding_window_cell{2} = [2 2];
         
-        function_handle = @mvgc_analysis; function_name = function_handle;
+        fcn_handle = @mvgc_analysis;
         
         varargin = {[], '', 1};
         
@@ -41,7 +41,7 @@ switch analysis
         
         sliding_window_cell{2} = [1 1];
         
-        function_handle = @pmtm_detrend;
+        fcn_handle = @pmtm_detrend;
         
         varargin = {window_length, [], data_labels_struct.sampling_freq{1}};
         
@@ -51,7 +51,7 @@ switch analysis
         
         sliding_window_cell{2} = [1 1]; % {[500 500], [1 1]}; %
         
-        function_handle = @mvgc_analysis; function_name = get_fname(function_handle);
+        fcn_handle = @mvgc_analysis;
         
         varargin = {[], '', 3};
         
@@ -61,7 +61,7 @@ switch analysis
         
         sliding_window_cell{2} = [2 2]; % = {[150*500 150*500], [2 2]};
         
-        function_handle = @mvgc_analysis;
+        fcn_handle = @mvgc_analysis;
         
         varargin = {[], '', 3};
         
@@ -69,7 +69,7 @@ switch analysis
         
         sliding_window_cell{2} = [1 1]; % = {[150*500 150*500], [2 2]};
         
-        function_handle = @PAC;
+        fcn_handle = @PAC;
         
         varargin = {data_labels_struct.sampling_freq{1}, [.25:.25:10 11:30], [15:30 32.5:2.5:80 85:5:200]};
         
@@ -78,4 +78,4 @@ switch analysis
         
 end
 
-function_name = func2str(function_handle);
+function_name = func2str(fcn_handle);
