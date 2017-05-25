@@ -268,7 +268,7 @@ for b = 1:no_bands
     
     subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 4);
     
-    xp_compare_2D(squeeze(SW_cross), @ttest, 2*p_val, [], 1)
+    xp_comparison_plot_2D(squeeze(SW_cross), @ttest, 2*p_val, [], 1)
     
     legend off
     
@@ -328,7 +328,7 @@ for b = 1:no_bands
     
         subplot(no_bands, no_measures_plotted, (b - 1)*no_measures_plotted + 4 + direction);
         
-        xp_compare_2D(squeeze(SW_direction), @ttest, 2*p_val, [], 1)
+        xp_comparison_plot_2D(squeeze(SW_direction), @ttest, 2*p_val, [], 1)
         
         legend off
         
@@ -342,7 +342,7 @@ for b = 1:no_bands
         
 end
 
-set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 18.2 9.1*1.5], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 18.2 9.1*1.5])
+set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 27.3 9.1*1.5], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 27.3 9.1*1.5])
 
 saveas(gcf, 'supplementary_figure.fig')
 
