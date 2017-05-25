@@ -152,6 +152,8 @@ for w = 1:length(whos)
             norm_struct = struct('who', whos{w});
             
             norm_struct.how = {hows{h}, hows{h1}};
+
+            PD_sliding_window_pre_post_xPlt_test(function_name, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
             
             PD_sliding_window_pre_post_xPlt_plot(function_handle, sliding_window_cell, data_labels_struct, filename, .1, norm_struct, varargin{:})
             
