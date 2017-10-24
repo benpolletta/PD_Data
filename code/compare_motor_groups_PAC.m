@@ -151,6 +151,7 @@ recursivePlot(SW_xPlt, function_handles, dimensions, function_arguments)
 SW_post_minus_pre = norm_axis_by_value(SW_xPlt, 'Period', 'pre', 'subtract');
 SW_post_minus_pre = SW_post_minus_pre.axissubset('Period', 'post');
 
+function_arguments = {{},{@ranksum, significance}};
 dimensions = {{'Channel'}, {'Group'}};
 recursivePlot(SW_post_minus_pre, function_handles, dimensions, function_arguments)
 
