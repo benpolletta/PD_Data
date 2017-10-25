@@ -5,12 +5,9 @@ function PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, sd_lim, freqs, no
 %
 % INPUTS:
 % subjects_mat - name of .mat file containing list of folders.
+% peak_suffix - indicates how peaks are removed.
 % sd_lim - standard deviation cutoff above which the power at a given
 %  timepoint is deemed "high"; typical value is 2.
-% outlier_lims - vector of values, same length as 'folders' cell in
-%   subject_mat, which indicates the outlier cutoff used to remove
-%   artifacts from each recording; if this is left empty, a default vector
-%   included in subject_mat is used.
 % freqs - a vector of center frequencies for the wavelet spectrogram;
 %  default is 1:200.
 % no_cycles - a vector of numbers of cycles each wavelet contains
