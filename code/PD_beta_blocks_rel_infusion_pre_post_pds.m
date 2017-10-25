@@ -1,4 +1,23 @@
-function PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, epoch_secs, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, time_window, epoch_secs, freqs, no_cycles, bands)
+
+% Computes start and stop times of epochs having peak band power density.
+%
+% INPUTS:
+% subjects_mat - name of .mat file containing list of folders.
+% peak_suffix - indicates how peaks are removed.
+% time_window - 2 x 1 vector of start and stop time to search for epoch
+%  having peak band power density.
+% epoch_secs - length (in seconds) of epochs having peak band power density.
+% freqs - a vector of center frequencies for the wavelet spectrogram;
+%  default is 1:200.
+% no_cycles - a vector of numbers of cycles each wavelet contains
+%  (effectively gives the bandwidth of the spectrogram at each frequency);
+%  default is linspace(3, 7, 200).
+% bands - a matrix of band limits, over which spectrogram power will be
+%  summed; matrix is n by 2, with n the number of bands, the first
+%  column containing the start frequency of each band, and the second column
+%  containing the end frequency of each band; default is [1 4;4 8;8 30;30
+%  100;120 180;0 200].
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -24,7 +43,7 @@ load(subject_mat)
 
 no_folders = length(folders);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+load([folders{1}, '/', prefixes{1}, BP_suffix, '_wt.mat'], 'sampling_freq')
 
 no_bands = size(bands, 1);
 
@@ -84,18 +103,26 @@ for fo = 1:no_folders
         
         pd_indices(:, 1) = t > (min(t) + epoch_secs/2 - 1) & t < (-epoch_secs/2 + 1);
         
-        if strcmp(folder, '130328')
+        if ~isempty(time_window)
             
-            pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (t(end) - epoch_secs/2 + 1);
-            
-        elseif strcmp(folder, '130718')
-            
-            pd_indices(:, 2) = t > (5*60 + (epoch_secs/2 - 1)) & t < (1800 - epoch_secs/2 + 1);
+            pd_indices(:, 2) = t > (time_window(1) + epoch_secs/2 - 1) & t < (time_window(2) - epoch_secs/2 + 1);
             
         else
-        
-            pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (1800 - epoch_secs/2 + 1);
-        
+            
+            if strcmp(folder, '130328')
+                
+                pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (t(end) - epoch_secs/2 + 1);
+                
+            elseif strcmp(folder, '130718')
+                
+                pd_indices(:, 2) = t > (5*60 + (epoch_secs/2 - 1)) & t < (1800 - epoch_secs/2 + 1);
+                
+            else
+                
+                pd_indices(:, 2) = t > (epoch_secs/2 - 1) & t < (1800 - epoch_secs/2 + 1);
+                
+            end
+            
         end
             
     elseif no_pds == 1
@@ -191,8 +218,10 @@ end
 
 for b = 1:no_bands
            
-    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, '_by_STR'])
+    save_as_pdf(b, [subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, make_label('win', time_window, []),...
+        '_pct_BP_high_', num2str(epoch_secs/60), '_min_', short_band_labels{b}, '_by_STR'])
     
 end
 
-save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat'], 'pct_bp_high', 'All_bp_max_start', 'All_bp_max_end')
+save([subject_mat(1:(end - length('_subjects.mat'))), BP_suffix, make_label('win', time_window, []),...
+    '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs_by_STR.mat'], 'pct_bp_high', 'All_bp_max_start', 'All_bp_max_end')
