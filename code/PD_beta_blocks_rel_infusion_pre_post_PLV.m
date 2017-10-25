@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_PLV(subject_mat, peak_suffix, epoch_secs, pd_handle, band_index, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_PLV(subject_mat, peak_suffix, time_window, epoch_secs, pd_handle, band_index, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -30,7 +30,7 @@ load(subject_mat)
 
 no_folders = length(folders); no_pds = length(pd_labels); no_chans = length(chan_labels);
 
-load([folders{1}, '/', prefixes{1}, '_wt.mat'], 'sampling_freq')
+load([folders{1}, '/', prefixes{1}, BP_suffix, '_wt.mat'], 'sampling_freq')
 
 no_bands = size(bands, 1);
 
@@ -54,7 +54,8 @@ no_pds = length(pd_labels);
 
 [Coh_sec, Coh_sec_pct, dP_sec, dP_sec_pct] = deal(nan(no_freqs, epoch_secs, no_folders, no_pds));
 
-load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+load([subj_mat_name, BP_suffix, make_label('win', time_window, []),...
+    '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
 for fo = 1:no_folders
     
@@ -146,7 +147,7 @@ for fo = 1:no_folders
     
 end
 
-save([subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index}, ...
+save([subj_mat_name, BP_suffix,  make_label('win', time_window, []), '_pct_', short_band_labels{band_index}, ...
     '_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '_PLV.mat'], ... 
     'freqs', 'band_indices', 'band_index', 'Coh_baseline', 'Coh_sec', 'Coh_sec_pct', 'dP_baseline', 'dP_sec', 'dP_sec_pct')
 

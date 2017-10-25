@@ -1,4 +1,4 @@
-function run_carb(subject_mat, peak_suffix, freqs, no_cycles, bands, band_index)
+function run_carb(subject_mat, peak_suffix, time_window, freqs, no_cycles, bands, band_index)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -13,8 +13,8 @@ end
 % PD_pct_fix(subject_mat, peak_suffix, [], freqs, no_cycles, bands)
 % 
 % PD_beta_blocks_rel_infusion(subject_mat, peak_suffix, 2, freqs, no_cycles, bands);
-% 
-% PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, 150, freqs, no_cycles, bands);
+
+PD_beta_blocks_rel_infusion_pre_post_pds(subject_mat, peak_suffix, time_window, 150, freqs, no_cycles, bands);
 
 power_handles = {'', '_pct'};
 
@@ -22,7 +22,7 @@ for i = 1:length(power_handles)
     
     % PD_beta_blocks_rel_infusion_pre_post_power(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, freqs, no_cycles, bands);
    
-    PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, freqs, no_cycles, bands);
+    PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, time_window, 150, '_by_STR', power_handles{i}, band_index, freqs, no_cycles, bands);
 
 end
 
@@ -36,6 +36,10 @@ end
 %    
 % end
 
+PD_beta_blocks_rel_infusion_pre_post_PLV(subject_mat, peak_suffix, time_window, 150, '_by_STR', band_index, freqs, no_cycles, bands)
+
+peak_suffix = [peak_suffix, make_label('win', time_window, [])];
+
 for i = 1:length(power_handles)
     
     PD_beta_blocks_rel_infusion_pre_post_spectrum_plot(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands);
@@ -43,8 +47,6 @@ for i = 1:length(power_handles)
     PD_beta_blocks_rel_infusion_pre_post_spectrum_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', power_handles{i}, band_index, no_bands, freqs, no_cycles, bands, {}, []);
     
 end
-
-PD_beta_blocks_rel_infusion_pre_post_PLV(subject_mat, peak_suffix, 150, '_by_STR', band_index, freqs, no_cycles, bands)
 
 PD_beta_blocks_rel_infusion_pre_post_PLV_plot_individual(subject_mat, peak_suffix, 150, '_by_STR', 4, 7, freqs, no_cycles, bands, {})
 

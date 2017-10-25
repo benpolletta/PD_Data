@@ -1,4 +1,4 @@
-function PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, epoch_secs, pd_handle, norm, band_index, freqs, no_cycles, bands)
+function PD_beta_blocks_rel_infusion_pre_post_spectrum(subject_mat, peak_suffix, time_window, epoch_secs, pd_handle, norm, band_index, freqs, no_cycles, bands)
 
 if isempty(freqs) && isempty(no_cycles) && isempty(bands)
     
@@ -52,7 +52,8 @@ no_pds = length(pd_labels);
 
 WT_sec = nan(no_freqs, epoch_secs, no_folders, no_pds, no_chans);
     
-load([subj_mat_name, BP_suffix, '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
+load([subj_mat_name, BP_suffix, make_label('win', time_window, []),...
+    '_pct_BP_high_', num2str(epoch_secs/60), '_min_secs', pd_handle, '.mat'])
 
 for fo = 1:no_folders
     
@@ -118,7 +119,7 @@ for fo = 1:no_folders
     
 end
 
-save([subj_mat_name, BP_suffix, '_pct_', short_band_labels{band_index}, '_high_',...
+save([subj_mat_name, BP_suffix, make_label('win', time_window, []), '_pct_', short_band_labels{band_index}, '_high_',...
     num2str(epoch_secs/60), '_min_secs', pd_handle, norm, '_spectrum.mat'], 'freqs', 'band_indices', 'band_index', 'WT_sec')
 
 end
