@@ -128,6 +128,14 @@ for fl = 1:no_freq_limits
         
         hold on
         
+        if ~exist('y_lims', 'var'), y_lims = ylim;
+            
+        else curr_y_lims = ylim; y_lims = [min(curr_y_lims(1), y_lims(1)) max(curr_y_lims(2), y_lims(2))];
+            
+        end
+        
+        plot([8 15 30; 8 15 30], repmat(y_lims', 1, 3), 'k:')
+        
         set(gca, 'FontSize', 10, 'XTickLabelMode', 'auto', 'YTickLabelMode', 'auto')
         
         if group == 1 && fl == 1
@@ -145,6 +153,8 @@ for fl = 1:no_freq_limits
     end
     
 end
+
+clear y_lims
     
 %% Plotting spectra.
         
@@ -220,6 +230,16 @@ for ch = 1:2
             
             set(gca, 'FontSize', 10, 'XTickLabelMode', 'auto', 'YTickLabelMode', 'auto')
             
+            hold on
+            
+            if ~exist('y_lims', 'var'), y_lims = ylim;
+                
+            else curr_y_lims = ylim; y_lims = [min(curr_y_lims(1), y_lims(1)) max(curr_y_lims(2), y_lims(2))];
+                
+            end
+            
+            plot([8 15 30; 8 15 30], repmat(y_lims', 1, 3), 'k:')
+            
             if group == 1 && fl == 1
                 
                 y = ylabel({[chan_labels{ch}, ' Power']}, 'FontSize', 10);
@@ -241,6 +261,8 @@ for ch = 1:2
         end
         
     end
+    
+    clear y_lims
     
 end
     
@@ -310,6 +332,16 @@ for fl = 1:no_freq_limits
             
             legend off
             
+            hold on
+            
+            if ~exist('y_lims', 'var'), y_lims = ylim;
+                
+            else curr_y_lims = ylim; y_lims = [min(curr_y_lims(1), y_lims(1)) max(curr_y_lims(2), y_lims(2))];
+                
+            end
+            
+            plot([8 15 30; 8 15 30], repmat(y_lims', 1, 3), 'k:')
+            
             if group == 1 && fl == 1
                 
                 ylabel(direction_title, 'FontSize', 10)
@@ -327,6 +359,8 @@ for fl = 1:no_freq_limits
     end
     
 end
+
+clear y_lims
 
 sync_axes(ax(5, :), 'y'), sync_axes(ax(6, :), 'y')
     
@@ -361,7 +395,6 @@ M1_not_increased_index{2} = M1_not_increased_index{2} & All_index{2};
 
 groups_plotted = {M1_increased_index, M1_not_increased_index}; % {All_index};
 
-
 for fl = 1:no_freq_limits
     
     for group = 1:length(groups_plotted)
@@ -389,6 +422,16 @@ for fl = 1:no_freq_limits
         
         legend off
         
+        hold on
+        
+        if ~exist('y_lims', 'var'), y_lims = ylim;
+            
+        else curr_y_lims = ylim; y_lims = [min(curr_y_lims(1), y_lims(1)) max(curr_y_lims(2), y_lims(2))];
+            
+        end
+        
+        plot([8 15 30; 8 15 30], repmat(y_lims', 1, 3), 'k:')
+        
         if group == 1 && fl == 1
             
             ylabel('Cross-Spectrum', 'FontSize', 10)
@@ -404,6 +447,8 @@ for fl = 1:no_freq_limits
     end
     
 end
+
+clear y_lims
 
 sync_axes(ax(4, :), 'y')
 
