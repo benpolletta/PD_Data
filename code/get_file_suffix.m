@@ -19,7 +19,8 @@ switch data_type
     case 'high_density_periods'
         
         file_suffix = [data_labels_struct.BP_suffix, data_labels_struct.peak_suffix,...
-        '_pct_BP_high_', num2str(data_labels_struct.epoch_secs/60), '_min_secs', data_labels_struct.pd_handle, '.mat'];
+            make_label('win', data_labels_struct.time_window, []),...
+            '_pct_BP_high_', num2str(data_labels_struct.epoch_secs/60), '_min_secs', data_labels_struct.pd_handle, '.mat'];
         
 end
 

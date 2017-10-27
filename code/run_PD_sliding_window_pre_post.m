@@ -4,7 +4,7 @@ load('seven_bands')
 
 if ~exist('band_index', 'var'), band_index = 4; end
 
-data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted', 'band_index', band_index)
+data_labels_struct = init_data_labels(freqs, no_cycles, bands, 'data_field', 'data_subtracted', 'band_index', band_index, 'time_window', time_window)
 
 subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
 
