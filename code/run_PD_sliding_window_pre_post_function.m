@@ -1,4 +1,4 @@
-function [SW_xPlt, SW_Baseline, SW_Shuffles] = run_PD_sliding_window_pre_post_function(band_index, analysis, window_length, analysis_flag, load_flag, plot_flag)
+function [SW_xPlt, SW_Baseline, SW_Shuffles] = run_PD_sliding_window_pre_post_function(band_index, time_window, analysis, window_length, analysis_flag, load_flag, plot_flag)
 
 if nargin == 0, band_index = []; end
 if nargin < 2, analysis = []; end
@@ -16,7 +16,7 @@ if isempty(plot_flag), plot_flag = [1 0]; end
 seven_bands = load('seven_bands');
 
 if isempty(band_index), band_index = 4; end
-data_labels_struct = init_data_labels(seven_bands.freqs, seven_bands.no_cycles, seven_bands.bands, 'data_field', 'data_subtracted', 'band_index', band_index);
+data_labels_struct = init_data_labels(seven_bands.freqs, seven_bands.no_cycles, seven_bands.bands, 'data_field', 'data_subtracted', 'band_index', band_index, 'time_window', time_window);
 
 subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
 
