@@ -1,4 +1,4 @@
-function make_motor_groups_figure_v2(freq_limits, p_val, test_flag, bands, band_index, norm_struct)
+function make_motor_groups_figure_v2(peak_suffix, freq_limits, p_val, test_flag, bands, band_index, norm_struct)
 
 % freq_limits: a matrix, each row containing a 2 vector of limits on frequencies.
 
@@ -14,7 +14,7 @@ chan_labels = {'Striatal', 'M1'}; channel_labels = {'Striatum', 'Motor Ctx.'};
 
 no_chans = length(chan_labels);
 
-peak_suffix = '_kmeans';
+if isempty(peak_suffix), peak_suffix = '_kmeans'; end
 
 no_pds_plotted = 2;
 
@@ -95,7 +95,7 @@ for fl = 1:no_freq_limits
     for group = 1:2 % Plotting stats.
         
         % Loading data for all individuals.
-        load(['STR_M1_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
+        load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
         
         % Calculating difference between pre-infusion and post-infusion.
         p_vals = nan(sum(freq_index), 2);
@@ -118,7 +118,7 @@ for fl = 1:no_freq_limits
             
         end
         
-        [test, colors, p_tag] = test_p_vals(p_vals, p_val, [1 .5 0; 1 0 0]); % Getting test matrix, gradient of colors if p_val is a vector.
+        [test, ~, p_tag] = test_p_vals(p_vals, p_val, [1 .5 0; 1 0 0]); % Getting test matrix, gradient of colors if p_val is a vector.
         
         row = (group - 1)*no_freq_limits + fl;
         
@@ -198,7 +198,7 @@ for ch = 1:2
         for group = 1:2
             
             % Loading data for all individuals.
-            load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, '_kmeans_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
+            load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
             
             p_vals = nan(sum(freq_index), 2);
             
@@ -284,7 +284,7 @@ for period = 1:no_periods
     
 end
 
-if nargin < 6, norm_struct = []; end
+if nargin < 7, norm_struct = []; end
 if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
 
 norm_label = ['_', norm_struct.who];
@@ -382,7 +382,7 @@ for period = 1:no_periods
     
 end
 
-if nargin < 6, norm_struct = []; end
+if nargin < 7, norm_struct = []; end
 if isempty(norm_struct), norm_struct = struct('who', 'baseline', 'how', ''); end
 
 norm_label = ['_', norm_struct.who];
@@ -454,7 +454,7 @@ sync_axes(ax(4, :), 'y')
 
 %% Saving figure.
 
-name = [sprintf('STR_M1_kmeans_by_motor_groups_%s_allfreqs_%sHz', band_flag, band_labels{band_index}), p_tag, '_', test_flag];
+name = [sprintf('STR_M1_%s_by_motor_groups_%s_allfreqs_%sHz', peak_suffix, band_flag, band_labels{band_index}), p_tag, '_', test_flag];
 
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 18.2], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 18.2])
 
