@@ -1,24 +1,10 @@
-function PD_all_data_wav_fix(subjects_mat, freqs, no_cycles, bands)
+function PD_all_data_wav_fix(subjects_mat, peak_suffix, freqs, no_cycles, bands)
 
 load(subjects_mat)
 
-if isempty(freqs) && isempty(no_cycles) && isempty(bands)
-    
-    freqs = 1:200;
-    
-    no_cycles = linspace(3, 21, 200);
-    
-    bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
-    
-    save_name = subj_name;
-    
-else
-
-    save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
-
-end
-
 for fo = 1:length(folders)
+    
+    clear save_name
     
     folder = folders{fo};
     
@@ -28,9 +14,29 @@ for fo = 1:length(folders)
     
     subj_name = [folder,'/',prefix];
     
+    if isempty(freqs) && isempty(no_cycles) && isempty(bands)
+        
+        freqs = 1:200;
+        
+        no_cycles = linspace(3, 21, 200);
+        
+        bands = [1 4; 4 8; 8 30; 30 100; 120 180; 0 200];
+        
+        save_name = subj_name;
+        
+    else
+        
+        save_name = sprintf('%s_%.0f-%.0fHz_%.0f-%.0fcycles_%dbands', subj_name, freqs(1), freqs(end), no_cycles(1), no_cycles(end), size(bands, 1));
+        
+    end
+    
+    no_freqs = length(freqs); no_bands = length(bands);
+    
+    save_name = [save_name, peak_suffix];
+    
     load([subj_name,'_all_channel_data_dec.mat'])
     
-    no_secs = min(basetime + 1500, length(PD_dec)/sampling_freq);
+    no_secs = length(PD_dec)/sampling_freq; % min(basetime + 1500, length(PD_dec)/sampling_freq);
     
     t = (1:no_secs*sampling_freq)/sampling_freq;
     
@@ -107,6 +113,6 @@ for fo = 1:length(folders)
     save([save_name, '_wt_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_pct', '-v7.3')
     save([save_name, '_wt_norm_pct.mat'], 'sampling_freq', 't', 'basetime', 'freqs', 'Spec_norm_pct', '-v7.3')
     
-    save([subj_name, '_wt_BP.mat'], '-v7.3', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', 't', 'basetime', 'bands', 'sampling_freq')
+    save([save_name, '_wt_BP.mat'], '-v7.3', 'BP', 'BP_norm', 'BP_pct', 'BP_norm_pct', 't', 'basetime', 'bands', 'sampling_freq')
     
 end
