@@ -1,20 +1,22 @@
 function make_all_band_figure_striatum_v2
 
+peak_suffix = '_kmeans_win_420_1020';
+
 channel_prefix = 'STR_w_M1';
 
 channel_title = 'Striatal';
 
 freq_limit = 100;
 
-p_val = .02/2;
+p_val = .05;
 
 test_flag = 'ttest';
 
 short_group_labels = {'All', 'M1+', 'M1-'};
 
-band_number_flag = {'7', '8', '8', '7', '7', '7'};
+band_number_flag =  {'7', '8', '8', '7', '7', '7'}; % {'7', '7', '7', '7', '7', '7'}; %
 
-band_labels = {'1-4', '5-8', '9-14', '15-30', '40-100', '120-180'}; % , '0-200'};
+band_labels = {'1-4', '5-8', '9-14', '15-30', '40-100', '120-180'}; % , '0-200'}; % '4-8', '8-12', '15-30', '40-100', '120-180'}; % 
 
 no_bands = length(band_labels);
 
@@ -64,7 +66,7 @@ for b = 1:no_bands
             
             freq_index = frequencies >= freq_lims(fl, 1) & frequencies <= freq_lims(fl, 2);
             
-            load([channel_prefix, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', groups{g}, '_ch1_data_for_plot.mat'])
+            load([channel_prefix, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands', peak_suffix, '_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_', groups{g}, '_ch1_data_for_plot.mat'])
             
             All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se; % Constructing CI from p_val & SE.
             
@@ -82,7 +84,7 @@ for b = 1:no_bands
     
     y_extremes = [min(y_lims(:, 1)) max(y_lims(:, 2))];
     
-    load([channel_prefix, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands_kmeans_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat']) % Loading mean data for all individuals.
+    load([channel_prefix, '_1-200Hz_3-21cycles_', band_number_flag{b}, 'bands', peak_suffix, '_pct_', band_labels{b}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat']) % Loading mean data for all individuals.
     
     for g = 1:no_groups
         
@@ -124,9 +126,9 @@ for b = 1:no_bands
             
             set(gca, 'ylim', y_extremes)
             
-            add_stars_one_line(gca, frequencies(freq_index)', logical(test(:, :, 1)), 0, 'c_order', colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
+            add_stars_one_line(gca, frequencies(freq_index)', logical(test(freq_index, :, 1)), 0, 'c_order', colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
             
-            add_stars_one_line(gca, frequencies(freq_index)', logical(test(:, :, 2)), 1, 'c_order', colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
+            add_stars_one_line(gca, frequencies(freq_index)', logical(test(freq_index, :, 2)), 1, 'c_order', colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
             
             if b == 1 && g == 1 && fl == 1
                 
@@ -169,12 +171,14 @@ for b = 1:no_bands
             end
             
         end
+    
+        sync_axes(tight_subplot_handles((b - 1)*no_groups*no_fls + (g - 1)*no_fls + (1:2)), 'y')
         
     end
     
 end
 
-name = ['striatum_all_bands_spec_allfreqs', p_tag, '_', test_flag];
+name = ['striatum', peak_suffix, '_all_bands_spec_allfreqs', p_tag, '_', test_flag];
 
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', .9*[0 0 9.1 18.2], 'PaperUnits', 'centimeters', 'PaperPosition', .9*[0 0 9.1 18.2])
 
