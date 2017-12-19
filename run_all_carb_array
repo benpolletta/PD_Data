@@ -4,8 +4,9 @@
 
 # #$ -l h_rt=48:00:00
 
-#$ -t 1-6
-bands=(1 2 3 4 5 6)
+#$ -t 1-2
+bands=(2 3)
+# 4 5 6)
 # bands=$1
 index=$(($SGE_TASK_ID-1))
 band=${bands[$index]}

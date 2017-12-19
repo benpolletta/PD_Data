@@ -1,8 +1,10 @@
 #!/bin/sh
 
+#$ -pe mpi_16_tasks_per_node 16
+
 echo "Job starting: executing run_all_carb('_kmeans', "$1", freqs, no_cycles, bands, "$2")."
 
-matlab -nosplash -nodisplay -r "cd (project_folder), cd PD_Data, load('seven_bands'), run_all_carb('_kmeans', $1, freqs, no_cycles, bands, $2), quit"
+matlab -nosplash -nodisplay -r "cd (project_folder), cd PD_Data, load('eight_bands'), run_all_carb('_kmeans', $1, freqs, no_cycles, bands, $2), quit"
 
 #matlab -nosplash -nodisplay -r "cd /projectnb/crc-nak/brpp/PD_Data/, run ../startup, freqs = 8:.5:30; no_cycles = linspace(3,7,length(8:.5:30)); bands = [8 13; 13 18; 18 25; 13 25; 18 30]; run_carb('st_m1_subjects.mat',freqs,no_cycles,bands), run_carb('st_stn_subjects.mat',freqs,no_cycles,bands), quit"
 
