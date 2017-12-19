@@ -126,7 +126,7 @@ for b = 1:no_bands
             
             set(gca, 'ylim', y_extremes)
             
-            add_stars_one_line(gca, frequencies(freq_index)', logical(test(freq_index, :, 1)), 0, 'c_order', colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
+            % add_stars_one_line(gca, frequencies(freq_index)', logical(test(freq_index, :, 1)), 0, 'c_order', colors(:, :, 1)) % logical(test(:, 1)), 0, [1 .5 0])
             
             add_stars_one_line(gca, frequencies(freq_index)', logical(test(freq_index, :, 2)), 1, 'c_order', colors(:, :, 2)) % logical(test(:, 2)), 1, [1 0 0])
             
