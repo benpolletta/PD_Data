@@ -418,7 +418,7 @@ for fl = 1:no_freq_limits
         ax(4, row) = tight_subplot_handles(3*columns + row);
         axes(ax(4, row))
         
-        xp_comparison_plot_2D(squeeze(SW_cross), str2func(test_flag), 2*p_val, [], 1)
+        xp_comparison_plot_2D(squeeze(SW_cross), str2func(test_flag), 2*p_val, [], 0)
         
         legend off
         
