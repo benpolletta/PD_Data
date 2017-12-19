@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Job starting: executing run_carb_groups('_kmeans', "$1", freqs, no_cycles, bands, "$2")."
+
+matlab -nosplash -nodisplay -r "cd (project_folder), cd PD_Data, load('eight_bands'), run_carb_groups('_kmeans', $1, freqs, no_cycles, bands, $2), quit"
