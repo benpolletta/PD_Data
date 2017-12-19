@@ -6,4 +6,4 @@ module load matlab/2016a
 
 matlab -nosplash -nodisplay -r "cd (project_folder), cd PD_Data, run_PD_sliding_window_pre_post_function($1, $2, $3, 10, $4, $5, $6), exit"
 
-# Sample call: qsub -pe mpi_4_tasks_per_node 4 run_sliding_window 5 "'granger'" "[0 0 0 0]" "0" "[1 0]"
+# Sample call: qsub -pe mpi_4_tasks_per_node 4 run_sliding_window 5 "[420 1020]" "'granger'" "[0 0 0 0]" "0" "[1 0]"
