@@ -47,7 +47,7 @@ for s = 1:length(subjects_mat_cell)
     
     subjects_mat_prefix = subjects_mat_name(1:(end - length('_subjects.mat')));
     
-    parfor fo = 1:no_folders
+    for fo = 1:no_folders
         
         subjects_struct = load(subjects_mat_name);
         
@@ -89,7 +89,8 @@ for s = 1:length(subjects_mat_cell)
             
             [~, ~] = sliding_window_analysis_multichannel(function_handle, data_selected,...
                 data_labels_struct.sampling_freq, sliding_window_cell, 1, [subj_name, '_', pd_names{pd},...
-                '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.band_index), 7, 'back')], varargin{:});
+                '_band', num2str(data_labels_struct.band_index),...
+                make_label('bands', length(data_labels_struct.band_index), 7, 'back')], varargin{:});
             
         end
         
