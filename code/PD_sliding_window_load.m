@@ -49,7 +49,7 @@ end
 no_folders = sum(subject_mat_folders);
             
 first_name = make_sliding_window_analysis_name([folders{1}, '/', prefixes{1}, '_', pd_names{1},...
-    '_band', num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name, window_time_cell, 2, varargin{:});
+    '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name, window_time_cell, 2, varargin{:});
 
 load([first_name, '.mat'], 'output_size', 'no_windows')
 
@@ -143,5 +143,5 @@ if ~isempty(SW_xPlt.findaxis('Dim 1'))
 end
 
 save([make_sliding_window_analysis_name([filename, pd_label,...
-    '_band', num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name,...
+    '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name,...
     window_time_cell, 2, varargin{:}), '_xPlt.mat'], 'SW_xPlt', 'axes_info_struct' , '-v7.3')

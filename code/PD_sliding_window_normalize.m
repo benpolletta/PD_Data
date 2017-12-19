@@ -53,7 +53,7 @@ switch norm_struct.who
         end
 
         SW_Baseline_struct = load([make_sliding_window_analysis_name([filename, baseline_pd_label, '_band',... % '_baseline_band',... % 
-            num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name,...
+            num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
         collapse_struct = struct('function', @nanmean, 'varargin', {});
@@ -124,7 +124,7 @@ switch norm_struct.who
         end
 
         SW_Shuffle_struct = load([make_sliding_window_analysis_name([filename, shuffle_pd_label, '_band',...
-            num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name,...
+            num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name,...
             window_time_cell, 2, varargin{:}), '_xPlt.mat']);
         
         collapse_struct = struct('function', @nanmean, 'varargin', {});

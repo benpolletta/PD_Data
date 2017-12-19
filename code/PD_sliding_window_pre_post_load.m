@@ -47,7 +47,7 @@ end
 no_folders = sum(subject_mat_folders);
             
 first_name = make_sliding_window_analysis_name([folders{1}, '/', prefixes{1}, '_', pd_names{1},...
-    '_band', num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name, window_time_cell, 2, varargin{:});
+    '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name, window_time_cell, 2, varargin{:});
 
 load(first_name, 'output_size', 'no_windows')
 
@@ -81,7 +81,7 @@ for s = 1:length(subjects_mat_cell)
         for period = 1:2
             
             analysis_name = make_sliding_window_analysis_name([subj_name, '_', pd_names{period},...
-                '_band', num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name, window_time_cell, 2, varargin{:});
+                '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name, window_time_cell, 2, varargin{:});
             
             load(analysis_name)
             
@@ -94,6 +94,6 @@ for s = 1:length(subjects_mat_cell)
 end
 
 save(make_sliding_window_analysis_name([filename, pd_label,...
-    '_band', num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], function_name,...
+    '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name,...
     window_time_cell, 2, varargin{:}), 'SW', 'indices_cell', 'window_time',...
     'sliding_window_cell', 'sampling_freq', 'output_size', 'no_windows')

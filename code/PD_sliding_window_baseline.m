@@ -75,7 +75,7 @@ for s = 1:length(subjects_mat_cell)
         
         [~, ~] = sliding_window_analysis_multichannel(function_handle, baseline_data,...
             data_labels_struct.sampling_freq, sliding_window_cell, 1, [subj_name, '_baseline',...
-            '_band', num2str(data_labels_struct.band_index), make_label('bands', legnth(data_labels_struct.bands), 7, 'back')], varargin{:});
+            '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], varargin{:});
         
     end
     
