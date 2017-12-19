@@ -1,10 +1,12 @@
-function make_motor_groups_figure_v2(peak_suffix, freq_limits, p_val, test_flag, bands, band_index, norm_struct)
+function make_motor_groups_figure_v2(peak_suffix, time_window, freq_limits, p_val, test_flag, bands, band_index, norm_struct)
 
 % freq_limits: a matrix, each row containing a 2 vector of limits on frequencies.
 
 load('STR_M1_subjects.mat', 'pd_labels', 'folders')
 
-group_flags = {'M1_not_increased', 'M1_increased'};
+load(['M1_groups', make_label('win', time_window, []), '.mat'])
+
+group_flags = {M1_not_increased{1}, M1_increased{1}};
 
 group_titles = {'M1+'; 'M1-'};
 
@@ -14,7 +16,7 @@ chan_labels = {'Striatal', 'M1'}; channel_labels = {'Striatum', 'Motor Ctx.'};
 
 no_chans = length(chan_labels);
 
-if isempty(peak_suffix), peak_suffix = '_kmeans'; end
+if isempty(peak_suffix), peak_suffix = ['_kmeans', make_label('win', time_window, [])]; end
 
 no_pds_plotted = 2;
 
@@ -29,8 +31,6 @@ band_flag = sprintf('%dbands', length(bands));
 figure
 
 %% Calculating indicator function of which individuals are included in each group.
-
-load('M1_groups.mat')
 
 for group = 1:2
 
@@ -67,7 +67,8 @@ for fl = 1:no_freq_limits
     
     for group = 1:2 % Plotting mean and CI.
         
-        load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_', group_flags{group} '_Coh_sec_pct_data_for_plot.mat'])
+        load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, make_label('win', time_window, []), '_pct_',...
+            band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV', group_flags{group} '_Coh_sec_pct_data_for_plot.mat'])
         
         PLV_mean = All_mean_mean; PLV_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
         
@@ -95,7 +96,8 @@ for fl = 1:no_freq_limits
     for group = 1:2 % Plotting stats.
         
         % Loading data for all individuals.
-        load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
+        load(['STR_M1_1-200Hz_3-21cycles_', band_flag, peak_suffix, make_label('win', time_window, []),...
+            '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_PLV_data_for_plot.mat'])
         
         % Calculating difference between pre-infusion and post-infusion.
         p_vals = nan(sum(freq_index), 2);
@@ -169,7 +171,10 @@ for ch = 1:2
         
         for group = 1:2
             
-            load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_', group_flags{group}, '_ch1_data_for_plot.mat'])
+            load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag,...
+                peak_suffix, make_label('win', time_window, []), '_pct_',...
+                band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum',...
+                group_flags{group}, '_ch1_data_for_plot.mat'])
             
             All_mean_ci = norminv(1 - max(p_val), 0, 1)*All_mean_se;
             
@@ -198,7 +203,9 @@ for ch = 1:2
         for group = 1:2
             
             % Loading data for all individuals.
-            load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag, peak_suffix, '_pct_', band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
+            load([channel_prefixes{ch}, '_1-200Hz_3-21cycles_', band_flag,...
+                peak_suffix, make_label('win', time_window, []), '_pct_',...
+                band_labels{band_index}, 'Hz_high_2.5_min_secs_pct_spectrum_data_for_plot.mat'])
             
             p_vals = nan(sum(freq_index), 2);
             
@@ -304,7 +311,7 @@ for fl = 1:no_freq_limits
         row = (group - 1)*no_freq_limits + fl;
         
         group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
-            '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.band_index), 7, 'back')], function_name,...
+            '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name,...
             window_time_cell, 2, varargin{:}), norm_label];
         
         load([group_name, '_recordingspacked.mat'])
@@ -454,7 +461,8 @@ sync_axes(ax(4, :), 'y')
 
 %% Saving figure.
 
-name = [sprintf('STR_M1_%s_by_motor_groups_%s_allfreqs_%sHz', peak_suffix, band_flag, band_labels{band_index}), p_tag, '_', test_flag];
+name = [sprintf('STR_M1_%s%s_by_motor_groups_%s_allfreqs_%sHz', peak_suffix,...
+    make_label('win', time_window, []), band_flag, band_labels{band_index}), p_tag, '_', test_flag];
 
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 18.2], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 18.2])
 
