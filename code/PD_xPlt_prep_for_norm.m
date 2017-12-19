@@ -58,7 +58,7 @@ function SW_norm = PD_xPlt_prep_for_norm(SW_norm_struct, SW_xPlt, function_name,
     % SW_norm values, and replicating over sliding window of SW_xPlt values.
     if ~isempty(SW_norm.findaxis('Window_Dim_1')) % If norm values are unpacked.
         
-        SW_norm = mean_over_axis(SW_norm, 'Window_Dim_1', collapse_struct.function, collapse_struct.varargin);
+        SW_norm = mean_over_axis(SW_norm, 'Window_Dim_1', collapse_struct); % collapse_struct.function, collapse_struct.varargin);
         
     elseif isfield(SW_norm.meta, ['matrix_dim_', num2str(axes_info_struct.odims + 1)])
         
