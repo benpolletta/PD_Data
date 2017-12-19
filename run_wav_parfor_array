@@ -1,0 +1,18 @@
+#!/bin/sh -l
+
+#$ -pe mpi_16_tasks_per_node 16
+
+# #$ -l h_rt=48:00:00
+
+#$ -t 1-14
+folders=("'130703'" "'130709'" "'130716'" "'130718'" "'130725'" "'130813'" "'130815'" "'130822'" "'130830'" "'mice1'" "'mice2'" "'mice3'" "'mice4'" "'mice5'")
+prefixes=("'13703'" "'13709'" "'13716'" "'13718'" "'13725'" "'13813'" "'13815'" "'13822'" "'13830'" "'mice1'" "'mice2'" "'mice3'" "'mice4'" "'mice5'")
+basetimes=(300 300 300 600 300 450 450 300 300 600 600 600 600 600)
+
+index=$(($SGE_TASK_ID-1))
+folder=${folders[$index]}
+prefix=${prefixes[$index]}
+basetime=${basetimes[$index]}
+
+echo "Executing run_wav_parfor "$folder" "$prefix" "$basetime" '_kmeans'"
+/projectnb/crc-nak/brpp/PD_Data/run_wav_parfor $folder $prefix $basetime "'_kmeans'"

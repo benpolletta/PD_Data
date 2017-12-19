@@ -1,0 +1,9 @@
+#!/bin/sh -l
+
+echo "Job starting: executing wav_inner_parfor("$1", "$2", "$3", freqs, no_cycles, bands, "$4")."
+
+module load matlab/2016a
+
+matlab -nosplash -nodisplay -r "cd (project_folder), cd PD_Data, load('eight_bands'), wav_inner_parfor($1, $2, $3, freqs, no_cycles, bands, $4), exit"
+
+# Sample call: qsub -pe mpi_16_tasks_per_node 16 run_wav_parfor "'130709'" "'13709'" "300" "'_kmeans'"
