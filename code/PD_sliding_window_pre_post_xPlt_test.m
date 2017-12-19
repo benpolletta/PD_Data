@@ -112,7 +112,7 @@ end
 
 %% Loading & looping over groups.
 
-load('M1_groups')
+load(['M1_groups', make_label('win', data_labels_struct.time_window, [])])
 
 M1_increased_index{2} = M1_increased_index{2} & All_index{2};
 

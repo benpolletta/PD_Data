@@ -96,7 +96,7 @@ SW_Bands.data = cellfun(@(x) band_max(x, frequencies, bands(1:end, :)), SW_xPlt.
 SW_Bands.meta.matrix_dim_1.name = '';
 SW_Bands.meta.matrix_dim_1.values = band_labels;
 
-load('M1_groups')
+load(['M1_groups', make_label('win', data_labels_struct.time_window, [])])
 
 M1_increased_index{2} = M1_increased_index{2} & All_index{2};
 

@@ -112,7 +112,7 @@ end
 
 %% Loading & looping over groups.
 
-load('M1_groups')
+load(['M1_groups', make_label('win', data_labels_struct.time_window, [])])
 
 M1_increased_index{2} = M1_increased_index{2} & All_index{2};
 
@@ -265,7 +265,7 @@ for group = 1:length(groups_plotted)
             
             %% % % Mean across recordings. % % %
             
-            SW_RecordingMean = mean_over_axis(SW_WindowMean, 'Recording', @nanmedian);
+            SW_RecordingMean = mean_over_axis(SW_WindowMean, 'Recording', struct('function_handle', @nanmedian));
             
             SW_RecordingMean.getaxisinfo
             
@@ -313,7 +313,7 @@ for group = 1:length(groups_plotted)
             
             %% % % Pre-post comparisons over recordings. % % %
             
-            SW_RecordingMean = mean_over_axis(SW_group, 'Recording', @nanmedian);
+            SW_RecordingMean = mean_over_axis(SW_group, 'Recording', struct('function_handle', @nanmedian));
             
             SW_RecordingMean.getaxisinfo
             
