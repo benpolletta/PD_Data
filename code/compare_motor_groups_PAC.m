@@ -1,6 +1,8 @@
-function compare_motor_groups_PAC(norm_struct, significance)
+function compare_motor_groups_PAC(norm_struct, significance, time_window)
 
 close('all')
+
+if nargin < 3, time_window = []; end
 
 %% Looping over normalizations.
 
@@ -102,7 +104,7 @@ if isfield(norm_struct, 'how')
 
 end
 
-load('M1_groups')
+load(['M1_groups', make_label('win', time_window, [])])
 
 M1_increased_index{2} = M1_increased_index{2} & All_index{2};
 
@@ -113,8 +115,9 @@ groups_plotted = {M1_increased_index, M1_not_increased_index}; % {All_index};
 for group = 1:length(groups_plotted)
 
     group_name = [make_sliding_window_analysis_name([filename, groups_plotted{group}{1}, pd_label,...
-        '_band', num2str(data_labels_struct.band_index), make_label('bands', length(data_labels_struct.bands), 7, 'back')], function_name,...
-        window_time_cell, 2, varargin{:}), norm_label];
+        '_band', num2str(data_labels_struct.band_index),...
+        make_label('bands', length(data_labels_struct.bands), 7, 'back')],...
+        function_name, window_time_cell, 2, varargin{:}), norm_label];
 
     SW_group = load([group_name, '_recordingspacked.mat']);
 
@@ -158,7 +161,8 @@ recursivePlot(SW_post_minus_pre, function_handles, dimensions, function_argument
 function_arguments = {{},{[], significance}};
 recursivePlot(SW_post_minus_pre, function_handles, dimensions, function_arguments)
 
-save_all_figs(['compare_motor_groups_PAC', norm_label, '_p', num2str(significance)])
+save_all_figs(['compare_motor_groups', make_label('win', time_window, []),...
+    '_PAC', norm_label, '_p', num2str(significance)])
 
 % frequencies = SW_RecordingsPacked.meta.matrix_dim_1.values;
 % freq_index = frequencies <= freq_limit;
