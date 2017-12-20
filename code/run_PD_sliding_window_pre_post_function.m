@@ -13,10 +13,10 @@ if isempty(plot_flag), plot_flag = [1 0]; end
 
 %% General stuff
 
-eight_bands = load('eight_bands');
+seven_bands = load('seven_bands');
 
 if isempty(band_index), band_index = 4; end
-data_labels_struct = init_data_labels(eight_bands.freqs, eight_bands.no_cycles, eight_bands.bands, 'data_field', 'data_subtracted', 'band_index', band_index, 'time_window', time_window);
+data_labels_struct = init_data_labels(seven_bands.freqs, seven_bands.no_cycles, seven_bands.bands, 'data_field', 'data_subtracted', 'band_index', band_index, 'time_window', time_window);
 
 subjects_mat_cell = {'st_m1_subjects.mat', 'st_m1_ali_subjects.mat', 'st_m1_ali2_subjects.mat'};
 
