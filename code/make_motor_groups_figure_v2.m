@@ -461,8 +461,9 @@ sync_axes(ax(4, :), 'y')
 
 %% Saving figure.
 
-name = [sprintf('STR_M1_%s%s_by_motor_groups_%s_allfreqs_%sHz', peak_suffix,...
-    make_label('win', time_window, []), band_flag, band_labels{band_index}), p_tag, '_', test_flag];
+name = [sprintf('STR_M1%s%s_by_motor_groups%s_%s_allfreqs_%sHz', peak_suffix,...
+    make_label('win', time_window, []), make_label('win', time_window, []),...
+    band_flag, band_labels{band_index}), p_tag, '_', test_flag];
 
 set(gcf, 'PaperOrientation', 'landscape', 'Units', 'centimeters', 'Position', [0 0 9.1 18.2], 'PaperUnits', 'centimeters', 'PaperPosition', [0 0 9.1 18.2])
 
